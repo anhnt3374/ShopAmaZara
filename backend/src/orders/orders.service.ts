@@ -146,4 +146,75 @@ export class OrdersService {
       })),
     };
   }
+
+  async listForStore(
+    storeId: string,
+    opts: { status?: string; q?: string },
+  ) {
+    const qb = this.orders
+      .createQueryBuilder('o')
+      .innerJoin('order_items', 'oi', 'oi.order_id = o.id')
+      .innerJoin('users', 'u', 'u.id = o.buyer_id')
+      .where('oi.store_id = :storeId', { storeId })
+      .groupBy('o.id')
+      .addGroupBy('u.email')
+      .addGroupBy('u.full_name')
+      .addSelect('u.email', 'buyer_email')
+      .addSelect('u.full_name', 'buyer_name')
+      .addSelect(
+        'SUM(oi.price_snapshot * oi.quantity)',
+        'store_total',
+      )
+      .addSelect('SUM(oi.quantity)', 'store_qty');
+    if (opts.status) qb.andWhere('o.status = :status', { status: opts.status });
+    if (opts.q) {
+      const like = `%${opts.q.toLowerCase()}%`;
+      qb.andWhere(
+        '(LOWER(u.email) LIKE :like OR LOWER(u.full_name) LIKE :like OR CAST(o.id AS CHAR) LIKE :like)',
+        { like },
+      );
+    }
+    qb.orderBy('o.created_at', 'DESC');
+    const rows = await qb.getRawAndEntities<{
+      buyer_email: string;
+      buyer_name: string;
+      store_total: string;
+      store_qty: string;
+    }>();
+    const items = rows.entities.map((order, i) => {
+      const r = rows.raw[i];
+      return {
+        id: String(order.id),
+        customer: r.buyer_name,
+        email: r.buyer_email,
+        date: order.createdAt.toISOString().slice(0, 10),
+        status: order.status,
+        items: Number(r.store_qty),
+        total: Number(r.store_total),
+      };
+    });
+    return { items };
+  }
+
+  async updateStatusForStore(
+    storeId: string,
+    orderId: string,
+    status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled',
+  ) {
+    const order = await this.orders.findOne({
+      where: { id: orderId },
+      relations: { items: true },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+    const hasItemFromStore = order.items?.some((i) => i.storeId === storeId);
+    if (!hasItemFromStore) throw new ForbiddenException('Not your order');
+    order.status = status;
+    await this.orders.save(order);
+    return {
+      order: {
+        id: String(order.id),
+        status: order.status,
+      },
+    };
+  }
 }

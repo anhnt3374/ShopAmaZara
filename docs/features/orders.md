@@ -18,3 +18,13 @@ Schemas:
 
 - `orders(id, buyer_id, subtotal, shipping, tax, total, status, created_at, updated_at)`
 - `order_items(id, order_id, product_id, store_id, name_snapshot, price_snapshot, quantity)`
+
+## Seller routes
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/store/orders` | Orders that contain ≥1 item from the seller's store. Each row's `items` count and `total` are the **store's slice** only, not the full order. Supports `status` and `q` filters. |
+| PATCH | `/store/orders/:id` | Update overall order status (`Processing`, `Shipped`, `Delivered`, `Cancelled`). 403 if no item belongs to the caller's store. |
+
+Note: orders carry a single status across stores in v1. If marketplace-style
+multi-seller fulfillment is needed, the status field would move onto `order_items`.
