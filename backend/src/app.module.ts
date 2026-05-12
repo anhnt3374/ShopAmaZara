@@ -8,11 +8,14 @@ import { StoresModule } from './stores/stores.module';
 import { ProductsModule } from './products/products.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { CartModule } from './cart/cart.module';
+import { OrdersModule } from './orders/orders.module';
 import { User } from './users/user.entity';
 import { Store } from './stores/store.entity';
 import { Product } from './products/product.entity';
 import { WishlistItem } from './wishlist/wishlist-item.entity';
 import { CartItem } from './cart/cart-item.entity';
+import { Order } from './orders/order.entity';
+import { OrderItem } from './orders/order-item.entity';
 
 @Module({
   imports: [
@@ -26,7 +29,7 @@ import { CartItem } from './cart/cart-item.entity';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store, Product, WishlistItem, CartItem],
+        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -37,6 +40,7 @@ import { CartItem } from './cart/cart-item.entity';
     ProductsModule,
     WishlistModule,
     CartModule,
+    OrdersModule,
   ],
   controllers: [AppController],
 })
