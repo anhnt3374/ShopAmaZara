@@ -33,6 +33,7 @@ export async function createTestApp(): Promise<TestContext> {
 
 export async function resetDatabase(dataSource: DataSource): Promise<void> {
   await dataSource.query('SET FOREIGN_KEY_CHECKS = 0');
+  await dataSource.query('TRUNCATE TABLE stores');
   await dataSource.query('TRUNCATE TABLE users');
   await dataSource.query('SET FOREIGN_KEY_CHECKS = 1');
 }

@@ -4,7 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { StoresModule } from './stores/stores.module';
 import { User } from './users/user.entity';
+import { Store } from './stores/store.entity';
 
 @Module({
   imports: [
@@ -18,13 +20,14 @@ import { User } from './users/user.entity';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User],
+        entities: [User, Store],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
     }),
     UsersModule,
     AuthModule,
+    StoresModule,
   ],
   controllers: [AppController],
 })

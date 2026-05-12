@@ -10,3 +10,4 @@ under `superpowers/plans/`.
 | Date       | Feature              | Doc                        |
 |------------|----------------------|----------------------------|
 | 2026-05-12 | Auth (register/login)| [features/auth.md](features/auth.md) |
+| Stores foundation | docs/features/stores.md |
