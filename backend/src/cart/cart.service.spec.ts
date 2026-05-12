@@ -30,20 +30,52 @@ describe('CartService', () => {
   });
 
   it('add() inserts a new row when none exists', async () => {
-    products.findOne.mockResolvedValue({ id: 'p1', stock: 10 });
+    products.findOne.mockResolvedValue({
+      id: 'p1',
+      name: 'A',
+      brand: 'B',
+      category: 'C',
+      storeId: 's',
+      price: '10.00',
+      discount: 0,
+      stock: 10,
+      imageFirst: 'i',
+      shortDescription: null,
+      availableColors: [],
+    });
     items.findOne.mockResolvedValue(null);
     items.create.mockImplementation((v) => v);
     items.save.mockImplementation((v) => Promise.resolve({ id: '1', ...v }));
     const out = await service.add('u1', { productId: 'p1', quantity: 2 } as any);
     expect(out.item.quantity).toBe(2);
+    expect(out.item.product).toBeDefined();
+    expect(out.item.product.id).toBe('p1');
+    expect(typeof out.item.lineTotal).toBe('number');
+    expect(out.item.lineTotal).toBe(20);
   });
 
   it('add() increments quantity on duplicate productId', async () => {
-    products.findOne.mockResolvedValue({ id: 'p1', stock: 10 });
+    products.findOne.mockResolvedValue({
+      id: 'p1',
+      name: 'A',
+      brand: 'B',
+      category: 'C',
+      storeId: 's',
+      price: '10.00',
+      discount: 0,
+      stock: 10,
+      imageFirst: 'i',
+      shortDescription: null,
+      availableColors: [],
+    });
     items.findOne.mockResolvedValue({ id: '1', userId: 'u1', productId: 'p1', quantity: 1 });
     items.save.mockImplementation((v) => Promise.resolve(v));
     const out = await service.add('u1', { productId: 'p1', quantity: 3 } as any);
     expect(out.item.quantity).toBe(4);
+    expect(out.item.product).toBeDefined();
+    expect(out.item.product.id).toBe('p1');
+    expect(typeof out.item.lineTotal).toBe('number');
+    expect(out.item.lineTotal).toBe(40);
   });
 
   it('add() rejects when product not found', async () => {

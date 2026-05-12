@@ -29,6 +29,18 @@ export class CartService {
     @InjectRepository(Product) private readonly products: Repository<Product>,
   ) {}
 
+  private hydrateRow(row: CartItem, product: Product): CartItemView {
+    const summary = toProductSummary(product);
+    const lineTotal = Math.round(summary.price * row.quantity * 100) / 100;
+    return {
+      id: row.id,
+      productId: row.productId,
+      quantity: row.quantity,
+      product: summary,
+      lineTotal,
+    };
+  }
+
   async list(userId: string): Promise<{ items: CartItemView[]; subtotal: number }> {
     const rows = await this.items.find({
       where: { userId },
@@ -44,16 +56,9 @@ export class CartService {
     for (const r of rows) {
       const p = byId.get(r.productId);
       if (!p) continue;
-      const summary = toProductSummary(p);
-      const line = Math.round(summary.price * r.quantity * 100) / 100;
-      subtotal += line;
-      items.push({
-        id: r.id,
-        productId: r.productId,
-        quantity: r.quantity,
-        product: summary,
-        lineTotal: line,
-      });
+      const view = this.hydrateRow(r, p);
+      subtotal += view.lineTotal;
+      items.push(view);
     }
     return { items, subtotal: Math.round(subtotal * 100) / 100 };
   }
@@ -61,7 +66,7 @@ export class CartService {
   async add(
     userId: string,
     dto: AddCartItemDto,
-  ): Promise<{ item: CartItem }> {
+  ): Promise<{ item: CartItemView }> {
     const product = await this.products.findOne({ where: { id: dto.productId } });
     if (!product) throw new NotFoundException('Product not found');
     const existing = await this.items.findOne({
@@ -73,21 +78,22 @@ export class CartService {
     if (existing) {
       existing.quantity = nextQty;
       const saved = await this.items.save(existing);
-      return { item: saved };
+      return { item: this.hydrateRow(saved, product) };
     }
     const created = this.items.create({
       userId,
       productId: dto.productId,
       quantity: dto.quantity,
     });
-    return { item: await this.items.save(created) };
+    const saved = await this.items.save(created);
+    return { item: this.hydrateRow(saved, product) };
   }
 
   async update(
     userId: string,
     productId: string,
     dto: UpdateCartItemDto,
-  ): Promise<CartItem | null> {
+  ): Promise<CartItemView | null> {
     const row = await this.items.findOne({ where: { userId, productId } });
     if (!row) throw new NotFoundException('Cart row not found');
     if (dto.quantity === 0) {
@@ -99,7 +105,8 @@ export class CartService {
     if (dto.quantity > product.stock)
       throw new BadRequestException('Requested quantity exceeds stock');
     row.quantity = dto.quantity;
-    return this.items.save(row);
+    const saved = await this.items.save(row);
+    return this.hydrateRow(saved, product);
   }
 
   async remove(userId: string, productId: string): Promise<void> {

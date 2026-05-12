@@ -123,7 +123,7 @@ describe('Cart (e2e)', () => {
       .patch(`/me/cart/${productId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ quantity: 0 })
-      .expect(200);
+      .expect(204);
     const list = await request(ctx.app.getHttpServer())
       .get('/me/cart')
       .set('Authorization', `Bearer ${token}`);

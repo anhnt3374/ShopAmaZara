@@ -8,9 +8,10 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CartService } from './cart.service';
 import { AddCartItemDto } from './dto/add-cart-item.dto';
@@ -38,11 +39,15 @@ export class CartController {
   @Patch(':productId')
   async update(
     @Req() req: Request & { user: { id: string } },
+    @Res({ passthrough: true }) res: Response,
     @Param('productId') productId: string,
     @Body() dto: UpdateCartItemDto,
   ) {
     const item = await this.cart.update(req.user.id, productId, dto);
-    if (!item) return { ok: true };
+    if (!item) {
+      res.status(204);
+      return;
+    }
     return { item };
   }
 
