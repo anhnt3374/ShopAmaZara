@@ -497,13 +497,11 @@ docker compose exec mysql mysql -uamazara -pamazara amazara \
 
 - [ ] **Step 15: Add the row in `docs/README.md`**
 
-Modify `docs/README.md` — append a row to the completed-features table:
+Modify `docs/README.md` — append a row to the completed-features table. The table has three columns (Date / Feature / Doc); follow that exact format and use today's date:
 
 ```markdown
-| Stores foundation | docs/features/stores.md |
+| 2026-05-12 | Stores foundation | [features/stores.md](features/stores.md) |
 ```
-
-(Match the existing column structure — the auth row already there is the template.)
 
 - [ ] **Step 16: Commit Task 1**
 
@@ -1391,7 +1389,7 @@ function mapRowToProduct(r: CsvRow):
 }
 ```
 
-Also remove the `void rows;` no-op statement from Step 12.
+Also: remove the `void rows;` no-op statement from Step 12, and remove the now-unused `Repository` named import from `typeorm` at the top of the file (Task 1 left it imported but unused; Task 2 still doesn't need it directly).
 
 - [ ] **Step 15: Run the seed script and verify**
 
@@ -1439,10 +1437,11 @@ No FULLTEXT index yet.
 
 - [ ] **Step 17: Add the row in `docs/README.md`**
 
-Append:
+Append a three-column row (Date / Feature / Doc) using today's date. Also fix Task 1's previously-appended row to use the same three-column format if it isn't already. Final two rows:
 
 ```markdown
-| Products catalog | docs/features/products.md |
+| 2026-05-12 | Stores foundation | [features/stores.md](features/stores.md) |
+| 2026-05-13 | Products catalog  | [features/products.md](features/products.md) |
 ```
 
 - [ ] **Step 18: Commit Task 2**
@@ -2702,10 +2701,10 @@ Schema: `wishlist_items(id, user_id, product_id, created_at)` with a unique
 index on `(user_id, product_id)`.
 ```
 
-Append to `docs/README.md`:
+Append to `docs/README.md` (three-column row, today's date):
 
 ```markdown
-| Wishlist | docs/features/wishlist.md |
+| 2026-05-13 | Wishlist | [features/wishlist.md](features/wishlist.md) |
 ```
 
 - [ ] **Step 12: Commit Task 4**
@@ -3351,10 +3350,10 @@ Schema: `cart_items(id, user_id, product_id, quantity, created_at, updated_at)`
 with a unique index on `(user_id, product_id)`.
 ```
 
-Append to `docs/README.md`:
+Append to `docs/README.md` (three-column row, today's date):
 
 ```markdown
-| Cart | docs/features/cart.md |
+| 2026-05-13 | Cart | [features/cart.md](features/cart.md) |
 ```
 
 - [ ] **Step 12: Commit Task 5**
@@ -4043,10 +4042,10 @@ Schemas:
 - `order_items(id, order_id, product_id, store_id, name_snapshot, price_snapshot, quantity)`
 ```
 
-Append to `docs/README.md`:
+Append to `docs/README.md` (three-column row, today's date):
 
 ```markdown
-| Orders (buyer) | docs/features/orders.md |
+| 2026-05-13 | Orders (buyer) | [features/orders.md](features/orders.md) |
 ```
 
 - [ ] **Step 12: Commit Task 6**
