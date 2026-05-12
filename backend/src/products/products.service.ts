@@ -1,8 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
+import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import {
   ProductDetail,
   ProductSummary,
@@ -115,6 +122,143 @@ export class ProductsService {
         min: Number(range?.min ?? 0),
         max: Number(range?.max ?? 0),
       },
+    };
+  }
+
+  async listForStore(
+    storeId: string,
+    opts: { q?: string; page?: number; limit?: number },
+  ): Promise<ListResult> {
+    const page = opts.page ?? 1;
+    const limit = Math.min(opts.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
+    const qb = this.products
+      .createQueryBuilder('p')
+      .where('p.store_id = :storeId', { storeId });
+    if (opts.q) {
+      const like = `%${opts.q.toLowerCase()}%`;
+      qb.andWhere('(LOWER(p.name) LIKE :like OR LOWER(p.brand) LIKE :like)', {
+        like,
+      });
+    }
+    qb.orderBy('p.updated_at', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+    const [rows, total] = await qb.getManyAndCount();
+    return { items: rows.map(toProductSummary), total, page, limit };
+  }
+
+  async createForStore(storeId: string, dto: CreateProductDto): Promise<Product> {
+    const entity = this.products.create({
+      id: randomUUID(),
+      name: dto.name,
+      brand: dto.brand,
+      category: dto.category,
+      storeId,
+      price: dto.price.toFixed(2),
+      discount: dto.discount ?? 0,
+      stock: dto.stock,
+      imageFirst: dto.imageFirst,
+      shortDescription: dto.shortDescription ?? null,
+      longDescription: dto.longDescription ?? null,
+      highlights: dto.highlights ?? null,
+      availableColors: dto.availableColors ?? null,
+      availableSizes: dto.availableSizes ?? null,
+      material: dto.material ?? null,
+      targetGender: dto.targetGender ?? null,
+      targetAgeGroup: dto.targetAgeGroup ?? null,
+      tags: dto.tags ?? null,
+    });
+    return this.products.save(entity);
+  }
+
+  async updateForStore(
+    storeId: string,
+    id: string,
+    dto: UpdateProductDto,
+  ): Promise<Product> {
+    const product = await this.products.findOne({ where: { id } });
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.storeId !== storeId)
+      throw new ForbiddenException('Not your product');
+    Object.assign(product, {
+      ...(dto.name !== undefined && { name: dto.name }),
+      ...(dto.brand !== undefined && { brand: dto.brand }),
+      ...(dto.category !== undefined && { category: dto.category }),
+      ...(dto.price !== undefined && { price: dto.price.toFixed(2) }),
+      ...(dto.discount !== undefined && { discount: dto.discount }),
+      ...(dto.stock !== undefined && { stock: dto.stock }),
+      ...(dto.imageFirst !== undefined && { imageFirst: dto.imageFirst }),
+      ...(dto.shortDescription !== undefined && {
+        shortDescription: dto.shortDescription,
+      }),
+      ...(dto.longDescription !== undefined && {
+        longDescription: dto.longDescription,
+      }),
+      ...(dto.highlights !== undefined && { highlights: dto.highlights }),
+      ...(dto.availableColors !== undefined && {
+        availableColors: dto.availableColors,
+      }),
+      ...(dto.availableSizes !== undefined && {
+        availableSizes: dto.availableSizes,
+      }),
+      ...(dto.material !== undefined && { material: dto.material }),
+      ...(dto.targetGender !== undefined && {
+        targetGender: dto.targetGender,
+      }),
+      ...(dto.targetAgeGroup !== undefined && {
+        targetAgeGroup: dto.targetAgeGroup,
+      }),
+      ...(dto.tags !== undefined && { tags: dto.tags }),
+    });
+    return this.products.save(product);
+  }
+
+  async deleteForStore(storeId: string, id: string): Promise<void> {
+    const product = await this.products.findOne({ where: { id } });
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.storeId !== storeId)
+      throw new ForbiddenException('Not your product');
+    await this.products.remove(product);
+  }
+
+  async inventoryForStore(
+    storeId: string,
+    q?: string,
+  ): Promise<{
+    items: Array<{
+      sku: string;
+      name: string;
+      category: string;
+      stock: number;
+      price: number;
+      status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+    }>;
+  }> {
+    const qb = this.products
+      .createQueryBuilder('p')
+      .where('p.store_id = :storeId', { storeId });
+    if (q) {
+      const like = `%${q.toLowerCase()}%`;
+      qb.andWhere('(LOWER(p.name) LIKE :like OR LOWER(p.id) LIKE :like)', {
+        like,
+      });
+    }
+    qb.orderBy('p.updated_at', 'DESC');
+    const rows = await qb.getMany();
+    return {
+      items: rows.map((p) => {
+        const price = Number(p.price);
+        const status: 'In Stock' | 'Low Stock' | 'Out of Stock' =
+          p.stock === 0 ? 'Out of Stock' : p.stock <= 10 ? 'Low Stock' : 'In Stock';
+        return {
+          sku: p.id,
+          name: p.name,
+          category: p.category,
+          stock: p.stock,
+          price,
+          status,
+        };
+      }),
     };
   }
 }
