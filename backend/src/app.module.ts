@@ -5,8 +5,10 @@ import { AppController } from './app.controller';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { StoresModule } from './stores/stores.module';
+import { ProductsModule } from './products/products.module';
 import { User } from './users/user.entity';
 import { Store } from './stores/store.entity';
+import { Product } from './products/product.entity';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { Store } from './stores/store.entity';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store],
+        entities: [User, Store, Product],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -28,6 +30,7 @@ import { Store } from './stores/store.entity';
     UsersModule,
     AuthModule,
     StoresModule,
+    ProductsModule,
   ],
   controllers: [AppController],
 })

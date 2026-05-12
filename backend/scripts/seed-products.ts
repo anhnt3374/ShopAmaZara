@@ -3,7 +3,7 @@ import { parse } from 'csv-parse/sync';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { User } from '../src/users/user.entity';
 import { Store } from '../src/stores/store.entity';
@@ -97,12 +97,107 @@ async function main() {
       console.log('Example seller logins (password "seller123"):');
       for (const e of printedSellers) console.log(`  ${e}`);
     }
-    // Products are inserted by Task 2. Re-running this script after Task 2
-    // ships will also upsert products.
-    void rows; // referenced so the parse step is verified
+
+    const productsRepo = ds.getRepository(
+      (await import('../src/products/product.entity')).Product,
+    );
+
+    // De-duplicate by id across the whole CSV (last occurrence wins) so we
+    // don't trigger duplicate-key errors on intra-batch duplicates. The CSV
+    // contains a few repeated ids.
+    const mappedById = new Map<string, NonNullable<ReturnType<typeof mapRowToProduct>>>();
+    for (const r of rows) {
+      const p = mapRowToProduct(r);
+      if (p) mappedById.set(p.id, p);
+    }
+    const allEntities = Array.from(mappedById.values());
+
+    let productsInserted = 0;
+    let productsUpdated = 0;
+    const BATCH = 500;
+    for (let i = 0; i < allEntities.length; i += BATCH) {
+      const entities = allEntities.slice(i, i + BATCH);
+      const existing = await productsRepo
+        .createQueryBuilder('p')
+        .select('p.id')
+        .where('p.id IN (:...ids)', { ids: entities.map((e) => e.id) })
+        .getMany();
+      const existingIds = new Set(existing.map((e) => e.id));
+      await productsRepo.save(entities);
+      for (const e of entities) {
+        if (existingIds.has(e.id)) productsUpdated += 1;
+        else productsInserted += 1;
+      }
+      console.log(`Products: ${i + entities.length} / ${allEntities.length}`);
+    }
+    console.log(`Seeded ${productsInserted} new products, updated ${productsUpdated}`);
   } finally {
     await app.close();
   }
+}
+
+function safeJson(value: string): unknown {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return null;
+  }
+}
+
+function mapRowToProduct(r: CsvRow):
+  | {
+      id: string;
+      name: string;
+      brand: string;
+      category: string;
+      storeId: string;
+      price: string;
+      discount: number;
+      stock: number;
+      imageFirst: string;
+      shortDescription: string | null;
+      longDescription: string | null;
+      highlights: unknown;
+      color: unknown;
+      availableColors: unknown;
+      availableSizes: unknown;
+      material: string | null;
+      targetGender: 'men' | 'women' | 'unisex' | 'kids' | null;
+      targetAgeGroup: string | null;
+      tags: unknown;
+    }
+  | null {
+  if (!r.id || !r.name || !r.store_id) return null;
+  const price = Number(r.price);
+  const discount = Math.max(0, Math.min(100, Math.round(Number(r.discount) || 0)));
+  const stock = Math.max(0, Math.round(Number(r.stock) || 0));
+  const allowedGenders = new Set(['men', 'women', 'unisex', 'kids']);
+  const gender = allowedGenders.has(r.target_gender)
+    ? (r.target_gender as 'men' | 'women' | 'unisex' | 'kids')
+    : null;
+  return {
+    id: r.id,
+    name: r.name,
+    brand: r.brand || 'Unbranded',
+    category: r.category || 'Other',
+    storeId: r.store_id,
+    price: price.toFixed(2),
+    discount,
+    stock,
+    imageFirst: r.image_first || '',
+    shortDescription: r.short_description || null,
+    longDescription: r.long_description || null,
+    highlights: safeJson(r.highlights),
+    color: safeJson(r.color),
+    availableColors: safeJson(r.available_colors),
+    availableSizes: safeJson(r.available_sizes),
+    material: r.material || null,
+    targetGender: gender,
+    targetAgeGroup: r.target_age_group || null,
+    tags: safeJson(r.tags),
+  };
 }
 
 main().catch((err) => {
