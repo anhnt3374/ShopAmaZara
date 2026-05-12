@@ -8,22 +8,33 @@ Marketplace project with a React + Vite storefront and a NestJS + MySQL backend.
 |-----------------------------------|--------------------------------------------------|
 | `frontend/`                       | React 18 + Vite 5 + Tailwind. Storefront + seller dashboard. |
 | `backend/`                        | NestJS 10 + TypeORM + MySQL. JWT auth.           |
-| `backend/docker-compose.yml`      | MySQL 8.0 (dev) + init script for `amazara_test` schema. |
+| `docker-compose.yml` (root)       | Full-stack dev: MySQL + backend (NestJS, watch) + frontend (Vite HMR). |
 | `backend/Dockerfile`              | Multi-stage prod image for the API.              |
+| `backend/Dockerfile.dev`          | Dev image for the API (used by root compose).    |
+| `frontend/Dockerfile`             | Multi-stage prod image (nginx) for the SPA.      |
+| `frontend/Dockerfile.dev`         | Dev image for the SPA (used by root compose).    |
+| `backend/docker/init.sql`         | MySQL init script that creates `amazara_test` schema. |
 | `docs/`                           | Feature docs (`features/`), design specs (`superpowers/specs/`), plans (`superpowers/plans/`). |
 
 ## Common commands
 
 ```bash
-# Backend
-cd backend && docker compose up -d mysql        # start MySQL
-cd backend && npm run start:dev                 # NestJS on :3000
-cd backend && npm test                          # unit tests
-cd backend && npm run test:e2e                  # e2e tests (needs MySQL up)
+# Full stack (recommended)
+docker compose up -d                          # MySQL + backend (:3000) + frontend (:5173)
+docker compose logs -f backend                # tail backend
+docker compose down                           # stop everything (volumes persist)
+docker compose down -v                        # nuke including data
 
-# Frontend
-cd frontend && npm run dev                      # Vite on :5173
-cd frontend && npm run build
+# Native backend dev (no Docker for the app, MySQL only via Docker)
+docker compose up -d mysql
+cd backend && npm install && npm run start:dev
+
+# Native frontend dev
+cd frontend && npm install && npm run dev
+
+# Tests
+cd backend && npm test                        # unit
+cd backend && npm run test:e2e                # e2e (needs MySQL up via `docker compose up -d mysql`)
 ```
 
 ## Conventions

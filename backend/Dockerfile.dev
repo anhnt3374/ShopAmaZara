@@ -1,0 +1,12 @@
+# Dev container for the NestJS backend. Source is mounted via docker-compose
+# so edits on the host are picked up by `nest start --watch`.
+
+FROM node:20-alpine
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY . .
+EXPOSE 3000
+CMD ["npm", "run", "start:dev"]

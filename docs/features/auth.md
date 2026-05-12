@@ -77,14 +77,14 @@ migrations before production.
 ## Local development
 
 ```bash
-# Terminal 1 — MySQL
-cd backend && cp .env.example .env && docker compose up -d mysql
+# Recommended: bring up the full stack in Docker
+docker compose up -d
+# Frontend: http://localhost:5173, Backend: http://localhost:3000, MySQL: localhost:3306
 
-# Terminal 2 — backend
-cd backend && npm install && npm run start:dev
-
-# Terminal 3 — frontend
-cd frontend && cp .env.example .env && npm install && npm run dev
+# Alternative: run only MySQL in Docker; run backend / frontend natively
+docker compose up -d mysql
+cd backend && npm install && npm run start:dev    # http://localhost:3000
+cd frontend && cp .env.example .env && npm install && npm run dev   # http://localhost:5173
 ```
 
 Frontend: http://localhost:5173 — open `/auth`.
