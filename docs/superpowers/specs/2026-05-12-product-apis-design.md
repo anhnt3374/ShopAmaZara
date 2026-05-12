@@ -161,7 +161,9 @@ order items only).
    TypeORM uses the same config as runtime (`.env`-driven).
 2. Parse CSV with `csv-parse/sync`.
 3. For each distinct `store_id`:
-   - upsert a `User` (`email = seller-<first-8-of-uuid>@amazara.local`,
+   - upsert a `User` (`email = seller-<storeId>@amazara.local` — the full
+     36-char UUID, to guarantee uniqueness and avoid silent prefix
+     collisions where two store UUIDs share their first 8 hex chars,
      `fullName = "Seller <first-5>"`, `role = 'seller'`,
      `passwordHash = bcrypt('seller123', 12)`) keyed by email,
    - upsert a `Store` keyed by `id` with `ownerId` from above.

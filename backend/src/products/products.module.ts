@@ -18,6 +18,6 @@ import { SellerStoreGuard } from '../common/guards/seller-store.guard';
     StoreMeController,
   ],
   providers: [ProductsService, SellerStoreGuard],
-  exports: [ProductsService, TypeOrmModule],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

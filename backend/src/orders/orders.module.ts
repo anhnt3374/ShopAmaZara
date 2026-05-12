@@ -17,6 +17,6 @@ import { StoreOrdersController } from './store-orders.controller';
   ],
   controllers: [OrdersController, StoreOrdersController],
   providers: [OrdersService, SellerStoreGuard],
-  exports: [OrdersService, TypeOrmModule],
+  exports: [OrdersService],
 })
 export class OrdersModule {}

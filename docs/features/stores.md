@@ -15,8 +15,11 @@ The script is idempotent — rerunning only inserts what is missing.
 
 ## Seller credentials
 
-- email: `seller-<first-8-of-store-uuid>@amazara.local`
+- email: `seller-<store-uuid>@amazara.local`
 - password: `seller123`
+
+The full 36-char store UUID is used in the email to guarantee uniqueness —
+shorter prefixes risk a silent collision where two stores share an owner.
 
 The seed log prints a few example emails. To list more:
 
@@ -24,6 +27,11 @@ The seed log prints a few example emails. To list more:
 docker compose exec mysql mysql -uamazara -pamazara amazara \
   -e "SELECT email FROM users WHERE role='seller' LIMIT 5;"
 ```
+
+Existing rows seeded before this change still carry the legacy
+`seller-<first-8-of-store-uuid>@amazara.local` form. No data migration is
+provided; the next clean reseed after
+`TRUNCATE TABLE users; TRUNCATE TABLE stores;` produces the new pattern.
 
 ## Schema
 

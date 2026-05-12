@@ -43,3 +43,16 @@ All require `Authorization: Bearer <token>` from a seller who owns a store.
 
 `status` is derived from `stock`: `Out of Stock` (0), `Low Stock` (≤ 10),
 `In Stock` (> 10).
+
+## Known follow-ups
+
+- `originalPrice` returns `Infinity` when `discount === 100`. Should clamp to `null`.
+- `GET /products` is missing e2e coverage for `category[]`, `brand[]`, `storeId[]`, `gender`, `ageGroup`, and multi-page pagination.
+- `StoreProductsController.list` parses `page`/`limit` from raw query strings instead of a validated DTO.
+- `ProductsService.updateForStore`'s 28-line `Object.assign` could be a single keyed loop.
+- `CartService.add` is non-atomic; concurrent POSTs would surface as a 500 instead of a friendly retry.
+- `OrdersService.listForStore` pairs `raw[i]` with `entities[i]` by index; safe today thanks to `GROUP BY o.id` but fragile.
+- `StoreOrdersController.list` accepts arbitrary `?status=` strings without validation; bad values silently return `{ items: [] }`.
+- `Product.color` JSON column is mapped from CSV but never read by any response shape. Either expose or drop.
+- Multi-item checkout rollback is not exercised by an e2e test.
+- Frontend is still on mocks; wiring the storefront/seller pages to these APIs is a separate plan.

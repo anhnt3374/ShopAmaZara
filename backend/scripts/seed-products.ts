@@ -61,8 +61,7 @@ async function main() {
 
     for (const storeId of distinctStoreIds) {
       const short5 = storeId.slice(0, 5);
-      const short8 = storeId.slice(0, 8);
-      const email = `seller-${short8}@amazara.local`;
+      const email = `seller-${storeId}@amazara.local`;
 
       let seller = await users.findOne({ where: { email } });
       if (!seller) {
