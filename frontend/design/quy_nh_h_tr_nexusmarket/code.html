@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Support &amp; Rules - NexusMarket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#173bab",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffafd3",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#001453",
+                        "surface": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-container": "#e5eeff",
+                        "on-primary-container": "#a8b8ff",
+                        "tertiary-container": "#8b1a5e",
+                        "outline-variant": "#c4c5d5",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#ff9dcc",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-tertiary-fixed": "#3d0026",
+                        "outline": "#757684",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-secondary-container": "#684000",
+                        "primary-container": "#1e40af",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#85145a",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffddb8",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary-fixed": "#ffd8e7",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#3755c3",
+                        "secondary-container": "#fea619",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#6a0045",
+                        "on-surface-variant": "#444653",
+                        "inverse-primary": "#b8c4ff",
+                        "primary": "#00288e",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary": "#855300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar Component -->
+<header class="bg-surface/95 backdrop-blur-md w-full top-0 sticky z-50 border-b border-outline-variant shadow-sm">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-16">
+<!-- Brand -->
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md font-bold text-primary">NexusMarket</span>
+</div>
+<!-- Navigation Links (Desktop) -->
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high transition-all duration-150 scale-95 active:scale-90 px-3 py-2 rounded" href="#">Shop</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high transition-all duration-150 scale-95 active:scale-90 px-3 py-2 rounded" href="#">Deals</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high transition-all duration-150 scale-95 active:scale-90 px-3 py-2 rounded" href="#">Sell</a>
+<a class="text-label-md font-label-md text-primary border-b-2 border-primary pb-1 px-3 py-2" href="#">Support</a>
+</nav>
+<!-- Trailing Icons -->
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:text-primary hover:bg-surface-container-high transition-all duration-150 scale-95 active:scale-90 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="hover:text-primary hover:bg-surface-container-high transition-all duration-150 scale-95 active:scale-90 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+<button class="hover:text-primary hover:bg-surface-container-high transition-all duration-150 scale-95 active:scale-90 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-20">
+<div class="mb-12">
+<h1 class="text-display-lg font-display-lg text-primary mb-4">Support &amp; Policies</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">
+                Clear guidelines and detailed policies to ensure a safe, transparent, and efficient experience for all NexusMarket users.
+            </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter items-start">
+<!-- Sticky Navigation Side Panel -->
+<aside class="md:col-span-3 sticky top-24 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm hidden md:block">
+<nav class="flex flex-col gap-2">
+<a class="text-label-md font-label-md text-primary bg-primary-container/10 px-4 py-3 rounded-lg flex items-center justify-between group" href="#privacy">
+<span>Privacy Policy</span>
+<span class="material-symbols-outlined text-[18px] opacity-100 transition-opacity">chevron_right</span>
+</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface px-4 py-3 rounded-lg flex items-center justify-between transition-colors" href="#terms">
+<span>Terms of Use</span>
+<span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface px-4 py-3 rounded-lg flex items-center justify-between transition-colors" href="#shipping">
+<span>Shipping Guide</span>
+<span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface px-4 py-3 rounded-lg flex items-center justify-between transition-colors" href="#vendor">
+<span>Vendor Rules</span>
+<span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</a>
+</nav>
+</aside>
+<!-- Policy Content Sections -->
+<div class="md:col-span-9 flex flex-col gap-8">
+<!-- Privacy Policy Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm" id="privacy">
+<div class="flex items-center gap-3 mb-6 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary text-[28px]">shield_lock</span>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Privacy Policy</h2>
+</div>
+<div class="space-y-6 text-on-surface-variant">
+<p>At NexusMarket, we prioritize your privacy. This policy outlines how we collect, use, and protect your personal data when you interact with our platform.</p>
+<h3 class="text-headline-md font-headline-md text-on-surface mt-8 mb-3">1. Information Collection</h3>
+<p>We collect information necessary to provide and improve our services. This includes account details, transaction history, and interaction metrics. We do not sell your personal data to third parties under any circumstances.</p>
+<h3 class="text-headline-md font-headline-md text-on-surface mt-8 mb-3">2. Data Security</h3>
+<p>All sensitive information is encrypted in transit and at rest using industry-standard protocols. We conduct regular security audits to ensure your data remains protected against unauthorized access.</p>
+</div>
+</section>
+<!-- Terms of Use Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm" id="terms">
+<div class="flex items-center gap-3 mb-6 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary text-[28px]">gavel</span>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Terms of Use</h2>
+</div>
+<div class="space-y-6 text-on-surface-variant">
+<p>By accessing NexusMarket, you agree to abide by these terms. They govern your use of our platform and outline the rights and responsibilities of both users and the marketplace.</p>
+<ul class="list-disc pl-5 space-y-2 mt-4">
+<li>Users must be at least 18 years of age to create an account.</li>
+<li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+<li>Fraudulent activity will result in immediate account termination.</li>
+</ul>
+</div>
+</section>
+<!-- Shipping Guide Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm" id="shipping">
+<div class="flex items-center gap-3 mb-6 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary text-[28px]">local_shipping</span>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Shipping Guide</h2>
+</div>
+<div class="space-y-6 text-on-surface-variant">
+<p>We aim for transparency in all logistics. Delivery times and costs vary by vendor and destination. Standard shipping typically resolves within 3-5 business days domestically.</p>
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant/50 mt-6">
+<h4 class="text-label-md font-label-md text-on-surface mb-2">Tracking Your Order</h4>
+<p class="text-body-sm font-body-sm">Once an order is dispatched, tracking information will be available in your dashboard under "Orders". Please allow 24 hours for initial tracking updates.</p>
+</div>
+</div>
+</section>
+<!-- Vendor Rules Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm" id="vendor">
+<div class="flex items-center gap-3 mb-6 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary text-[28px]">storefront</span>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Vendor Rules</h2>
+</div>
+<div class="space-y-6 text-on-surface-variant">
+<p>Vendors are the backbone of NexusMarket. To maintain quality and trust, all sellers must adhere to our strict operational guidelines.</p>
+<ul class="list-disc pl-5 space-y-2 mt-4">
+<li>All product descriptions must be accurate and truthful.</li>
+<li>Sellers must respond to customer inquiries within 48 hours.</li>
+<li>Counterfeit or illegal goods are strictly prohibited.</li>
+</ul>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer Component -->
+<footer class="bg-surface-container-low border-t border-outline-variant w-full mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center py-8 px-margin-desktop max-w-container-max mx-auto gap-6 md:gap-0">
+<div class="text-body-sm font-body-sm text-on-surface-variant">
+                © 2024 NexusMarket. Professional Excellence in Commerce.
+            </div>
+<nav class="flex flex-wrap justify-center gap-6">
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Privacy Policy</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Terms of Use</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Shipping Guide</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Vendor Rules</a>
+</nav>
+</div>
+</footer>
+</body></html>

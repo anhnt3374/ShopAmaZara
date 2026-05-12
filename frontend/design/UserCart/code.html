@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shopping Cart - NexusMarket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#173bab",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffafd3",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#001453",
+                        "surface": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-container": "#e5eeff",
+                        "on-primary-container": "#a8b8ff",
+                        "tertiary-container": "#8b1a5e",
+                        "outline-variant": "#c4c5d5",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#ff9dcc",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-tertiary-fixed": "#3d0026",
+                        "outline": "#757684",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-secondary-container": "#684000",
+                        "primary-container": "#1e40af",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#85145a",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffddb8",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary-fixed": "#ffd8e7",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#3755c3",
+                        "secondary-container": "#fea619",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#6a0045",
+                        "on-surface-variant": "#444653",
+                        "inverse-primary": "#b8c4ff",
+                        "primary": "#00288e",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary": "#855300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md">
+<!-- TopNavBar -->
+<header class="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md text-primary dark:text-inverse-primary docked full-width top-0 sticky z-50 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-gutter">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">NexusMarket</span>
+<nav class="hidden md:flex gap-unit">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-lowest transition-all duration-150 scale-95 active:scale-90 transition-transform px-3 py-2 rounded-lg text-label-md font-label-md" href="#">Shop</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-lowest transition-all duration-150 scale-95 active:scale-90 transition-transform px-3 py-2 rounded-lg text-label-md font-label-md" href="#">Deals</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-lowest transition-all duration-150 scale-95 active:scale-90 transition-transform px-3 py-2 rounded-lg text-label-md font-label-md" href="#">Sell</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-lowest transition-all duration-150 scale-95 active:scale-90 transition-transform px-3 py-2 rounded-lg text-label-md font-label-md" href="#">Support</a>
+</nav>
+</div>
+<div class="flex flex-1 max-w-md mx-gutter">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container text-on-surface text-body-md font-body-md rounded-full py-2 pl-10 pr-4 border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="Search products..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all duration-150 scale-95 active:scale-90 flex items-center justify-center">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="p-2 text-primary border-b-2 border-primary pb-1 flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all duration-150 scale-95 active:scale-90 flex items-center justify-center">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
+<div class="mb-8">
+<h1 class="text-headline-lg font-headline-lg text-on-surface">Your Cart</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-2">2 items in your cart.</p>
+</div>
+<div class="flex flex-col lg:flex-row gap-gutter">
+<!-- Cart Items List -->
+<div class="flex-1 flex flex-col gap-unit">
+<div class="flex items-center gap-3 px-2 py-1">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" id="selectAll" type="checkbox"/>
+<label class="text-body-md font-body-md text-on-surface cursor-pointer" for="selectAll">Select All</label>
+</div>
+<!-- Cart Item 1 -->
+<div class="bg-surface border border-outline-variant rounded-lg p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center relative group">
+<div class="flex items-center justify-center pt-2 sm:pt-0">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</div>
+<div class="w-24 h-24 rounded-md overflow-hidden bg-surface-container-low shrink-0 border border-outline-variant/50">
+<img alt="Premium Wireless Headphones" class="w-full h-full object-cover" data-alt="A pair of sleek, modern premium wireless headphones resting on a minimalist geometric pedestal. The setting is a clean, bright studio with high-key lighting that emphasizes the smooth matte finish of the headphones. The color palette is predominantly stark white and soft greys, with the deep navy blue of the headphones serving as a striking focal point. The overall mood is sophisticated, professional, and technologically advanced, perfectly aligning with a Corporate Modernism aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPxNUN01q_oMKa9rSybdGc0gdME88YTVNanOhckdDOqe1GagqosXudDbt3uh17unyii0Pf_TEYuuZJaxetw8crmwD4K2imUI5d0YcwnTY5HJUhJPBm7RrShd0Wfjr6h10j7biwalRgJ4GxdzJQ93RgOZGtLo_2vcOKrcJG3it8oqC_mNvJbW7oeElD-gEOAs6Mz8gRKehrNu6fQBZATCPznTEL0kBX7IX5yvPs695ArlpBxV0pS1Xeyq3v_nQp80tvl8XisBFwTPo"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface truncate text-lg">Premium Wireless Headphones</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Color: Midnight Blue</p>
+</div>
+<span class="text-headline-md font-headline-md text-on-surface text-lg font-bold">$299.99</span>
+</div>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center border border-outline-variant rounded-md overflow-hidden bg-surface">
+<button class="px-3 py-1 text-on-surface hover:bg-surface-container transition-colors">-</button>
+<span class="px-4 py-1 text-data-mono font-data-mono border-x border-outline-variant bg-surface-container-low">1</span>
+<button class="px-3 py-1 text-on-surface hover:bg-surface-container transition-colors">+</button>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-primary hover:text-primary-container text-label-md font-label-md flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm">chat</span>
+                                    Ask about this item
+                                </button>
+<div class="w-px h-4 bg-outline-variant"></div>
+<button class="text-error hover:text-on-error-container text-label-md font-label-md flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+                                    Remove
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Cart Item 2 -->
+<div class="bg-surface border border-outline-variant rounded-lg p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center relative group">
+<div class="flex items-center justify-center pt-2 sm:pt-0">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" type="checkbox"/>
+</div>
+<div class="w-24 h-24 rounded-md overflow-hidden bg-surface-container-low shrink-0 border border-outline-variant/50">
+<img alt="Minimalist Smartwatch" class="w-full h-full object-cover" data-alt="A minimalist smartwatch with a sleek metal casing and a textured silicone band, displayed against a pristine white background. The lighting is diffused and even, eliminating harsh shadows and highlighting the precise craftsmanship of the device. The composition is highly structured, using a strict grid layout subtlely implied in the background styling. The primary color accents are subtle silvers and deep blues, evoking a sense of reliability, efficiency, and professional excellence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhmaZXjkNogSXxlTVXRF_StNnDgY0CzUElq-0zZ2cfek_yFPEO1WWvrFThJ5QjOiSpFIYtm7Dn_hNQwydV6LUISbfO8jY7-iu7X-hGOQ8zILp1vsb772wuDyc1j5KOtBK9XZyTBQX_f2MpoKpLk-X05VGOGd89Ov3eW9FzL5qK7Q80oVZfJxqNl01tJXTUDocrwIoK2zX15MTI_NQXq0zq73yi_NaDDiry6ZotL0FAkKR31XgYjgSRMyf1sdo4D3pLZUq8dkb47K4"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface truncate text-lg">Minimalist Smartwatch</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Size: 42mm | Band: Sport Black</p>
+</div>
+<span class="text-headline-md font-headline-md text-on-surface text-lg font-bold">$199.00</span>
+</div>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center border border-outline-variant rounded-md overflow-hidden bg-surface">
+<button class="px-3 py-1 text-on-surface hover:bg-surface-container transition-colors">-</button>
+<span class="px-4 py-1 text-data-mono font-data-mono border-x border-outline-variant bg-surface-container-low">2</span>
+<button class="px-3 py-1 text-on-surface hover:bg-surface-container transition-colors">+</button>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-primary hover:text-primary-container text-label-md font-label-md flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm">chat</span>
+                                    Ask about this item
+                                </button>
+<div class="w-px h-4 bg-outline-variant"></div>
+<button class="text-error hover:text-on-error-container text-label-md font-label-md flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+                                    Remove
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Order Summary Section -->
+<div class="w-full lg:w-96 shrink-0">
+<div class="bg-surface border border-outline-variant rounded-lg p-6 sticky top-24">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6 border-b border-outline-variant pb-4">Order Summary</h2>
+<div class="flex flex-col gap-4 text-body-md font-body-md">
+<div class="flex justify-between text-on-surface-variant">
+<span>Subtotal</span>
+<span class="text-data-mono font-data-mono">$697.99</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Estimated Shipping</span>
+<span class="text-data-mono font-data-mono">$12.50</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Estimated Tax</span>
+<span class="text-data-mono font-data-mono">$55.84</span>
+</div>
+<div class="border-t border-outline-variant pt-4 mt-2">
+<div class="flex justify-between items-center">
+<span class="text-headline-md font-headline-md text-on-surface">Total</span>
+<span class="text-headline-lg font-headline-lg text-primary font-bold">$766.33</span>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary text-label-md font-label-md py-3 px-6 rounded-lg mt-8 hover:bg-primary-container transition-colors duration-150 flex items-center justify-center gap-2">
+                        Checkout Selected Items
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<div class="mt-4 flex items-center justify-center gap-2 text-body-sm font-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">lock</span>
+                        Secure SSL Checkout
+                    </div>
+</div>
+</div>
+</div>
+</main>
+<!-- Persistent Chatbot Button -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-[0px_10px_30px_rgba(15,23,42,0.12)] flex items-center justify-center hover:bg-primary-container transition-colors duration-150 z-50">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-lowest full-width bottom-0 border-t border-outline-variant dark:border-outline flex flex-col md:flex-row justify-between items-center py-8 px-margin-desktop max-w-container-max mx-auto w-full mt-auto">
+<div class="text-headline-md font-headline-md text-primary mb-4 md:mb-0">
+            NexusMarket
+        </div>
+<div class="text-body-sm font-body-sm text-on-surface-variant text-center md:text-left mb-4 md:mb-0">
+            © 2024 NexusMarket. Professional Excellence in Commerce.
+        </div>
+<nav class="flex gap-4">
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Privacy Policy</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Terms of Use</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Shipping Guide</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Vendor Rules</a>
+</nav>
+</footer>
+</body></html>

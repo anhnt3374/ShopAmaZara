@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexusMarket - Support Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#173bab",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffafd3",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#001453",
+                        "surface": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-container": "#e5eeff",
+                        "on-primary-container": "#a8b8ff",
+                        "tertiary-container": "#8b1a5e",
+                        "outline-variant": "#c4c5d5",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#ff9dcc",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-tertiary-fixed": "#3d0026",
+                        "outline": "#757684",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-secondary-container": "#684000",
+                        "primary-container": "#1e40af",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#85145a",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffddb8",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary-fixed": "#ffd8e7",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#3755c3",
+                        "secondary-container": "#fea619",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#6a0045",
+                        "on-surface-variant": "#444653",
+                        "inverse-primary": "#b8c4ff",
+                        "primary": "#00288e",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary": "#855300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md docked full-width top-0 sticky z-50 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none h-16 w-full">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-8">
+<a class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim" href="#">NexusMarket</a>
+<nav class="hidden md:flex items-center gap-6 h-full">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-container-high dark:hover:bg-surface-container-lowest px-3" href="#">Shop</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-container-high dark:hover:bg-surface-container-lowest px-3" href="#">Deals</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-container-high dark:hover:bg-surface-container-lowest px-3" href="#">Sell</a>
+<a class="text-primary dark:text-primary-fixed-dim border-b-2 border-primary dark:border-primary-fixed-dim h-full flex items-center hover:bg-surface-container-high dark:hover:bg-surface-container-lowest px-3 pt-[2px]" href="#">Support</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex relative items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-full text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 w-64 transition-all" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all scale-95 active:scale-90">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all scale-95 active:scale-90">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all scale-95 active:scale-90">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area: Sidebar + Chat Window -->
+<main class="flex-1 flex overflow-hidden max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-gutter gap-gutter h-[calc(100vh-64px)]">
+<!-- Left Sidebar: Conversations & Navigation -->
+<aside class="w-80 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden hidden lg:flex shadow-sm">
+<div class="p-4 border-b border-outline-variant bg-surface-container-low">
+<h2 class="text-headline-md font-headline-md text-on-surface">Inbox</h2>
+</div>
+<div class="p-4 border-b border-outline-variant">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[20px]">search</span>
+<input class="w-full pl-9 pr-4 py-2 bg-surface border border-outline-variant rounded-lg text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" placeholder="Search chats..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<ul class="flex flex-col">
+<!-- Active Chat -->
+<li class="bg-primary-container/10 border-l-4 border-primary cursor-pointer hover:bg-surface-container transition-colors">
+<div class="p-4 flex gap-3 items-start">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary">support_agent</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-label-md font-label-md text-on-surface truncate">Nexus Support</h3>
+<span class="text-[12px] text-on-surface-variant">Now</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">I'd be happy to help you with that order.</p>
+</div>
+</div>
+</li>
+<!-- Other Chats -->
+<li class="cursor-pointer hover:bg-surface-container transition-colors border-l-4 border-transparent">
+<div class="p-4 flex gap-3 items-start border-b border-outline-variant/50">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden shrink-0">
+<img alt="TechStore Logo" class="w-full h-full object-cover" data-alt="A close up shot of a generic electronics store logo featuring a minimalist circuit board design in white against a dark blue background. The lighting is flat and even, typical of a profile picture. The style is clean, modern, and corporate, fitting seamlessly into a high-end e-commerce interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJp1ReUP6g2gMk1ba50kTB6tMuOu7Y3pjiXPmwehmpIh8r-9BLNENgIChWYKuWODSrWKyCcQYM14WJ-yt4kw6kCicci5zOrrFkveYLo62pTc3k-yL6eL4lSgkJ7MRaA6TRVDNbFgh09eo7tzegvnUsXRCp4mSBQKWaIsGht6gxjyOKRUHbw4rn2j-gjvfJDohbc63FRHcszuJwg8MkaDd_nXkMS5jkBHozDY-pme8GrlJZSRDX4cfEv6qS9R_EC4lfWL7szyTE_3Q"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-label-md font-label-md text-on-surface truncate">TechStore Pro</h3>
+<span class="text-[12px] text-on-surface-variant">Yesterday</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Your warranty covers this issue.</p>
+</div>
+</div>
+</li>
+<li class="cursor-pointer hover:bg-surface-container transition-colors border-l-4 border-transparent">
+<div class="p-4 flex gap-3 items-start border-b border-outline-variant/50">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-outline">notifications</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-label-md font-label-md text-on-surface truncate">System Alerts</h3>
+<span class="text-[12px] text-on-surface-variant">Mon</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Your order #10934 has shipped.</p>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<!-- Quick Links -->
+<div class="p-4 border-t border-outline-variant bg-surface-container-low">
+<h4 class="text-label-md font-label-md text-on-surface-variant mb-3 uppercase tracking-wider text-[11px]">Resources</h4>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span> FAQ
+                    </a>
+<a class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">library_books</span> Shipping Policies
+                    </a>
+</nav>
+</div>
+</aside>
+<!-- Main Chat Area -->
+<section class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-sm">
+<!-- Chat Header -->
+<div class="h-16 px-6 border-b border-outline-variant bg-surface-container-low flex items-center justify-between shrink-0">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary">support_agent</span>
+</div>
+<div>
+<h2 class="text-headline-md font-headline-md text-on-surface text-[18px] leading-tight">Nexus Support</h2>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span class="text-[12px] text-on-surface-variant">Typically replies in a few minutes</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-full transition-colors" title="View Details">
+<span class="material-symbols-outlined">info</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-full transition-colors" title="More Options">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Chat Messages -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-surface-bright">
+<!-- Date Divider -->
+<div class="flex items-center justify-center">
+<span class="text-[12px] bg-surface-container px-3 py-1 rounded-full text-on-surface-variant font-medium">Today</span>
+</div>
+<!-- System Message -->
+<div class="flex flex-col items-center gap-2">
+<div class="bg-surface-container border border-outline-variant px-4 py-2 rounded-lg text-body-sm font-body-sm text-on-surface-variant max-w-md text-center">
+                        Welcome to Nexus Support! How can we help you today? You can select a quick action below or type your question.
+                    </div>
+<!-- Quick Actions -->
+<div class="flex flex-wrap gap-2 justify-center mt-2">
+<button class="px-3 py-1.5 bg-surface border border-outline-variant rounded-full text-body-sm font-body-sm text-primary hover:bg-primary-container/10 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span> Track Order
+                        </button>
+<button class="px-3 py-1.5 bg-surface border border-outline-variant rounded-full text-body-sm font-body-sm text-primary hover:bg-primary-container/10 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">assignment_return</span> Returns
+                        </button>
+<button class="px-3 py-1.5 bg-surface border border-outline-variant rounded-full text-body-sm font-body-sm text-primary hover:bg-primary-container/10 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">shopping_cart</span> Cart Issue
+                        </button>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex justify-end">
+<div class="bg-primary text-on-primary rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%] shadow-sm">
+<p class="text-body-md font-body-md">Hi, I have a question about an item in my cart. Will it fit a 15-inch laptop?</p>
+<div class="text-[11px] text-on-primary/70 text-right mt-1">10:42 AM</div>
+</div>
+</div>
+<!-- Product Context Card inserted by user -->
+<div class="flex justify-end">
+<div class="bg-surface border border-outline-variant rounded-xl p-3 max-w-[80%] flex gap-3 items-center shadow-sm w-80">
+<div class="w-16 h-16 bg-surface-container rounded-md overflow-hidden shrink-0 border border-outline-variant/50">
+<img alt="Backpack" class="w-full h-full object-cover" data-alt="A product shot of a sleek, modern, dark grey minimalist backpack set against a pure white background. The lighting is bright and evenly highlights the premium fabric texture and clean lines of the bag. The overall aesthetic is professional, clean, and typical of high-end e-commerce product photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBS-rZ8v-5PvrdGUHGyo6lSP9r-zSvF7Q6rmZwXS4Gg7OcnRU0QiDfcHcKEzB5WJXueX54viHEE5sp3cNulpoGDkm1CACGoZa8HiUAV7XArO-L4F-wAZvlF7HeMWsqTmWUV8pFMch-qp2afOK0f143Ffxtojn5BTtfaofHzh_ZWyCgS4MVLIZK1xj1j7WeUbvCmuL3NmBTEL2wXQM702VyZIM_HjMhFCnLFdTHoSlorONipaddFhz_Lv5Zpntk-asTmDqE9MNghVv8"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-body-sm font-body-sm font-medium text-on-surface truncate">Urban Commuter Backpack</h4>
+<p class="text-[12px] text-on-surface-variant">$89.99</p>
+<a class="text-[12px] text-primary hover:underline mt-1 inline-block" href="#">View details</a>
+</div>
+</div>
+</div>
+<!-- Agent Message -->
+<div class="flex gap-3 max-w-[80%]">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1">
+<span class="material-symbols-outlined text-on-primary text-[18px]">support_agent</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+<p class="text-body-md font-body-md text-on-surface">Hello! Yes, the Urban Commuter Backpack has a dedicated padded sleeve that comfortably fits up to a 16-inch laptop.</p>
+<div class="text-[11px] text-on-surface-variant mt-1">10:45 AM</div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-4 bg-surface border-t border-outline-variant shrink-0">
+<!-- Attachments Context Bar (Hidden by default, shown for context) -->
+<div class="flex items-center gap-2 mb-3 pb-2 border-b border-outline-variant/50 overflow-x-auto">
+<span class="text-[12px] font-medium text-on-surface-variant whitespace-nowrap">Link context:</span>
+<button class="flex items-center gap-1 px-2 py-1 bg-surface-container border border-outline-variant rounded text-[12px] text-on-surface hover:bg-surface-container-high transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">shopping_cart</span> Cart Items
+                    </button>
+<button class="flex items-center gap-1 px-2 py-1 bg-surface-container border border-outline-variant rounded text-[12px] text-on-surface hover:bg-surface-container-high transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">favorite</span> Wishlist
+                    </button>
+<button class="flex items-center gap-1 px-2 py-1 bg-surface-container border border-outline-variant rounded text-[12px] text-on-surface hover:bg-surface-container-high transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">receipt_long</span> Orders
+                    </button>
+</div>
+<div class="flex items-end gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors shrink-0 mb-1" title="Attach Image">
+<span class="material-symbols-outlined">image</span>
+</button>
+<div class="flex-1 relative">
+<textarea class="w-full bg-surface-container-low border border-outline-variant rounded-2xl pl-4 pr-10 py-3 text-body-md font-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none max-h-32 min-h-[48px]" placeholder="Type a message..." rows="1"></textarea>
+<button class="absolute right-2 bottom-2 p-1.5 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+</button>
+</div>
+<button class="w-12 h-12 bg-primary text-on-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors shadow-sm shrink-0 mb-[2px]">
+<span class="material-symbols-outlined ml-1">send</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</body></html>

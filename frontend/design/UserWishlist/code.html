@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wishlist - NexusMarket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#2a1700",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "secondary": "#855300",
+                        "surface-container-highest": "#d3e4fe",
+                        "inverse-primary": "#b8c4ff",
+                        "on-surface": "#0b1c30",
+                        "primary": "#00288e",
+                        "background": "#f8f9ff",
+                        "on-surface-variant": "#444653",
+                        "on-primary-fixed": "#001453",
+                        "primary-container": "#1e40af",
+                        "tertiary-fixed-dim": "#ffafd3",
+                        "outline": "#757684",
+                        "on-tertiary-fixed-variant": "#85145a",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#ffddb8",
+                        "on-primary-fixed-variant": "#173bab",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#ff9dcc",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#8b1a5e",
+                        "surface-tint": "#3755c3",
+                        "on-background": "#0b1c30",
+                        "surface": "#f8f9ff",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#6a0045",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-tertiary-fixed": "#3d0026",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "tertiary-fixed": "#ffd8e7",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "secondary-container": "#fea619",
+                        "inverse-surface": "#213145",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#684000",
+                        "on-primary-container": "#a8b8ff",
+                        "surface-dim": "#cbdbf5",
+                        "outline-variant": "#c4c5d5",
+                        "surface-container": "#e5eeff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "8px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "headline-md": ["Inter", "sans-serif"],
+                        "data-mono": ["Inter", "monospace"],
+                        "display-lg": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "headline-lg-mobile": ["Inter", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "data-mono": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md docked full-width top-0 z-50 border-b border-outline-variant dark:border-outline shadow-sm sticky">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-20">
+<!-- Left: Logo & Search -->
+<div class="flex items-center gap-8">
+<a class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[28px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">storefront</span>
+                    NexusMarket
+                </a>
+<div class="hidden lg:flex relative group items-center focus-within:ring-2 focus-within:ring-primary/10 transition-all rounded-full">
+<span class="material-symbols-outlined absolute left-3 text-outline pointer-events-none text-[20px]">search</span>
+<input class="pl-10 pr-4 py-2 w-64 rounded-full border border-outline-variant bg-surface-container-lowest text-body-sm font-body-sm focus:outline-none focus:border-primary focus:w-80 transition-all duration-300 placeholder-outline text-on-surface" placeholder="Search products..." type="text"/>
+</div>
+</div>
+<!-- Center: Navigation -->
+<ul class="hidden md:flex items-center gap-8 font-label-md text-label-md">
+<li><a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150 py-2" href="#">Shop</a></li>
+<li><a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150 py-2" href="#">Categories</a></li>
+<li><a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150 py-2" href="#">Deals</a></li>
+<!-- Active Nav Item based on semantic mapping -->
+<li><a class="text-primary dark:text-primary-fixed-dim border-b-2 border-primary pb-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Wishlist</a></li>
+</ul>
+<!-- Right: Actions -->
+<div class="flex items-center gap-4 text-primary dark:text-primary-fixed-dim">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary/10">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors focus-within:ring-2 focus-within:ring-primary/10">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">My Wishlist</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">You have 3 items saved for later.</p>
+</div>
+<button class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">share</span>
+                Share Wishlist
+            </button>
+</div>
+<!-- Wishlist Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Item 1 -->
+<div class="group flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:border-primary hover:shadow-[0_4px_20px_rgba(30,64,175,0.08)] transition-all duration-300">
+<div class="relative w-full aspect-square overflow-hidden bg-surface-container-low flex items-center justify-center p-4">
+<img alt="" class="object-cover w-full h-full rounded-lg group-hover:scale-[1.02] transition-transform duration-500" data-alt="A high-end pair of over-ear wireless headphones resting on a pristine, matte white surface. The product is sleek and modern, constructed from brushed aluminum and supple black leather, reflecting a premium Corporate Modernism aesthetic. Lighting is soft, high-key studio illumination that casts subtle, diffused shadows, emphasizing the minimalist curves and precision engineering. The overall color palette is dominated by cool whites, slate grays, and deep blacks, evoking a sense of technological sophistication and reliable quality suitable for a professional e-commerce platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1eCuBe-hZTTaXlF1fz4Vw-QNLChbrujr8jSIYjnFS_roCk1oO8iYtkRWrnNqY1I6RrtibHz68JtU80mWex-HICXJBMY9GbGi3N8XO_HI0rB-bsrl9mQyLywMu5y5TWHiT1qWIu47f2mh960X8kGbdBdU1Xc5LUnaAap4dGcVTrT62hSKyges1OMKLop9zjv0eE4HeyX_Xb5-xmND7gN49UUFzFe3UU7yHccxkyKnaUwyDwOW3XD_5sTsmnw4qJtd9FDMCahkDNd4"/>
+<div class="absolute top-4 right-4 bg-surface-container-lowest rounded-full p-1.5 border border-outline-variant shadow-sm z-10 cursor-pointer hover:bg-error-container transition-colors group/fav">
+<span class="material-symbols-outlined text-error text-[20px] group-hover/fav:scale-110 transition-transform" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2 gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">Aura Pro Noise Cancelling Headphones</h3>
+</div>
+<p class="font-headline-md text-headline-md font-bold text-on-surface mb-4">$349.00</p>
+<div class="flex items-center gap-2 mb-6 mt-auto">
+<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+<span class="font-label-md text-label-md text-on-surface-variant">In Stock</span>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 bg-primary text-on-primary font-label-md text-label-md py-2.5 rounded-lg hover:bg-primary-container transition-colors duration-150 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+                            Add to Cart
+                        </button>
+<button aria-label="Remove item" class="px-3 py-2.5 border border-outline-variant text-on-surface-variant rounded-lg hover:border-error hover:text-error hover:bg-error-container/20 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:border-primary hover:shadow-[0_4px_20px_rgba(30,64,175,0.08)] transition-all duration-300">
+<div class="relative w-full aspect-square overflow-hidden bg-surface-container-low flex items-center justify-center p-4">
+<img alt="" class="object-cover w-full h-full rounded-lg group-hover:scale-[1.02] transition-transform duration-500" data-alt="A minimalist analog wrist watch with a clean white dial and a smooth, tan leather strap, positioned elegantly on a light gray architectural concrete slab. The design language speaks to efficiency and clarity, with no unnecessary embellishments on the face. Shot from a slight overhead angle in bright, natural daylight that creates crisp, deliberate shadows. The visual style aligns with a secure, professional shopping experience, highlighting the texture of the leather and the polished stainless steel casing against a neutral, airy background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAID1M3drNWf7lI71rR_BNXsZK_uV0OtAVUNukC5qFEbnGxtk5KraZ4J-sZnKU03vj332PjsFzxKiioVfa324h5NrEqrgsxXGMyxjq4Zasvu3XgoAuiVdE8-lqv93pzEpt-qAQGee_v-JowsNhcLoJmRtvPeVG6eVFm41BRCGCspHVm7hn2MLtgP59FEF1kyODV6DYz4AgvmGXkLhgR_ITri40bCnxTKI9VAXhJ5e6FTg_9qCuTbq1BVcrIKMmFKYqHpsEW6ws9ADo"/>
+<div class="absolute top-4 right-4 bg-surface-container-lowest rounded-full p-1.5 border border-outline-variant shadow-sm z-10 cursor-pointer hover:bg-error-container transition-colors group/fav">
+<span class="material-symbols-outlined text-error text-[20px] group-hover/fav:scale-110 transition-transform" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2 gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">Chronos Minimalist Chronograph</h3>
+</div>
+<p class="font-headline-md text-headline-md font-bold text-on-surface mb-4">$185.00</p>
+<div class="flex items-center gap-2 mb-6 mt-auto">
+<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+<span class="font-label-md text-label-md text-on-surface-variant">In Stock</span>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 bg-primary text-on-primary font-label-md text-label-md py-2.5 rounded-lg hover:bg-primary-container transition-colors duration-150 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+                            Add to Cart
+                        </button>
+<button aria-label="Remove item" class="px-3 py-2.5 border border-outline-variant text-on-surface-variant rounded-lg hover:border-error hover:text-error hover:bg-error-container/20 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="group flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:border-primary hover:shadow-[0_4px_20px_rgba(30,64,175,0.08)] transition-all duration-300 opacity-80">
+<div class="relative w-full aspect-square overflow-hidden bg-surface-container-low flex items-center justify-center p-4">
+<img alt="" class="object-cover w-full h-full rounded-lg group-hover:scale-[1.02] transition-transform duration-500 grayscale-[30%]" data-alt="A sleek, low-profile mechanical keyboard designed for professional workflows, displayed on a spotless white desktop next to a minimal ceramic coffee cup. The keyboard features dark slate keycaps with crisp white legends, resting on an aircraft-grade aluminum chassis. The environment is bathed in bright, evenly distributed light, eliminating harsh contrasts and focusing on the utility and clean lines of the product. The mood is calm, productive, and highly organized, fitting a high-density, utility-first user interface aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcT8LJ_s0_T4biVz8AshxQvTVdlCkTff_d8juQdbEC62yeMzYox3TnuAX6AWZBtbkUnfwEpdlEblmP-F-dD8Kx-Y2KG8Rgp3c1eHkH0mctWDmCJm4HcHjsRhVr1K0xd-p79LSciYr7BXfSc7QcceAodL7h4Fwp_hPUrPGAkXl9RZhKZOLRBvklI5H137nmOa-bavaEz0ptpHgVoAO4YqFaYNKflm64ev51vFNH7sxIQBZ-rtvYFchSZoc9aRe3-9o42SsNk6_-aWU"/>
+<div class="absolute top-4 right-4 bg-surface-container-lowest rounded-full p-1.5 border border-outline-variant shadow-sm z-10 cursor-pointer hover:bg-error-container transition-colors group/fav">
+<span class="material-symbols-outlined text-error text-[20px] group-hover/fav:scale-110 transition-transform" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2 gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight">ErgoType Mechanical Keyboard</h3>
+</div>
+<p class="font-headline-md text-headline-md font-bold text-on-surface mb-4">$129.99</p>
+<div class="flex items-center gap-2 mb-6 mt-auto">
+<span class="material-symbols-outlined text-outline text-[18px]">inventory_2</span>
+<span class="font-label-md text-label-md text-outline">Out of Stock</span>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 bg-surface-variant text-outline font-label-md text-label-md py-2.5 rounded-lg cursor-not-allowed flex items-center justify-center gap-2" disabled="">
+                            Notify Me
+                        </button>
+<button aria-label="Remove item" class="px-3 py-2.5 border border-outline-variant text-on-surface-variant rounded-lg hover:border-error hover:text-error hover:bg-error-container/20 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-low w-full py-margin-desktop border-t border-outline-variant dark:border-outline mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto px-margin-desktop gap-gutter">
+<div class="font-headline-sm text-headline-sm text-on-surface dark:text-inverse-on-surface flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[24px]">storefront</span>
+<span class="font-bold">NexusMarket</span>
+</div>
+<ul class="flex flex-wrap justify-center gap-x-6 gap-y-2 font-label-md text-label-md text-on-surface-variant dark:text-surface-variant">
+<li><a class="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Terms of Service</a></li>
+<li><a class="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Shipping Information</a></li>
+<li><a class="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Returns &amp; Exchanges</a></li>
+<li><a class="hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Contact Support</a></li>
+</ul>
+<div class="font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant text-center md:text-right">
+                © 2024 NexusMarket E-commerce. Built for professional excellence.
+            </div>
+</div>
+</footer>
+</body></html>

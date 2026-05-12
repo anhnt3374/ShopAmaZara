@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Product Detail - NexusMarket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#173bab",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffafd3",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#001453",
+                        "surface": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-container": "#e5eeff",
+                        "on-primary-container": "#a8b8ff",
+                        "tertiary-container": "#8b1a5e",
+                        "outline-variant": "#c4c5d5",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#ff9dcc",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-tertiary-fixed": "#3d0026",
+                        "outline": "#757684",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-secondary-container": "#684000",
+                        "primary-container": "#1e40af",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#85145a",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffddb8",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary-fixed": "#ffd8e7",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#3755c3",
+                        "secondary-container": "#fea619",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#6a0045",
+                        "on-surface-variant": "#444653",
+                        "inverse-primary": "#b8c4ff",
+                        "primary": "#00288e",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "background": "#f8f9ff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary": "#855300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md full-width top-0 sticky z-50 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-8">
+<a class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim" href="#">NexusMarket</a>
+<div class="hidden md:flex gap-6">
+<a class="text-primary dark:text-primary-fixed-dim border-b-2 border-primary dark:border-primary-fixed-dim pb-1 text-label-md font-label-md" href="#">Shop</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-lowest transition-all duration-150 text-label-md font-label-md" href="#">Deals</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-lowest transition-all duration-150 text-label-md font-label-md" href="#">Sell</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors hover:bg-surface-container-high dark:hover:bg-surface-container-lowest transition-all duration-150 text-label-md font-label-md" href="#">Support</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden md:block">
+<input class="bg-surface-container-low border border-outline-variant rounded-full py-2 pl-4 pr-10 text-body-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all w-64 outline-none" placeholder="Search products..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-outline" data-icon="search">search</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 text-body-sm text-on-surface-variant mb-8">
+<a class="hover:text-primary transition-colors" href="#">Home</a>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Electronics</a>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-on-surface font-medium">Premium Noise-Cancelling Headphones</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-16">
+<!-- Left Column: Image Gallery -->
+<div class="lg:col-span-6 flex flex-col gap-4">
+<div class="aspect-square bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden relative group">
+<img alt="Product Image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="High-resolution product shot of premium over-ear headphones in sleek matte black, resting on a clean white surface. Soft studio lighting highlights the premium materials and ear cup texture. The minimalist composition reflects a modern, corporate aesthetic suitable for an e-commerce platform. High contrast between the dark product and bright background ensures sharp focus on the details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ5-U0hsficfNXPAHnKmRi4cv7Wrdjt0HvSbrqPLPmYby7Gz_2oePbxzGat65jAfggEkMCf1IAKR4eHpP6Eshr-anUkt4SvLd3TzNHZQiAkqmUMhYNNimmNVMT6rqqwq5RkzQfUFv3Le03x7e_kBw5cY1Yb5-MY_swh5bDw-L3SuUf7vZqx2VTs5kiv4iSgGWcDpUZsaevgyb0b18tp_M9uGrzeIiLvZUppcyC1DPi-0Xjn7Pra0_FB1DyVMKUbxOB5Q2JTRRzMCg"/>
+<button class="absolute top-4 right-4 bg-surface/80 backdrop-blur p-2 rounded-full text-on-surface-variant hover:text-primary shadow-sm transition-colors">
+<span class="material-symbols-outlined" data-icon="favorite_border">favorite_border</span>
+</button>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<button class="aspect-square bg-surface-container-lowest rounded-lg border-2 border-primary overflow-hidden">
+<img alt="Thumbnail 1" class="w-full h-full object-cover" data-alt="Close-up thumbnail of premium over-ear headphones, focusing on the sleek matte black finish of the ear cup. The lighting is soft and studio-quality, emphasizing the high-end materials. Minimalist white background maintains a clean, modern e-commerce look. Detail shot captures the subtle texture of the brand logo." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlN0_iOdlj5EV7kqpPBErZoicOLILqwusGx5JvwVx_J5nle4_cdhLd0FqCig0cGfGAHXcZj-Bj0hSGaMc0h8FM7vK4MXP2m8k_DKqxKk3cQ8jDGkY67hQfB337nDT7agsrlrjElklWZ8u2Badp6kHdDunNa8QJjO07eOlsRvu_Li4czk1YH4Mc6WyEA6d-EBn05gxKjpYQnC2NxZdX9iLlpAWVv7ij2tRLCI2Vj2vG9XCZhpwcm3dWNrcvU9GftAFD9DiVfaW-uyI"/>
+</button>
+<button class="aspect-square bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-colors overflow-hidden">
+<img alt="Thumbnail 2" class="w-full h-full object-cover" data-alt="Thumbnail showing the premium headphones folded for travel. The matte black finish contrasts sharply with the pure white background. Soft lighting reveals the hinges and compact design. Professional product photography styling ensures clarity and precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfR3XZ_wyPitjwP5cx7qX3Uf90w2LNng_s9hvosUhmWPhFp_aQOEc5Jc-yP9U7LcSjYqEjVmefyB__N5Zd2it8F2gl5B9KCIYBtiY9NFpDrew7eHRZNRyFJuh71BN1F-RA2Ak_LxQKg_bus3f_v943aglstz7Gx2s9O6SQxAX3XRaFLUMOsuOJhSTzW-SC6RnE69sYFeH_1lnS1NChQcuhG56IoltGE7xIiW4ORtiwy2mhvocANJEeqvr2DNGAVAgnr8csgEsJWKc"/>
+</button>
+<button class="aspect-square bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-colors overflow-hidden">
+<img alt="Thumbnail 3" class="w-full h-full object-cover" data-alt="Thumbnail highlighting the plush memory foam ear pads of the premium headphones. Macro shot emphasizes comfort and material quality. The lighting is diffused to show the soft texture of the leather-like material. Clean, corporate modern aesthetic with a stark white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaM68WB_kHZKgB94bNVyUFWB95iNUXSV3to2e0IEtQBcFhhzL1kCS-VyQBMJQlH1jXlVpaHekwsYVc7YEGh5qSx-LA06IpvMAWDpKwH7VB64tKx3tmohnqeDJRf6XdcT-bvapHv4_-k9mtv2ZvDE3Cc5PgF5RpzEu2eSAV7Xwd2Nbh7_28FuVPODNVD7oV-qNHpN7RvH1qE0yTKRdz_tIb8jQuj5kQccpkbbPb_a7q0HgQ-Xn1xd7M0yQhpCFirAQGkh8PnRClRiw"/>
+</button>
+<button class="aspect-square bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-colors overflow-hidden flex items-center justify-center bg-surface-container-low text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-[32px]" data-icon="play_circle">play_circle</span>
+</button>
+</div>
+</div>
+<!-- Right Column: Product Details -->
+<div class="lg:col-span-6 flex flex-col">
+<div class="mb-2">
+<span class="inline-block bg-primary-container/10 text-primary px-2 py-1 rounded text-label-md font-label-md uppercase tracking-wider mb-2">Top Rated</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-2">Premium Noise-Cancelling Headphones Pro</h1>
+<div class="flex items-center gap-4 mb-6">
+<div class="flex items-center text-secondary-container">
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star_half">star_half</span>
+</div>
+<span class="text-body-sm text-on-surface-variant underline cursor-pointer">4.8 (1,284 Reviews)</span>
+</div>
+<div class="flex items-end gap-3 mb-6 pb-6 border-b border-outline-variant">
+<span class="text-display-lg font-display-lg text-on-surface">$299.00</span>
+<span class="text-headline-md font-headline-md text-outline line-through mb-1">$349.00</span>
+<span class="text-label-md font-label-md text-error bg-error-container/30 px-2 py-1 rounded mb-2 ml-2">Save $50</span>
+</div>
+<div class="mb-8">
+<p class="text-body-lg font-body-lg text-on-surface-variant leading-relaxed">
+                        Experience industry-leading noise cancellation with our custom acoustic architecture. Enjoy up to 40 hours of battery life, plush memory foam ear cushions, and seamless multipoint Bluetooth connectivity.
+                    </p>
+</div>
+<!-- Variants -->
+<div class="mb-8">
+<h3 class="text-label-md font-label-md text-on-surface mb-3 uppercase tracking-wide">Color: <span class="text-on-surface-variant font-normal">Matte Black</span></h3>
+<div class="flex gap-3">
+<button class="w-10 h-10 rounded-full bg-black border-2 border-primary ring-2 ring-primary/20 transition-all"></button>
+<button class="w-10 h-10 rounded-full bg-gray-300 border border-outline-variant hover:border-primary transition-all"></button>
+<button class="w-10 h-10 rounded-full bg-blue-900 border border-outline-variant hover:border-primary transition-all"></button>
+</div>
+</div>
+<!-- Quantity & Actions -->
+<div class="flex flex-col sm:flex-row gap-4 mt-auto">
+<div class="flex items-center border border-outline-variant rounded-lg bg-surface-container-lowest overflow-hidden h-12 w-full sm:w-32">
+<button class="px-4 text-on-surface-variant hover:bg-surface-container transition-colors h-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<input class="w-full text-center border-none focus:ring-0 text-body-md font-medium p-0 h-full bg-transparent" type="text" value="1"/>
+<button class="px-4 text-on-surface-variant hover:bg-surface-container transition-colors h-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<button class="flex-1 bg-surface-container-lowest border border-primary text-primary hover:bg-surface-container-low h-12 rounded-lg flex items-center justify-center gap-2 font-label-md transition-all duration-150 active:scale-95">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                        Add to Cart
+                    </button>
+<button class="flex-1 bg-primary text-on-primary hover:bg-primary/90 h-12 rounded-lg flex items-center justify-center font-label-md transition-all duration-150 shadow-[0px_4px_20px_rgba(30,64,175,0.2)] active:scale-95">
+                        Buy Now
+                    </button>
+</div>
+<div class="flex items-center gap-6 mt-6 text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="local_shipping">local_shipping</span>
+                        Free Shipping
+                    </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="verified_user">verified_user</span>
+                        2-Year Warranty
+                    </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="replay">replay</span>
+                        30-Day Returns
+                    </div>
+</div>
+</div>
+</div>
+<!-- Features Bento Grid -->
+<div class="mb-16">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6 border-b border-outline-variant pb-4">Product Features</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 hover:shadow-[0px_4px_20px_rgba(30,64,175,0.08)] transition-shadow">
+<span class="material-symbols-outlined text-primary text-[32px] mb-4" data-icon="graphic_eq">graphic_eq</span>
+<h3 class="text-label-md font-label-md text-on-surface mb-2">Active Noise Cancellation</h3>
+<p class="text-body-sm text-on-surface-variant">Advanced algorithms continuously adapt to your environment, blocking out distractions.</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 hover:shadow-[0px_4px_20px_rgba(30,64,175,0.08)] transition-shadow">
+<span class="material-symbols-outlined text-primary text-[32px] mb-4" data-icon="battery_charging_full">battery_charging_full</span>
+<h3 class="text-label-md font-label-md text-on-surface mb-2">40-Hour Battery Life</h3>
+<p class="text-body-sm text-on-surface-variant">Listen for days on a single charge. A quick 10-minute charge gives you 3 hours of playback.</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 hover:shadow-[0px_4px_20px_rgba(30,64,175,0.08)] transition-shadow">
+<span class="material-symbols-outlined text-primary text-[32px] mb-4" data-icon="bluetooth">bluetooth</span>
+<h3 class="text-label-md font-label-md text-on-surface mb-2">Multipoint Connectivity</h3>
+<p class="text-body-sm text-on-surface-variant">Seamlessly switch between two Bluetooth devices without having to disconnect.</p>
+</div>
+</div>
+</div>
+<!-- Reviews Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<div class="lg:col-span-4">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6">Customer Reviews</h2>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 mb-6">
+<div class="flex items-center gap-4 mb-4">
+<span class="text-display-lg font-display-lg text-on-surface">4.8</span>
+<div>
+<div class="flex text-secondary-container mb-1">
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star_half">star_half</span>
+</div>
+<span class="text-body-sm text-on-surface-variant">Based on 1,284 reviews</span>
+</div>
+</div>
+<!-- Rating Bars -->
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-body-sm">
+<span class="w-3">5</span>
+<span class="material-symbols-outlined text-[16px] text-secondary-container" data-icon="star" data-weight="fill">star</span>
+<div class="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container w-[80%]"></div>
+</div>
+<span class="w-8 text-right text-on-surface-variant">80%</span>
+</div>
+<!-- Add more bars as needed -->
+</div>
+</div>
+<!-- Write Review Input -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant">
+<h3 class="text-label-md font-label-md text-on-surface mb-4">Write a Review</h3>
+<div class="flex gap-2 text-outline mb-4 cursor-pointer hover:text-secondary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="material-symbols-outlined" data-icon="star">star</span>
+</div>
+<textarea class="w-full border border-outline-variant rounded-lg p-3 text-body-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none mb-4 h-24 resize-none bg-transparent" placeholder="Share your experience..."></textarea>
+<button class="w-full bg-surface-container-low border border-primary text-primary hover:bg-surface-container transition-colors py-2 rounded-lg font-label-md">Submit Review</button>
+</div>
+</div>
+<div class="lg:col-span-8 space-y-6">
+<!-- Individual Review -->
+<div class="border-b border-outline-variant pb-6">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-label-md">JD</div>
+<div>
+<span class="block text-label-md font-label-md text-on-surface">John Doe</span>
+<span class="text-body-sm text-on-surface-variant">Verified Buyer</span>
+</div>
+</div>
+<span class="text-body-sm text-outline">Oct 12, 2024</span>
+</div>
+<div class="flex text-secondary-container mb-3 text-[18px]">
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+</div>
+<h4 class="text-body-md font-semibold text-on-surface mb-2">Incredible sound quality and comfort!</h4>
+<p class="text-body-md text-on-surface-variant">These are by far the best headphones I've ever owned. The noise cancellation is unreal, perfect for my noisy office environment. They are also incredibly comfortable to wear for long periods.</p>
+</div>
+<!-- Individual Review -->
+<div class="border-b border-outline-variant pb-6">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-bold text-label-md">SA</div>
+<div>
+<span class="block text-label-md font-label-md text-on-surface">Sarah Adams</span>
+<span class="text-body-sm text-on-surface-variant">Verified Buyer</span>
+</div>
+</div>
+<span class="text-body-sm text-outline">Oct 05, 2024</span>
+</div>
+<div class="flex text-secondary-container mb-3 text-[18px]">
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-icon="star">star_outline</span>
+</div>
+<h4 class="text-body-md font-semibold text-on-surface mb-2">Great battery life, decent ANC</h4>
+<p class="text-body-md text-on-surface-variant">Love the battery life on these, I rarely have to charge them. The ANC is good, but maybe not the absolute best on the market. Still very happy with the purchase.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-lowest full-width bottom-0 border-t border-outline-variant dark:border-outline">
+<div class="flex flex-col md:flex-row justify-between items-center py-8 px-margin-desktop max-w-container-max mx-auto">
+<div class="mb-4 md:mb-0">
+<span class="text-headline-md font-headline-md text-primary">NexusMarket</span>
+<p class="text-body-sm font-body-sm text-on-surface dark:text-on-surface-variant mt-2">© 2024 NexusMarket. Professional Excellence in Commerce.</p>
+</div>
+<div class="flex flex-wrap gap-6 text-label-md font-label-md text-on-surface-variant hover:text-primary">
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Terms of Use</a>
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Shipping Guide</a>
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Vendor Rules</a>
+</div>
+</div>
+</footer>
+</body></html>

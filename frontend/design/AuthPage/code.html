@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NexusMarket - Authentication</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#173bab",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#ffafd3",
+                      "surface-container-high": "#dce9ff",
+                      "on-primary-fixed": "#001453",
+                      "surface": "#f8f9ff",
+                      "error": "#ba1a1a",
+                      "on-background": "#0b1c30",
+                      "on-secondary-fixed": "#2a1700",
+                      "surface-container": "#e5eeff",
+                      "on-primary-container": "#a8b8ff",
+                      "tertiary-container": "#8b1a5e",
+                      "outline-variant": "#c4c5d5",
+                      "surface-container-low": "#eff4ff",
+                      "primary-fixed": "#dde1ff",
+                      "on-tertiary-container": "#ff9dcc",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed-dim": "#b8c4ff",
+                      "on-tertiary-fixed": "#3d0026",
+                      "outline": "#757684",
+                      "on-primary": "#ffffff",
+                      "on-secondary-fixed-variant": "#653e00",
+                      "on-secondary-container": "#684000",
+                      "primary-container": "#1e40af",
+                      "on-surface": "#0b1c30",
+                      "on-tertiary-fixed-variant": "#85145a",
+                      "surface-bright": "#f8f9ff",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#ffddb8",
+                      "secondary-fixed-dim": "#ffb95f",
+                      "surface-variant": "#d3e4fe",
+                      "tertiary-fixed": "#ffd8e7",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-error-container": "#93000a",
+                      "surface-tint": "#3755c3",
+                      "secondary-container": "#fea619",
+                      "surface-container-highest": "#d3e4fe",
+                      "tertiary": "#6a0045",
+                      "on-surface-variant": "#444653",
+                      "inverse-primary": "#b8c4ff",
+                      "primary": "#00288e",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-surface": "#213145",
+                      "background": "#f8f9ff",
+                      "surface-dim": "#cbdbf5",
+                      "secondary": "#855300"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "margin-desktop": "40px",
+                      "margin-mobile": "16px",
+                      "unit": "8px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "data-mono": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-mono": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- Transactional Page: No Navigation Shells Rendered -->
+<main class="flex-grow flex items-center justify-center p-margin-mobile md:p-margin-desktop relative overflow-hidden">
+<!-- Decorative Background Elements for Professional Depth -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+<div class="absolute -top-40 -left-40 w-96 h-96 bg-primary-container opacity-10 rounded-full blur-3xl"></div>
+<div class="absolute bottom-0 right-0 w-1/2 h-1/2 bg-surface-container-high opacity-50 blur-2xl transform translate-x-1/4 translate-y-1/4 rounded-full"></div>
+</div>
+<!-- Auth Container Bento Style -->
+<div class="w-full max-w-5xl z-10 grid grid-cols-1 md:grid-cols-2 gap-unit rounded-xl overflow-hidden shadow-sm border border-outline-variant bg-surface-container-lowest">
+<!-- Left Side: Form Area -->
+<div class="p-8 md:p-12 flex flex-col justify-center">
+<!-- Brand Header -->
+<div class="mb-10 text-center md:text-left">
+<h1 class="text-headline-lg font-headline-lg text-primary tracking-tight mb-2">NexusMarket</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Welcome back. Please enter your details.</p>
+</div>
+<!-- Account Type Toggle -->
+<div class="flex p-1 bg-surface-container rounded-lg mb-8" role="tablist">
+<button aria-selected="true" class="flex-1 py-2 text-label-md font-label-md rounded-md bg-surface-container-lowest text-primary shadow-sm transition-all" role="tab">
+                        Buyer
+                    </button>
+<button aria-selected="false" class="flex-1 py-2 text-label-md font-label-md rounded-md text-on-surface-variant hover:text-primary transition-colors" role="tab">
+                        Store Owner
+                    </button>
+</div>
+<!-- Auth Forms (Login default visible) -->
+<div class="space-y-6">
+<!-- Login Form -->
+<form class="space-y-5">
+<div class="space-y-1.5">
+<label class="block text-label-md font-label-md text-on-surface" for="email">Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" style="font-variation-settings: 'FILL' 0;">mail</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface rounded-lg border border-outline-variant text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-outline" id="email" placeholder="Enter your email" type="email"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="block text-label-md font-label-md text-on-surface" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" style="font-variation-settings: 'FILL' 0;">lock</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface rounded-lg border border-outline-variant text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all placeholder-outline" id="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20 bg-surface" id="remember" type="checkbox"/>
+<label class="ml-2 text-body-sm font-body-sm text-on-surface-variant" for="remember">Remember for 30 days</label>
+</div>
+<a class="text-label-md font-label-md text-primary hover:underline" href="#">Forgot password?</a>
+</div>
+<button class="w-full py-3 bg-primary text-on-primary text-label-md font-label-md rounded-lg hover:bg-on-primary-fixed transition-colors duration-150" type="submit">
+                            Sign In
+                        </button>
+</form>
+<!-- OR Divider -->
+<div class="relative flex items-center py-2">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink-0 mx-4 text-body-sm font-body-sm text-outline">or continue with</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- Social Logins -->
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-2.5 border border-outline-variant rounded-lg text-label-md font-label-md text-on-surface hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<img alt="Google logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQ-p-1-dARSedTzHbaOiAol9yVQxNPlDhtbCNqjbS_xPtdw81hbeKvp54Y0fM8YjAIPJPTQ525Gh6UO2nK7EkfFEyN01gPhmCwJJ8l_fbTxlvjiyN4JxIeO66ShHCKtYNj0U-CEapr2TOw8t7JhpkfRP52dIdIyvCK1p4i-CC62n3VkSOXb-5eWZ7-iBK61hT3XYZUbnYCBhCv9NUlgV9DteqAr59iDzk66pnyzannzVmu_hvtGO2PMi1pAUlysoOV0XQvKRMwI8M"/>
+                            Google
+                        </button>
+<button class="flex items-center justify-center gap-2 py-2.5 border border-outline-variant rounded-lg text-label-md font-label-md text-on-surface hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<img alt="Microsoft logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCi41hJcNwx9u5UfqBflyi3mGwrc2am9_22bdd-WldstIOa2Zg1vwzuNB7zcJtDVLLgKsiX8z-JDZ83fhQgP-AnXzFkkrOfpuwKUqlSmxDiMK7r9JnIOBX5MN1-EEa9UZtLAKsKGtwNkv6DEe5bEU5dXcFoXSeDOsl3qu2V_qgjMbjwdJg_oHSVBwbvKClM2xHtesghdJGVxyxdNvvGEjPLbAtz_688GWMaSnmiXARIM8rGPjQqsE8R_HaMonBrPCfTTsjuJXZgXMQ"/>
+                            Microsoft
+                        </button>
+</div>
+<p class="text-center text-body-sm font-body-sm text-on-surface-variant mt-6">
+                        Don't have an account? <a class="text-primary font-label-md hover:underline" href="#">Sign up</a>
+</p>
+</div>
+</div>
+<!-- Right Side: Imagery/Value Prop (Hidden on mobile) -->
+<div class="hidden md:block relative bg-surface-container-low overflow-hidden group">
+<img alt="E-commerce operations" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A clean, modern e-commerce fulfillment center setting. High-key, bright lighting highlights rows of neatly organized shelves and a focused worker using a digital tablet. The scene conveys efficiency, professional commerce, and reliability, adhering to a light-mode aesthetic with subtle blue corporate tones in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcZw3D99QbJYYX3Pqene_bA561tjJPnyP0Hayi9wQCgBUrw41FHuf69huZgSn-tZasRjYGhAbt3dQaZgj-d5UNIAk_SoXdGRuDMT7lzsTKtLPoEhXVWG8-sZihNXVa90TeA8uxT7SqeAnGtoNFYJIRPaAR8IyUJroEU5JHnEzSX_L3MMkyyy5C0YihEXB5nIwMfMwvPZcP6oyPuR7SlY96QZfDLBnoceksMUJK3Y6LL5-Y2VO8ndqp_w2vqO-WckrcZkLovKeI6o8"/>
+<!-- Glassmorphism overlay for text -->
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/80 via-on-background/20 to-transparent flex flex-col justify-end p-12">
+<div class="backdrop-blur-md bg-surface-container-lowest/10 border border-on-secondary/20 p-6 rounded-xl">
+<h2 class="text-headline-md font-headline-md text-on-secondary mb-2">Professional Excellence in Commerce</h2>
+<p class="text-body-md font-body-md text-primary-fixed-dim">Join thousands of verified sellers and millions of satisfied buyers on the most reliable platform.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

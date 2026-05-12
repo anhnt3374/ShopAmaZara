@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Env files (keep .env.example tracked)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+
+# Local Claude settings
+.claude/settings.local.json

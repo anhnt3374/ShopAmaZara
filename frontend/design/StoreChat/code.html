@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merchant Portal - Messages</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-primary-fixed-variant": "#173bab",
+                "on-secondary": "#ffffff",
+                "tertiary-fixed-dim": "#ffafd3",
+                "surface-container-high": "#dce9ff",
+                "on-primary-fixed": "#001453",
+                "surface": "#f8f9ff",
+                "error": "#ba1a1a",
+                "on-background": "#0b1c30",
+                "on-secondary-fixed": "#2a1700",
+                "surface-container": "#e5eeff",
+                "on-primary-container": "#a8b8ff",
+                "tertiary-container": "#8b1a5e",
+                "outline-variant": "#c4c5d5",
+                "surface-container-low": "#eff4ff",
+                "primary-fixed": "#dde1ff",
+                "on-tertiary-container": "#ff9dcc",
+                "on-tertiary": "#ffffff",
+                "primary-fixed-dim": "#b8c4ff",
+                "on-tertiary-fixed": "#3d0026",
+                "outline": "#757684",
+                "on-primary": "#ffffff",
+                "on-secondary-fixed-variant": "#653e00",
+                "on-secondary-container": "#684000",
+                "primary-container": "#1e40af",
+                "on-surface": "#0b1c30",
+                "on-tertiary-fixed-variant": "#85145a",
+                "surface-bright": "#f8f9ff",
+                "on-error": "#ffffff",
+                "secondary-fixed": "#ffddb8",
+                "secondary-fixed-dim": "#ffb95f",
+                "surface-variant": "#d3e4fe",
+                "tertiary-fixed": "#ffd8e7",
+                "error-container": "#ffdad6",
+                "inverse-on-surface": "#eaf1ff",
+                "on-error-container": "#93000a",
+                "surface-tint": "#3755c3",
+                "secondary-container": "#fea619",
+                "surface-container-highest": "#d3e4fe",
+                "tertiary": "#6a0045",
+                "on-surface-variant": "#444653",
+                "inverse-primary": "#b8c4ff",
+                "primary": "#00288e",
+                "surface-container-lowest": "#ffffff",
+                "inverse-surface": "#213145",
+                "background": "#f8f9ff",
+                "surface-dim": "#cbdbf5",
+                "secondary": "#855300"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "gutter": "24px",
+                "container-max": "1280px",
+                "margin-desktop": "40px",
+                "margin-mobile": "16px",
+                "unit": "8px"
+        },
+        "fontFamily": {
+                "body-md": [
+                        "Inter"
+                ],
+                "body-sm": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "display-lg": [
+                        "Inter"
+                ],
+                "label-md": [
+                        "Inter"
+                ],
+                "data-mono": [
+                        "Inter"
+                ],
+                "body-lg": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "56px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "data-mono": [
+                        "13px",
+                        {
+                                "lineHeight": "18px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+  body {
+    background-color: theme('colors.background');
+    color: theme('colors.on-surface');
+  }
+</style>
+</head>
+<body class="flex h-screen overflow-hidden bg-background font-body-md text-on-surface">
+<!-- SideNavBar -->
+<aside class="bg-surface dark:bg-surface-dim text-primary dark:text-inverse-primary border-r border-outline-variant dark:border-outline docked h-screen left-0 sticky w-64 flex flex-col gap-unit p-4 shrink-0 z-40 hidden md:flex">
+<div class="flex items-center gap-3 mb-8 px-2">
+<img alt="Store Owner Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a mature business owner in a well-lit, modern office setting. The individual is wearing a crisp blue shirt, exuding confidence and reliability. The background features subtle, blurred architectural elements, bathed in cool, high-key lighting that perfectly matches a pristine corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfV1gnrp__h6nNtYeXtq-PWAsgueTCI8D-6Ps66LHeNOQbmJFHiPOSkVNaa0d-CV88ZUrf-gTtkevKvF2hv6w2yCsQAfX6a7pPm3_jaUIBl-mHrMv_t86zFjrOIJVYPmgjPSMX_YwcbDfNSP8zeErBOUtppQeUmgWR4EI01cT3HJzE1PxCkiwjzrsatxOlN4_hOp3QGJimdrjivnm9vY9hWf-eI_-kBiqV3OqlMzO7ncD55RJyaakv8UaN61JTEneqDgBTKlDX3YE"/>
+<div>
+<h2 class="text-label-md font-label-md font-bold text-primary dark:text-primary-fixed-dim">Merchant Portal</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Verified Seller</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 p-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg text-label-md font-label-md hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+        Dashboard
+      </a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg text-label-md font-label-md hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">shopping_bag</span>
+        Orders
+      </a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg text-label-md font-label-md hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+        Inventory
+      </a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg text-label-md font-label-md hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">group</span>
+        Customers
+      </a>
+<a class="flex items-center gap-3 p-3 bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-lg font-bold text-label-md font-label-md Active: opacity-80 scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+        Messages
+        <span class="ml-auto bg-error text-on-error text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg text-label-md font-label-md hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+        Settings
+      </a>
+</nav>
+<div class="mt-auto">
+<button class="w-full bg-primary hover:bg-primary/90 text-on-primary text-label-md font-label-md py-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-150">
+<span class="material-symbols-outlined">add</span>
+        Add Product
+      </button>
+</div>
+</aside>
+<!-- Main Content - Chat Interface -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface-container-low h-full">
+<!-- Mobile Header (Hidden on Desktop) -->
+<header class="md:hidden flex items-center justify-between p-4 bg-surface border-b border-outline-variant sticky top-0 z-30">
+<div class="flex items-center gap-3">
+<button class="p-2 text-on-surface-variant"><span class="material-symbols-outlined">menu</span></button>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">Messages</h1>
+</div>
+<button class="p-2 text-on-surface-variant"><span class="material-symbols-outlined">search</span></button>
+</header>
+<div class="flex-1 flex overflow-hidden">
+<!-- Conversation List (Left Panel) -->
+<div class="w-full md:w-80 lg:w-96 flex flex-col border-r border-outline-variant bg-surface shrink-0 h-full overflow-hidden">
+<div class="p-4 border-b border-outline-variant shrink-0">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container border border-outline-variant rounded-lg text-body-sm font-body-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="Search messages..." type="text"/>
+</div>
+<div class="flex gap-2 mt-4 overflow-x-auto pb-1 scrollbar-hide">
+<button class="px-3 py-1 bg-surface-container-high text-on-surface text-label-md font-label-md rounded-full whitespace-nowrap">All</button>
+<button class="px-3 py-1 text-on-surface-variant hover:bg-surface-container text-label-md font-label-md rounded-full whitespace-nowrap transition-colors">Unread</button>
+<button class="px-3 py-1 text-on-surface-variant hover:bg-surface-container text-label-md font-label-md rounded-full whitespace-nowrap transition-colors">Important</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<!-- Chat List Item Active -->
+<div class="flex items-start gap-3 p-4 bg-primary-container/10 border-l-4 border-primary cursor-pointer hover:bg-primary-container/20 transition-colors">
+<div class="relative shrink-0">
+<img alt="Customer Avatar" class="w-12 h-12 rounded-full object-cover" data-alt="A bright, cheerful headshot of a young woman with a warm smile. She has styled hair and is positioned against a clean, soft-focus background that enhances the modern, professional UI aesthetic. The lighting is soft and flattering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_GiUFtbXUmv7fwwwb8nvfvNstv4qwjjWQs--axnmdLXWkfFXUvXQ28az8ILOCAzRsqhxGGPhODI9VBWmWMIf1zNgcYBFsfFUuq3SWR3-o-nE6N60g8uQXUMD4bUAyNuplVJVbKzNnH3ncBivBQYyVyyE72EmKAUMuJhYQgSIdpDCEaPlIhNT3tCKARpZOcoyN-gQ3YWMuaI2Hz9CFnpzd1RojSlb70yPUBvoSBoagAv43UtwWVDvFqm1gX-ESWOL46-z8G96ky6Y"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-surface rounded-full"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-label-md font-label-md font-bold text-on-surface truncate">Sarah Jenkins</h3>
+<span class="text-body-sm font-body-sm text-primary font-medium">10:42 AM</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface truncate font-medium">I have a question about the sizing on the...</p>
+<div class="mt-2 flex gap-1">
+<span class="inline-block px-2 py-0.5 bg-surface-container text-on-surface-variant text-[10px] rounded-sm font-medium uppercase tracking-wider">Order #8492</span>
+</div>
+</div>
+<div class="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></div>
+</div>
+<!-- Chat List Item Inactive -->
+<div class="flex items-start gap-3 p-4 border-b border-outline-variant cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="relative shrink-0">
+<img alt="Customer Avatar" class="w-12 h-12 rounded-full object-cover" data-alt="A clear headshot of a middle-aged man wearing glasses, looking thoughtful but approachable. The background is a neutral, soft gradient, fitting perfectly within a clean, corporate dashboard UI. Lighting is even and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAL1xwwME_SohnOy4ObAW_U5EzY21GQEWY6huHzVy_KR_wNqvrtY-hpJFM2EHgRPuXFb62jaYRaako9McWd-pwMbgmu5xg1LosXxHmfaCJqV-n0hpHdBlQ7wVhSvNEZKpDj6vdfASMO1TDfq8SODEbslUUXztJNTOufQGiewQ6QWHDSI8OGEuVIow_DJ9RxM7s456ZqtI7GCJiK8Mbkjct-p5edtyJiD7AsdFHUyQ8tRfZrX8y3f0Iv1l7JVID93zvPC_BDTIr9FYU"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-label-md font-label-md text-on-surface truncate">Michael Chen</h3>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Yesterday</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Thanks! The package arrived safely.</p>
+</div>
+</div>
+<!-- Chat List Item Inactive -->
+<div class="flex items-start gap-3 p-4 border-b border-outline-variant cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="relative shrink-0 border border-outline-variant w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant text-headline-md font-headline-md">
+              EJ
+            </div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-label-md font-label-md text-on-surface truncate">Elena Rodriguez</h3>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Mon</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">attachment</span>
+                Image attached
+              </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Chat Window (Right Panel) -->
+<div class="hidden md:flex flex-1 flex-col bg-surface h-full relative">
+<!-- Chat Header -->
+<div class="p-4 border-b border-outline-variant bg-surface flex items-center justify-between shrink-0 shadow-sm z-10">
+<div class="flex items-center gap-4">
+<img alt="Customer Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="A bright, cheerful headshot of a young woman with a warm smile. She has styled hair and is positioned against a clean, soft-focus background that enhances the modern, professional UI aesthetic. The lighting is soft and flattering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmVqdo-K4sl-DiX2ynx68F5nsHJfmQ0DFW7J109rhwhKXhaotZUOiACYAJc9Za50VkQXkcygYp9017v95kNwF_ojFmEBmi6P92f_bVeS8qrdqLGQtKhgjy_hWO7Sj5aKrQ9EZekbuLIhrjruXPdUYKwQ72XabJ4QdZux0TN_sV1spmqaUS_uz3Iy229hE_SdX7sY45N9VntPRA-Clkj-E9fhJXR720XgrpPPysO_4Zbl9pXjKNm6B2HW29ZrjkM-Qp-j7W6ZPT3Qo"/>
+<div>
+<h2 class="text-headline-md font-headline-md text-on-surface !text-[18px]">Sarah Jenkins</h2>
+<p class="text-body-sm font-body-sm text-[#10B981] flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-[#10B981] rounded-full"></span> Online
+              </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">receipt_long</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Chat History -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6 bg-surface-bright">
+<!-- Date Divider -->
+<div class="flex items-center justify-center">
+<span class="text-body-sm font-body-sm text-on-surface-variant bg-surface-container-high px-3 py-1 rounded-full">Today</span>
+</div>
+<!-- Incoming Message -->
+<div class="flex items-end gap-2">
+<img alt="Customer Avatar" class="w-8 h-8 rounded-full object-cover mb-1" data-alt="A bright, cheerful headshot of a young woman with a warm smile. She has styled hair and is positioned against a clean, soft-focus background that enhances the modern, professional UI aesthetic. The lighting is soft and flattering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPFCwPME8BqT_Yn9ujbvncJset4xNfL0ErATXiAcJObZA7IOZp4Alvu5RysHVoSbqyUS3FviA0DqXZB0nTpKj2s5aFOp7FH_hGFXXO7BCVWrSyvsBdAwoSS3YHog-Uz_8l9PTwZ3Kl8AvRudFElljCKu4mqIW2GyZ03fWS_I4LFzT_WJDi-2k4eCVHhqir0f4UuJB5nijQgzmECfDTf1WIh6AeF2eGUQgp36PL_0sA7rWJwDoHRLhiHXBs0J96vn-W3GdiClmuhE0"/>
+<div class="bg-surface-container border border-outline-variant text-on-surface p-3 rounded-2xl rounded-bl-sm max-w-[70%]">
+<p class="text-body-md font-body-md">Hi there! I'm looking at the Nexus Pro Ergonomic Chair, but I'm unsure about the sizing. Does it adjust low enough for someone who is 5'2"?</p>
+<span class="text-[11px] text-on-surface-variant mt-1 block text-right">10:42 AM</span>
+</div>
+</div>
+<!-- Outgoing Message (Store Owner) -->
+<div class="flex items-end justify-end gap-2">
+<div class="bg-primary text-on-primary p-3 rounded-2xl rounded-br-sm max-w-[70%] shadow-sm">
+<p class="text-body-md font-body-md">Hello Sarah! Yes, the Nexus Pro chair features a high-grade pneumatic cylinder that adjusts down to 17 inches from the floor, which is typically very comfortable for users around 5'2".</p>
+<span class="text-[11px] text-primary-fixed-dim mt-1 block text-right flex items-center justify-end gap-1">
+                10:45 AM
+                <span class="material-symbols-outlined text-[14px]">done_all</span>
+</span>
+</div>
+</div>
+<!-- Outgoing Product Attachment -->
+<div class="flex items-end justify-end gap-2">
+<div class="bg-surface border border-outline-variant p-1 rounded-xl max-w-[70%] shadow-sm">
+<div class="flex items-center gap-3 p-2 bg-surface-container-low rounded-lg mb-1">
+<img alt="Ergonomic Chair" class="w-12 h-12 object-cover rounded-md border border-outline-variant" data-alt="A sleek, modern ergonomic office chair in black mesh, presented in a clean, professional studio setting. The lighting is high-key and crisp, emphasizing the chair's structural lines and premium build quality against a pure white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJzYI6aaPn8QbRhrxArKKoddkd4dplnWJ9GO3MQ_lpLTKugerPnomWlpm-nZN_IUbNdO20VTSETrlRTDQQ6T6b24rJyNei7gRpj0YA65O7qxRJT0monwnL5zU7BV0pLokYLpbyMZJqUiZxI_Tb0WJLmkrSHbym2TCt7ZgaVHuUR_y_R-bsWKePruy66fzJ5pzTO9LkCt1Jo5TVkJqAzy7N_XMT9JGCV3Ztv5DvwbpEbPaz8oDXIGiy6mVV_SXnwVooY3cJwSi45YM"/>
+<div>
+<p class="text-label-md font-label-md text-on-surface">Nexus Pro Ergonomic Chair</p>
+<p class="text-body-sm font-body-sm text-primary font-bold">$299.00</p>
+</div>
+</div>
+<div class="bg-primary text-on-primary p-2 rounded-lg rounded-br-sm">
+<p class="text-body-md font-body-md">Here is the link to the product details if you need to review the exact dimensions.</p>
+<span class="text-[11px] text-primary-fixed-dim mt-1 block text-right">10:46 AM</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-4 bg-surface border-t border-outline-variant shrink-0">
+<div class="flex items-end gap-2 bg-surface-container-low border border-outline-variant rounded-xl p-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors shrink-0">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors shrink-0">
+<span class="material-symbols-outlined">inventory_2</span>
+</button>
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-body-md font-body-md resize-none max-h-32 min-h-[44px] py-2 px-2 text-on-surface outline-none" placeholder="Type a message..." rows="1"></textarea>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors shrink-0 mb-1">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+</button>
+<button class="p-2 bg-primary text-on-primary hover:bg-primary/90 rounded-full transition-colors shrink-0 shadow-sm mb-1">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
