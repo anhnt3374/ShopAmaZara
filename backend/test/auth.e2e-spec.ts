@@ -74,4 +74,55 @@ describe('Auth (e2e)', () => {
       expect(res.status).toBe(400);
     });
   });
+
+  describe('POST /auth/login', () => {
+    beforeEach(async () => {
+      await request(ctx.app.getHttpServer()).post('/auth/register').send(validBody);
+    });
+
+    it('returns user + accessToken on valid credentials', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: validBody.email, password: validBody.password });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user).toMatchObject({
+        email: validBody.email,
+        fullName: validBody.fullName,
+        role: validBody.role,
+      });
+      expect(res.body.user.passwordHash).toBeUndefined();
+      expect(typeof res.body.accessToken).toBe('string');
+    });
+
+    it('accepts email regardless of case / whitespace', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: '  JANE@Example.com ', password: validBody.password });
+      expect(res.status).toBe(200);
+    });
+
+    it('returns 401 on wrong password', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: validBody.email, password: 'wrongpassword1' });
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe('Invalid credentials');
+    });
+
+    it('returns 401 on unknown email with the same generic message', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: 'nobody@example.com', password: validBody.password });
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe('Invalid credentials');
+    });
+
+    it('returns 400 on invalid body', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: 'not-an-email', password: 'short' });
+      expect(res.status).toBe(400);
+    });
+  });
 });
