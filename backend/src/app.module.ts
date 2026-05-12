@@ -6,9 +6,11 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { StoresModule } from './stores/stores.module';
 import { ProductsModule } from './products/products.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { User } from './users/user.entity';
 import { Store } from './stores/store.entity';
 import { Product } from './products/product.entity';
+import { WishlistItem } from './wishlist/wishlist-item.entity';
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { Product } from './products/product.entity';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store, Product],
+        entities: [User, Store, Product, WishlistItem],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -31,6 +33,7 @@ import { Product } from './products/product.entity';
     AuthModule,
     StoresModule,
     ProductsModule,
+    WishlistModule,
   ],
   controllers: [AppController],
 })

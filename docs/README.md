@@ -12,3 +12,4 @@ under `superpowers/plans/`.
 | 2026-05-12 | Auth (register/login)| [features/auth.md](features/auth.md) |
 | 2026-05-12 | Stores foundation | [features/stores.md](features/stores.md) |
 | 2026-05-13 | Products catalog  | [features/products.md](features/products.md) |
+| 2026-05-13 | Wishlist | [features/wishlist.md](features/wishlist.md) |
