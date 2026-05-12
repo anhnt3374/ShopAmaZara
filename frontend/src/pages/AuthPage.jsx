@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { ApiError } from '../services/api.js';
 
 const HERO_IMG =
   'https://images.unsplash.com/photo-1503551723145-6c040742065b-v2?auto=format&fit=crop&w=1200&q=80';
@@ -8,6 +10,34 @@ const HERO_IMG =
 export default function AuthPage() {
   const [mode, setMode] = useState('signin'); // signin | signup
   const [role, setRole] = useState('buyer'); // buyer | seller
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const { login, register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const user =
+        mode === 'signin'
+          ? await login({ email, password })
+          : await register({ email, password, fullName, role });
+      navigate(user.role === 'seller' ? '/store' : '/');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-overlay">
@@ -47,19 +77,15 @@ export default function AuthPage() {
           ))}
         </div>
 
-        <form
-          className="space-y-4 flex-1 flex flex-col"
-          onSubmit={(e) => {
-            e.preventDefault();
-            window.location.assign(role === 'seller' ? '/store' : '/');
-          }}
-        >
+        <form className="space-y-4 flex-1 flex flex-col" onSubmit={handleSubmit}>
           {mode === 'signup' && (
             <Field
               label="Full name"
               icon="person"
               placeholder="Jane Doe"
               required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
             />
           )}
           <Field
@@ -68,6 +94,8 @@ export default function AuthPage() {
             type="email"
             placeholder="you@email.com"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <Field
             label="Password"
@@ -75,6 +103,9 @@ export default function AuthPage() {
             type="password"
             placeholder="••••••••"
             required
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           {mode === 'signin' && (
@@ -89,9 +120,24 @@ export default function AuthPage() {
             </div>
           )}
 
-          <button type="submit" className="btn-primary py-3 px-6 mt-2">
-            {mode === 'signin' ? 'Sign in' : 'Create account'}
-            <Icon name="arrow_forward" size={18} />
+          {error && (
+            <p
+              role="alert"
+              className="text-body-sm text-error bg-error-container/30 border border-error/40 rounded-md px-3 py-2"
+            >
+              {error}
+            </p>
+          )}
+
+          <button type="submit" disabled={submitting} className="btn-primary py-3 px-6 mt-2 disabled:opacity-60">
+            {submitting
+              ? mode === 'signin'
+                ? 'Signing in…'
+                : 'Creating account…'
+              : mode === 'signin'
+              ? 'Sign in'
+              : 'Create account'}
+            {!submitting && <Icon name="arrow_forward" size={18} />}
           </button>
 
           <div className="flex items-center gap-3 text-body-sm text-on-surface-variant my-2">
@@ -111,7 +157,10 @@ export default function AuthPage() {
                 New to AmaZara?{' '}
                 <button
                   type="button"
-                  onClick={() => setMode('signup')}
+                  onClick={() => {
+                    setMode('signup');
+                    setError(null);
+                  }}
                   className="text-primary hover:underline"
                 >
                   Create an account
@@ -122,7 +171,10 @@ export default function AuthPage() {
                 Already have an account?{' '}
                 <button
                   type="button"
-                  onClick={() => setMode('signin')}
+                  onClick={() => {
+                    setMode('signin');
+                    setError(null);
+                  }}
                   className="text-primary hover:underline"
                 >
                   Sign in
