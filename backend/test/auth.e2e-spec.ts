@@ -125,4 +125,43 @@ describe('Auth (e2e)', () => {
       expect(res.status).toBe(400);
     });
   });
+
+  describe('GET /auth/me', () => {
+    let token: string;
+    let userId: string;
+
+    beforeEach(async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/register')
+        .send(validBody);
+      token = res.body.accessToken;
+      userId = res.body.user.id;
+    });
+
+    it('returns the authenticated user when token is valid', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/auth/me')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        id: userId,
+        email: validBody.email,
+        fullName: validBody.fullName,
+        role: validBody.role,
+      });
+    });
+
+    it('returns 401 when no token is provided', async () => {
+      const res = await request(ctx.app.getHttpServer()).get('/auth/me');
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 401 when token is malformed', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/auth/me')
+        .set('Authorization', 'Bearer not-a-real-token');
+      expect(res.status).toBe(401);
+    });
+  });
 });
