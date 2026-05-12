@@ -30,16 +30,6 @@ describe('UsersService', () => {
     service = moduleRef.get(UsersService);
   });
 
-  describe('findByEmail', () => {
-    it('normalizes the lookup email (lowercase + trim)', async () => {
-      (repo.findOne as jest.Mock).mockResolvedValue(null);
-      await service.findByEmail('  Jane@Example.COM  ');
-      expect(repo.findOne).toHaveBeenCalledWith({
-        where: { email: 'jane@example.com' },
-      });
-    });
-  });
-
   describe('create', () => {
     it('persists the user with normalized email', async () => {
       (repo.findOne as jest.Mock).mockResolvedValue(null);

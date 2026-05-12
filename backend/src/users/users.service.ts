@@ -20,10 +20,6 @@ export class UsersService {
     @InjectRepository(User) private readonly users: Repository<User>,
   ) {}
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.users.findOne({ where: { email: normalizeEmail(email) } });
-  }
-
   async findByEmailWithHash(email: string): Promise<User | null> {
     return this.users
       .createQueryBuilder('u')
@@ -32,8 +28,8 @@ export class UsersService {
       .getOne();
   }
 
-  async findById(id: string | number): Promise<User | null> {
-    return this.users.findOne({ where: { id: Number(id) as unknown as User['id'] } });
+  async findById(id: string): Promise<User | null> {
+    return this.users.findOne({ where: { id } });
   }
 
   async create(input: CreateUserInput): Promise<User> {
@@ -47,6 +43,18 @@ export class UsersService {
       fullName: input.fullName.trim(),
       role: input.role,
     });
-    return this.users.save(entity);
+    try {
+      return await this.users.save(entity);
+    } catch (err: unknown) {
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        (err as { code: string }).code === 'ER_DUP_ENTRY'
+      ) {
+        throw new ConflictException('Email already registered');
+      }
+      throw err;
+    }
   }
 }

@@ -23,6 +23,7 @@ export async function createTestApp(): Promise<TestContext> {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      transformOptions: { enableImplicitConversion: false },
     }),
   );
   await app.init();
