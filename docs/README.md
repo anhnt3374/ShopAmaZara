@@ -15,3 +15,5 @@ under `superpowers/plans/`.
 | 2026-05-13 | Wishlist | [features/wishlist.md](features/wishlist.md) |
 | 2026-05-13 | Cart | [features/cart.md](features/cart.md) |
 | 2026-05-13 | Orders (buyer) | [features/orders.md](features/orders.md) |
+| 2026-05-13 | Profile (PATCH /me, addresses) | [features/profile.md](features/profile.md) |
+| 2026-05-13 | Addresses (CRUD)               | [features/addresses.md](features/addresses.md) |
