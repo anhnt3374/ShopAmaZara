@@ -50,6 +50,13 @@ async function buyerCheckout(server: any): Promise<string> {
       role: 'buyer',
     });
   const buyerToken = reg.body.accessToken;
+  const addrRes = await request(server)
+    .post('/me/addresses')
+    .set('Authorization', `Bearer ${buyerToken}`)
+    .send({
+      label: 'Home', recipientName: 'B', phone: '+1',
+      line1: '1 St', city: 'SF', region: 'CA', postalCode: '94000', country: 'US',
+    });
   await request(server)
     .post('/me/cart')
     .set('Authorization', `Bearer ${buyerToken}`)
@@ -57,7 +64,12 @@ async function buyerCheckout(server: any): Promise<string> {
   const checkout = await request(server)
     .post('/orders/checkout')
     .set('Authorization', `Bearer ${buyerToken}`)
-    .send({ productIds: [productId] });
+    .send({
+      productIds: [productId],
+      addressId: addrRes.body.address.id,
+      shippingMethod: 'Standard',
+      payment: { method: 'card', cardLast4: '4242' },
+    });
   return checkout.body.orderId;
 }
 

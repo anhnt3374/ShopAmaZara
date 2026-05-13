@@ -47,6 +47,24 @@ async function registerBuyer(server: any, email: string): Promise<string> {
   return res.body.accessToken;
 }
 
+async function makeAddress(server: any, token: string): Promise<string> {
+  const res = await request(server)
+    .post('/me/addresses')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      label: 'Home', recipientName: 'B', phone: '+1',
+      line1: '1 St', city: 'SF', region: 'CA', postalCode: '94000', country: 'US',
+    });
+  return res.body.address.id;
+}
+
+const checkoutBody = (addressId: string, productIds: string[]) => ({
+  productIds,
+  addressId,
+  shippingMethod: 'Standard' as const,
+  payment: { method: 'card' as const, cardLast4: '4242' },
+});
+
 const productId = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 
 describe('Orders (e2e)', () => {
@@ -65,15 +83,17 @@ describe('Orders (e2e)', () => {
 
   it('checkout with empty productIds returns 400', async () => {
     const token = await registerBuyer(ctx.app.getHttpServer(), 'b1@a.local');
+    const addrId = await makeAddress(ctx.app.getHttpServer(), token);
     const res = await request(ctx.app.getHttpServer())
       .post('/orders/checkout')
       .set('Authorization', `Bearer ${token}`)
-      .send({ productIds: [] });
+      .send(checkoutBody(addrId, []));
     expect(res.status).toBe(400);
   });
 
   it('checkout decrements stock and clears cart rows', async () => {
     const token = await registerBuyer(ctx.app.getHttpServer(), 'b2@a.local');
+    const addrId = await makeAddress(ctx.app.getHttpServer(), token);
     await request(ctx.app.getHttpServer())
       .post('/me/cart')
       .set('Authorization', `Bearer ${token}`)
@@ -83,7 +103,7 @@ describe('Orders (e2e)', () => {
     const res = await request(ctx.app.getHttpServer())
       .post('/orders/checkout')
       .set('Authorization', `Bearer ${token}`)
-      .send({ productIds: [productId] });
+      .send(checkoutBody(addrId, [productId]));
     expect(res.status).toBe(201);
     expect(res.body.orderId).toBeDefined();
     expect(res.body.total).toBeGreaterThan(20);
@@ -103,6 +123,7 @@ describe('Orders (e2e)', () => {
     await resetDatabase(ctx.dataSource);
     await seedCatalog(ctx.dataSource, 1);
     const token = await registerBuyer(ctx.app.getHttpServer(), 'b3@a.local');
+    const addrId = await makeAddress(ctx.app.getHttpServer(), token);
     await request(ctx.app.getHttpServer())
       .post('/me/cart')
       .set('Authorization', `Bearer ${token}`)
@@ -113,13 +134,14 @@ describe('Orders (e2e)', () => {
     const res = await request(ctx.app.getHttpServer())
       .post('/orders/checkout')
       .set('Authorization', `Bearer ${token}`)
-      .send({ productIds: [productId] });
+      .send(checkoutBody(addrId, [productId]));
     expect(res.status).toBe(409);
   });
 
-  it('buyer cannot view another buyer’s order', async () => {
+  it('buyer cannot view another buyer\'s order', async () => {
     const tokenA = await registerBuyer(ctx.app.getHttpServer(), 'a@a.local');
     const tokenB = await registerBuyer(ctx.app.getHttpServer(), 'b@a.local');
+    const addrIdA = await makeAddress(ctx.app.getHttpServer(), tokenA);
     await request(ctx.app.getHttpServer())
       .post('/me/cart')
       .set('Authorization', `Bearer ${tokenA}`)
@@ -127,12 +149,32 @@ describe('Orders (e2e)', () => {
     const checkout = await request(ctx.app.getHttpServer())
       .post('/orders/checkout')
       .set('Authorization', `Bearer ${tokenA}`)
-      .send({ productIds: [productId] });
+      .send(checkoutBody(addrIdA, [productId]));
     const orderId = checkout.body.orderId;
 
     const res = await request(ctx.app.getHttpServer())
       .get(`/me/orders/${orderId}`)
       .set('Authorization', `Bearer ${tokenB}`);
     expect(res.status).toBe(403);
+  });
+
+  it('cancel restores stock and flips status', async () => {
+    const token = await registerBuyer(ctx.app.getHttpServer(), 'cancel@a.local');
+    const addrId = await makeAddress(ctx.app.getHttpServer(), token);
+    await request(ctx.app.getHttpServer())
+      .post('/me/cart')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ productId, quantity: 2 });
+    const co = await request(ctx.app.getHttpServer())
+      .post('/orders/checkout')
+      .set('Authorization', `Bearer ${token}`)
+      .send(checkoutBody(addrId, [productId]));
+    const orderId = co.body.orderId;
+    const cancel = await request(ctx.app.getHttpServer())
+      .patch(`/me/orders/${orderId}/cancel`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(cancel.status).toBe(200);
+    const p = await ctx.dataSource.getRepository(Product).findOne({ where: { id: productId } });
+    expect(p!.stock).toBe(5); // back to seed
   });
 });

@@ -39,6 +39,7 @@ export async function resetDatabase(dataSource: DataSource): Promise<void> {
   await dataSource.query('TRUNCATE TABLE wishlist_items');
   await dataSource.query('TRUNCATE TABLE products');
   await dataSource.query('TRUNCATE TABLE stores');
+  await dataSource.query('TRUNCATE TABLE user_addresses');
   await dataSource.query('TRUNCATE TABLE users');
   await dataSource.query('SET FOREIGN_KEY_CHECKS = 1');
 }
