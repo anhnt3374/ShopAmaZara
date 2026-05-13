@@ -9,6 +9,7 @@ import { ProductsModule } from './products/products.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
+import { AddressesModule } from './addresses/addresses.module';
 import { User } from './users/user.entity';
 import { Store } from './stores/store.entity';
 import { Product } from './products/product.entity';
@@ -16,6 +17,7 @@ import { WishlistItem } from './wishlist/wishlist-item.entity';
 import { CartItem } from './cart/cart-item.entity';
 import { Order } from './orders/order.entity';
 import { OrderItem } from './orders/order-item.entity';
+import { UserAddress } from './addresses/address.entity';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { OrderItem } from './orders/order-item.entity';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem],
+        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -41,6 +43,7 @@ import { OrderItem } from './orders/order-item.entity';
     WishlistModule,
     CartModule,
     OrdersModule,
+    AddressesModule,
   ],
   controllers: [AppController],
 })
