@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
-import { listConversations, listMessages, sendMessage } from '../services/chat.js';
+import { listChats, listMessages, sendMessage } from '../services/chat.js';
+
+// TODO(Task 17): replace with new chat service API
+const listConversations = listChats;
 
 // Full-page user messaging. Header stays sticky at the top, conversation
 // list sidebar is sticky to the viewport left so it does not scroll with

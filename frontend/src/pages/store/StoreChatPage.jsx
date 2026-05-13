@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import Icon from '../../components/Icon.jsx';
-import { listConversations, listMessages, sendMessage } from '../../services/chat.js';
+import { listStoreChats, listStoreMessages, sendStoreMessage } from '../../services/chat.js';
+
+// TODO(Task 18): replace with new store chat service API
+const listConversations = listStoreChats;
+const listMessages = listStoreMessages;
+const sendMessage = sendStoreMessage;
 
 export default function StoreChatPage() {
   const [conversations, setConversations] = useState([]);

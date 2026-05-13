@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import Icon from './Icon.jsx';
 import { useChat } from '../context/ChatContext.jsx';
-import { listConversations, listFaqs, listMessages, sendMessage } from '../services/chat.js';
+import { listChats, listMessages, sendMessage } from '../services/chat.js';
+
+// TODO(Task 16): replace listConversations/listFaqs references with new chat service API
+const listConversations = listChats;
+const listFaqs = () => Promise.resolve({ items: [] });
 
 // The persistent chat icon. Positioned bottom-right with safe offsets so it
 // stays out of the way of CTAs. The panel itself opens above the icon and
