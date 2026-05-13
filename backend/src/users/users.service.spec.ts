@@ -65,4 +65,35 @@ describe('UsersService', () => {
       expect(repo.save).not.toHaveBeenCalled();
     });
   });
+
+  describe('updateProfile', () => {
+    it('updates only provided fields and trims fullName', async () => {
+      const existing = {
+        id: '1',
+        email: 'a@b.c',
+        fullName: 'Old',
+        role: 'buyer',
+        phone: null,
+        avatarUrl: null,
+        biography: null,
+        preferredLanguage: 'en',
+      } as unknown as User;
+      (repo.findOne as jest.Mock).mockResolvedValue(existing);
+      (repo.save as jest.Mock).mockImplementation((u) => ({ ...existing, ...u }));
+
+      const out = await service.updateProfile('1', {
+        fullName: '  New Name  ',
+        phone: '+1 555',
+      });
+
+      expect(out.fullName).toBe('New Name');
+      expect(out.phone).toBe('+1 555');
+      expect(out.biography).toBeNull();
+    });
+
+    it('throws NotFound when user does not exist', async () => {
+      (repo.findOne as jest.Mock).mockResolvedValue(null);
+      await expect(service.updateProfile('1', { fullName: 'x' })).rejects.toThrow();
+    });
+  });
 });

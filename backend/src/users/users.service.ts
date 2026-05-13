@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './user.entity';
@@ -56,5 +56,26 @@ export class UsersService {
       }
       throw err;
     }
+  }
+
+  async updateProfile(
+    id: string,
+    patch: Partial<{
+      fullName: string;
+      phone: string | null;
+      avatarUrl: string | null;
+      biography: string | null;
+      preferredLanguage: string;
+    }>,
+  ): Promise<User> {
+    const user = await this.users.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    if (patch.fullName !== undefined) user.fullName = patch.fullName.trim();
+    if (patch.phone !== undefined) user.phone = patch.phone;
+    if (patch.avatarUrl !== undefined) user.avatarUrl = patch.avatarUrl;
+    if (patch.biography !== undefined) user.biography = patch.biography;
+    if (patch.preferredLanguage !== undefined)
+      user.preferredLanguage = patch.preferredLanguage;
+    return this.users.save(user);
   }
 }
