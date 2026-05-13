@@ -27,6 +27,18 @@ export class User {
   @Column({ type: 'enum', enum: ['buyer', 'seller'], default: 'buyer' })
   role!: UserRole;
 
+  @Column({ type: 'varchar', length: 32, nullable: true })
+  phone!: string | null;
+
+  @Column({ name: 'avatar_url', type: 'varchar', length: 512, nullable: true })
+  avatarUrl!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  biography!: string | null;
+
+  @Column({ name: 'preferred_language', type: 'varchar', length: 16, default: 'en' })
+  preferredLanguage!: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
 
