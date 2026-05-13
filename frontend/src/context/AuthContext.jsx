@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { authStorage } from '../services/api.js';
 import * as authService from '../services/auth.js';
+import { getMe } from '../services/profile.js';
 
 const AuthContext = createContext(null);
 
@@ -51,6 +52,17 @@ export function AuthProvider({ children }) {
     setState({ token: null, user: null });
   }, []);
 
+  const setUser = useCallback((u) => setState((s) => ({ ...s, user: u })), []);
+  const refreshUser = useCallback(async () => {
+    try {
+      const u = await getMe();
+      setUser(u);
+      return u;
+    } catch {
+      return null;
+    }
+  }, [setUser]);
+
   const value = useMemo(
     () => ({
       token,
@@ -59,8 +71,10 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      setUser,
+      refreshUser,
     }),
-    [token, user, login, register, logout],
+    [token, user, login, register, logout, setUser, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

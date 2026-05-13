@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const links = [
   { to: '/', label: 'Shop', end: true },
@@ -15,6 +16,7 @@ export default function TopNavBar() {
   const navigate = useNavigate();
   const { count } = useCart();
   const { ids: wishlistIds } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const [query, setQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -109,7 +111,7 @@ export default function TopNavBar() {
           </NavLink>
 
           <NavLink
-            to="/auth"
+            to={isAuthenticated ? '/account' : '/auth'}
             aria-label="Account"
             className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all"
           >
