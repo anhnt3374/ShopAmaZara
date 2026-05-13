@@ -239,23 +239,33 @@ export class OrdersService {
   async updateStatusForStore(
     storeId: string,
     orderId: string,
-    status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled',
+    status: 'Paid' | 'Shipped' | 'Delivered' | 'Cancelled',
   ) {
-    const order = await this.orders.findOne({
-      where: { id: orderId },
-      relations: { items: true },
+    return this.dataSource.transaction(async (manager) => {
+      const order = await manager.findOne(Order, {
+        where: { id: orderId },
+        relations: { items: true },
+      });
+      if (!order) throw new NotFoundException('Order not found');
+      const hasItemFromStore = order.items?.some((i) => i.storeId === storeId);
+      if (!hasItemFromStore) throw new ForbiddenException('Not your order');
+
+      if (status === 'Cancelled' && order.status !== 'Cancelled') {
+        for (const it of order.items ?? []) {
+          await manager.query(
+            'UPDATE products SET stock = stock + ? WHERE id = ?',
+            [it.quantity, it.productId],
+          );
+        }
+      }
+      const now = new Date();
+      order.status = status;
+      if (status === 'Shipped' && !order.shippedAt) order.shippedAt = now;
+      if (status === 'Delivered' && !order.deliveredAt) order.deliveredAt = now;
+      if (status === 'Cancelled' && !order.cancelledAt) order.cancelledAt = now;
+      await manager.save(order);
+      return { order: { id: String(order.id), status: order.status } };
     });
-    if (!order) throw new NotFoundException('Order not found');
-    const hasItemFromStore = order.items?.some((i) => i.storeId === storeId);
-    if (!hasItemFromStore) throw new ForbiddenException('Not your order');
-    order.status = status;
-    await this.orders.save(order);
-    return {
-      order: {
-        id: String(order.id),
-        status: order.status,
-      },
-    };
   }
 
   async cancelForBuyer(buyerId: string, id: string): Promise<{ id: string; status: 'Cancelled' }> {
