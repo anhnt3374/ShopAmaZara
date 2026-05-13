@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useChat } from '../context/ChatContext.jsx';
+import { useToast } from '../context/ToastContext.jsx';
 import { getProduct } from '../services/products.js';
 
 export default function ProductDetailPage() {
@@ -11,8 +14,26 @@ export default function ProductDetailPage() {
   const [activeImg, setActiveImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [color, setColor] = useState(0);
+  const navigate = useNavigate();
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
+  const { isAuthenticated } = useAuth();
+  const { ensureStoreChat } = useChat();
+  const toast = useToast();
+
+  async function contactSeller() {
+    if (!isAuthenticated) {
+      toast.error('Sign in to message the seller');
+      navigate('/auth');
+      return;
+    }
+    try {
+      const id = await ensureStoreChat(product.storeId);
+      navigate(`/messages/${id}`);
+    } catch (err) {
+      toast.error(err?.message ?? 'Could not open chat');
+    }
+  }
 
   useEffect(() => {
     getProduct(id).then(setProduct);
@@ -175,6 +196,15 @@ export default function ProductDetailPage() {
               className="btn-primary flex-1 h-12 shadow-lifted"
             >
               Buy Now
+            </button>
+          </div>
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={contactSeller}
+              className="btn-secondary px-4 py-2 inline-flex items-center gap-2"
+            >
+              <Icon name="chat" size={18} /> Contact seller
             </button>
           </div>
 

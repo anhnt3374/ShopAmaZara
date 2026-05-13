@@ -4,6 +4,8 @@ import Icon from '../components/Icon.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useChat } from '../context/ChatContext.jsx';
+import { getProduct } from '../services/products.js';
 
 const SHIPPING_RATE = 12.5;
 const TAX_RATE = 0.08;
@@ -22,6 +24,31 @@ export default function CartPage() {
     setAllSelected,
     removeItem,
   } = useCart();
+
+  const { ensureStoreChat } = useChat();
+
+  async function askAboutItem(item) {
+    if (!isAuthenticated) {
+      toast.error('Sign in to message the seller');
+      navigate('/auth', { state: { from: '/cart' } });
+      return;
+    }
+    try {
+      let storeId = item.storeId;
+      if (!storeId) {
+        const p = await getProduct(item.id).catch(() => null);
+        storeId = p?.storeId;
+      }
+      if (!storeId) {
+        toast.error('Seller info unavailable');
+        return;
+      }
+      const id = await ensureStoreChat(storeId);
+      navigate(`/messages/${id}`);
+    } catch (err) {
+      toast.error(err?.message ?? 'Could not open chat');
+    }
+  }
 
   const totals = useMemo(() => {
     const sub = subtotal;
@@ -125,13 +152,14 @@ export default function CartPage() {
                           </button>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Link
-                            to="/messages"
+                          <button
+                            type="button"
+                            onClick={() => askAboutItem(item)}
                             className="text-primary hover:text-primary-container text-label-md flex items-center gap-1 transition-colors"
                           >
                             <Icon name="chat" size={16} />
                             Ask about this item
-                          </Link>
+                          </button>
                           <div className="w-px h-4 bg-outline-variant" />
                           <button
                             type="button"
