@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -28,8 +30,11 @@ export class OrdersController {
   }
 
   @Get('me/orders')
-  list(@Req() req: Request & { user: { id: string } }) {
-    return this.orders.listForBuyer(req.user.id);
+  list(
+    @Req() req: Request & { user: { id: string } },
+    @Query('status') status?: string,
+  ) {
+    return this.orders.listForBuyer(req.user.id, status);
   }
 
   @Get('me/orders/:id')
@@ -38,5 +43,13 @@ export class OrdersController {
     @Param('id') id: string,
   ) {
     return this.orders.findOneForBuyer(req.user.id, id);
+  }
+
+  @Patch('me/orders/:id/cancel')
+  cancel(
+    @Req() req: Request & { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    return this.orders.cancelForBuyer(req.user.id, id);
   }
 }
