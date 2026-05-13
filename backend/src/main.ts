@@ -1,6 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DataSource } from 'typeorm';
 import { AppModule } from './app.module';
+import { renameProcessingStatus } from './common/bootstrap/order-status-rename';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +19,7 @@ async function bootstrap() {
   const origin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
   app.enableCors({ origin, credentials: false });
 
+  await renameProcessingStatus(app.get(DataSource));
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
   // eslint-disable-next-line no-console
