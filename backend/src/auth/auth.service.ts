@@ -13,6 +13,10 @@ export interface PublicUser {
   email: string;
   fullName: string;
   role: 'buyer' | 'seller';
+  phone: string | null;
+  avatarUrl: string | null;
+  biography: string | null;
+  preferredLanguage: string;
 }
 
 export interface AuthResponse {
@@ -52,6 +56,10 @@ export class AuthService {
       email: user.email,
       fullName: user.fullName,
       role: user.role,
+      phone: user.phone ?? null,
+      avatarUrl: user.avatarUrl ?? null,
+      biography: user.biography ?? null,
+      preferredLanguage: user.preferredLanguage ?? 'en',
     };
   }
 
