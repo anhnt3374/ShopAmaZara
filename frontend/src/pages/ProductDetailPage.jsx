@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
             <span className="text-label-md text-primary uppercase tracking-wider">{product.brand}</span>
             <button
               type="button"
-              onClick={() => toggle(product.id)}
+              onClick={() => toggle(product)}
               aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
               className={`p-2 rounded-full transition-colors ${
                 isWishlisted ? 'text-error bg-error-container/50' : 'text-on-surface-variant hover:text-error hover:bg-surface-container'
@@ -84,21 +84,23 @@ export default function ProductDetailPage() {
           <h1 className="text-headline-lg text-on-surface mb-2">{product.name}</h1>
           <p className="text-body-md text-on-surface-variant mb-4">{product.subtitle}</p>
 
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex text-secondary-container">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Icon
-                  key={s}
-                  name={s <= Math.round(product.rating) ? 'star' : 'star_outline'}
-                  filled={s <= Math.round(product.rating)}
-                  size={20}
-                />
-              ))}
+          {product.rating !== undefined && (
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex text-secondary-container">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Icon
+                    key={s}
+                    name={s <= Math.round(product.rating) ? 'star' : 'star_outline'}
+                    filled={s <= Math.round(product.rating)}
+                    size={20}
+                  />
+                ))}
+              </div>
+              <span className="text-body-sm text-on-surface-variant">
+                {product.rating} • {product.reviewCount} reviews
+              </span>
             </div>
-            <span className="text-body-sm text-on-surface-variant">
-              {product.rating} • {product.reviewCount} reviews
-            </span>
-          </div>
+          )}
 
           <div className="flex items-end gap-3 mb-6">
             <span className="text-display-lg text-on-surface">${product.price.toFixed(2)}</span>
@@ -148,7 +150,7 @@ export default function ProductDetailPage() {
                 min="1"
                 value={qty}
                 onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
-                className="w-full text-center border-none focus:ring-0 text-body-md font-medium p-0 h-full bg-transparent outline-none"
+                className="w-full text-center border-none focus:ring-0 text-body-md font-semibold text-on-surface p-0 h-full bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inverse-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <button
                 type="button"
@@ -194,87 +196,99 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Features */}
-      <div className="mb-16">
-        <h2 className="text-headline-md text-on-surface mb-6 border-b border-outline-variant pb-4">
-          Product Features
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {product.features.map((f) => (
-            <div
-              key={f.title}
-              className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 hover:shadow-lifted transition-shadow"
-            >
-              <Icon name={f.icon} className="text-primary mb-4" size={32} />
-              <h3 className="text-label-md text-on-surface mb-2">{f.title}</h3>
-              <p className="text-body-sm text-on-surface-variant">{f.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Reviews */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-        <div className="lg:col-span-4">
-          <h2 className="text-headline-md text-on-surface mb-6">Customer Reviews</h2>
-          <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 mb-6">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-display-lg text-on-surface">{product.rating}</span>
-              <div>
-                <div className="flex text-secondary-container mb-1">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Icon
-                      key={s}
-                      name={s <= Math.round(product.rating) ? 'star' : 'star_half'}
-                      filled
-                      size={18}
-                    />
-                  ))}
-                </div>
-                <span className="text-body-sm text-on-surface-variant">
-                  Based on {product.reviewCount} reviews
-                </span>
+      {product.features?.length > 0 && (
+        <div className="mb-16">
+          <h2 className="text-headline-md text-on-surface mb-6 border-b border-outline-variant pb-4">
+            Product Features
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {product.features.map((f) => (
+              <div
+                key={f.title}
+                className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 hover:shadow-lifted transition-shadow"
+              >
+                <Icon name={f.icon} className="text-primary mb-4" size={32} />
+                <h3 className="text-label-md text-on-surface mb-2">{f.title}</h3>
+                <p className="text-body-sm text-on-surface-variant">{f.body}</p>
               </div>
-            </div>
-            <div className="space-y-2">
-              {[80, 12, 5, 2, 1].map((pct, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-body-sm">
-                  <span className="w-3">{5 - idx}</span>
-                  <Icon name="star" filled size={16} className="text-secondary-container" />
-                  <div className="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
-                    <div className="h-full bg-secondary-container" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="w-8 text-right text-on-surface-variant">{pct}%</span>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
-        <div className="lg:col-span-8 space-y-6">
-          {product.reviews.map((r) => (
-            <div key={r.id} className="border-b border-outline-variant pb-6">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-md">
-                    {r.initials}
-                  </div>
-                  <div>
-                    <span className="block text-label-md text-on-surface">{r.author}</span>
-                    {r.verified && <span className="text-body-sm text-on-surface-variant">Verified Buyer</span>}
-                  </div>
-                </div>
-                <span className="text-body-sm text-outline">{r.date}</span>
-              </div>
-              <div className="flex text-secondary-container mb-3">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Icon key={s} name={s <= r.rating ? 'star' : 'star_outline'} filled size={18} />
-                ))}
-              </div>
-              <h4 className="text-body-md font-semibold text-on-surface mb-2">{r.title}</h4>
-              <p className="text-body-md text-on-surface-variant">{r.body}</p>
-            </div>
-          ))}
+      )}
+
+      {/* Highlights — replaces hardcoded "features" with the JSON column we actually have */}
+      {Array.isArray(product.highlights) && product.highlights.length > 0 && (
+        <div className="mb-16">
+          <h2 className="text-headline-md text-on-surface mb-6 border-b border-outline-variant pb-4">
+            Highlights
+          </h2>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {product.highlights.map((h, idx) => (
+              <li
+                key={idx}
+                className="flex items-start gap-3 bg-surface-container-low p-4 rounded-xl border border-outline-variant/50"
+              >
+                <Icon name="check_circle" className="text-primary mt-0.5" size={20} />
+                <span className="text-body-sm text-on-surface">{String(h)}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      )}
+
+      {/* Reviews — backend has no review storage yet, only render when an API supplies them */}
+      {product.reviews?.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+          <div className="lg:col-span-4">
+            <h2 className="text-headline-md text-on-surface mb-6">Customer Reviews</h2>
+            <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 mb-6">
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-display-lg text-on-surface">{product.rating}</span>
+                <div>
+                  <div className="flex text-secondary-container mb-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Icon
+                        key={s}
+                        name={s <= Math.round(product.rating) ? 'star' : 'star_half'}
+                        filled
+                        size={18}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-body-sm text-on-surface-variant">
+                    Based on {product.reviewCount} reviews
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="lg:col-span-8 space-y-6">
+            {product.reviews.map((r) => (
+              <div key={r.id} className="border-b border-outline-variant pb-6">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-md">
+                      {r.initials}
+                    </div>
+                    <div>
+                      <span className="block text-label-md text-on-surface">{r.author}</span>
+                      {r.verified && <span className="text-body-sm text-on-surface-variant">Verified Buyer</span>}
+                    </div>
+                  </div>
+                  <span className="text-body-sm text-outline">{r.date}</span>
+                </div>
+                <div className="flex text-secondary-container mb-3">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Icon key={s} name={s <= r.rating ? 'star' : 'star_outline'} filled size={18} />
+                  ))}
+                </div>
+                <h4 className="text-body-md font-semibold text-on-surface mb-2">{r.title}</h4>
+                <p className="text-body-md text-on-surface-variant">{r.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

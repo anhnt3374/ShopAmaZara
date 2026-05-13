@@ -7,23 +7,25 @@ export default function ProductCard({ product }) {
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
   const isWishlisted = has(product.id);
+  const discountBadge =
+    product.discountLabel ?? (product.discount > 0 ? `-${product.discount}%` : null);
 
   return (
     <article className="group relative bg-surface border border-outline-variant rounded-xl overflow-hidden hover:border-primary hover:shadow-lifted transition-all duration-300">
-      {product.discountLabel && (
+      {discountBadge && (
         <span
           className={`absolute top-3 left-3 z-10 text-[10px] font-bold uppercase tracking-wide py-1 px-2 rounded-sm shadow-sm ${
-            product.discountLabel.startsWith('-')
+            discountBadge.startsWith('-')
               ? 'bg-error text-on-error'
               : 'bg-secondary-container text-on-secondary-container'
           }`}
         >
-          {product.discountLabel}
+          {discountBadge}
         </span>
       )}
       <button
         type="button"
-        onClick={() => toggle(product.id)}
+        onClick={() => toggle(product)}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         className={`absolute top-3 right-3 z-10 p-2 bg-surface/80 backdrop-blur-sm rounded-full transition-all duration-200 ${
           isWishlisted
@@ -46,12 +48,18 @@ export default function ProductCard({ product }) {
       </Link>
 
       <div className="p-4">
-        <div className="flex items-center gap-1 mb-1 text-secondary-container">
-          <Icon name="star" filled size={14} />
-          <span className="text-data-mono text-on-surface-variant mt-0.5">
-            {product.rating?.toFixed(1)} ({product.reviewCount})
-          </span>
-        </div>
+        {product.rating !== undefined ? (
+          <div className="flex items-center gap-1 mb-1 text-secondary-container">
+            <Icon name="star" filled size={14} />
+            <span className="text-data-mono text-on-surface-variant mt-0.5">
+              {product.rating?.toFixed(1)} ({product.reviewCount ?? 0})
+            </span>
+          </div>
+        ) : (
+          <div className="text-body-sm text-on-surface-variant mb-1 truncate">
+            {product.brand}
+          </div>
+        )}
         <Link to={`/product/${product.id}`}>
           <h3 className="text-body-md font-semibold text-on-surface truncate mb-1 hover:text-primary transition-colors">
             {product.name}

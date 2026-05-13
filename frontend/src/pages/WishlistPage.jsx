@@ -3,21 +3,34 @@ import { Link } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import { listProducts } from '../services/products.js';
 
 export default function WishlistPage() {
-  const { ids, remove } = useWishlist();
+  const { isAuthenticated } = useAuth();
+  const { ids, products, loading, remove } = useWishlist();
   const { addItem } = useCart();
-  const [products, setProducts] = useState([]);
 
+  // When logged in, the context already provides hydrated `products`.
+  // When logged out, fall back to the legacy client-side filter so guest
+  // wishlists keep showing something — limited to whatever the first /products
+  // page returns.
+  const [guestProducts, setGuestProducts] = useState([]);
   useEffect(() => {
-    listProducts().then((res) => setProducts(res.items));
-  }, []);
+    if (isAuthenticated) return;
+    if (ids.length === 0) {
+      setGuestProducts([]);
+      return;
+    }
+    listProducts({ limit: 60 })
+      .then((res) => setGuestProducts(res.items ?? []))
+      .catch(() => setGuestProducts([]));
+  }, [isAuthenticated, ids]);
 
-  const wishlist = useMemo(
-    () => products.filter((p) => ids.includes(p.id)),
-    [products, ids],
-  );
+  const wishlist = useMemo(() => {
+    if (isAuthenticated) return products;
+    return guestProducts.filter((p) => ids.includes(p.id));
+  }, [isAuthenticated, products, guestProducts, ids]);
 
   return (
     <div className="container-max py-8">
@@ -26,6 +39,7 @@ export default function WishlistPage() {
           <h1 className="text-headline-lg text-on-surface">My Wishlist</h1>
           <p className="text-body-sm text-on-surface-variant mt-1">
             {wishlist.length} saved item{wishlist.length === 1 ? '' : 's'}
+            {!isAuthenticated && ids.length > 0 ? ' (sign in to sync across devices)' : ''}
           </p>
         </div>
         <button type="button" className="btn-secondary px-4 py-2 text-body-sm">
@@ -34,7 +48,11 @@ export default function WishlistPage() {
         </button>
       </div>
 
-      {wishlist.length === 0 ? (
+      {loading ? (
+        <div className="bg-surface-container-low border border-outline-variant rounded-xl p-12 text-center text-on-surface-variant">
+          <Icon name="hourglass_top" /> Loading wishlist…
+        </div>
+      ) : wishlist.length === 0 ? (
         <div className="bg-surface-container-low border border-outline-variant rounded-xl p-12 text-center">
           <Icon name="favorite" className="text-outline" size={48} />
           <p className="text-headline-md text-on-surface mt-4">Your wishlist is empty</p>
@@ -65,7 +83,7 @@ export default function WishlistPage() {
                 <p className="text-body-sm text-on-surface-variant truncate">{p.subtitle}</p>
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-headline-sm font-bold text-on-surface">
-                    ${p.price.toFixed(2)}
+                    ${Number(p.price ?? 0).toFixed(2)}
                   </span>
                   <span
                     className={`text-body-sm flex items-center gap-1 ${
@@ -88,7 +106,7 @@ export default function WishlistPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => remove(p.id)}
+                    onClick={() => remove(p)}
                     aria-label="Remove from wishlist"
                     className="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/30 rounded-lg transition-colors border border-outline-variant"
                   >
