@@ -7,8 +7,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
+import { randomUUID } from 'node:crypto';
 import { CartItem } from '../cart/cart-item.entity';
 import { Product } from '../products/product.entity';
+import { UserAddress } from '../addresses/address.entity';
 import { CheckoutDto } from './dto/checkout.dto';
 import { OrderItem } from './order-item.entity';
 import { Order } from './order.entity';
@@ -20,29 +22,30 @@ export class OrdersService {
     @InjectRepository(Order) private readonly orders: Repository<Order>,
   ) {}
 
-  async checkout(buyerId: string, dto: CheckoutDto): Promise<{ orderId: string; total: number }> {
+  async checkout(buyerId: string, dto: CheckoutDto): Promise<{ orderId: string; total: number; status: 'Paid' }> {
     return this.dataSource.transaction(async (manager) => {
+      // 1. cart rows
       const cartRows = await manager.find(CartItem, {
         where: { userId: buyerId, productId: In(dto.productIds) },
       });
-      if (cartRows.length === 0) {
-        throw new BadRequestException('No matching cart items');
-      }
+      if (cartRows.length === 0) throw new BadRequestException('No matching cart items');
+
+      // 2. products
       const productIds = cartRows.map((r) => r.productId);
-      const products = await manager.find(Product, {
-        where: { id: In(productIds) },
-      });
+      const products = await manager.find(Product, { where: { id: In(productIds) } });
       const byId = new Map(products.map((p) => [p.id, p]));
 
-      let subtotal = 0;
-      const orderItemDrafts: Array<{
-        productId: string;
-        storeId: string;
-        nameSnapshot: string;
-        priceSnapshot: string;
-        quantity: number;
-      }> = [];
+      // 3. shipping address — owned by buyer
+      const addr = await manager.findOne(UserAddress, { where: { id: dto.addressId } });
+      if (!addr) throw new NotFoundException('Address not found');
+      if (addr.userId !== buyerId) throw new ForbiddenException('Not your address');
 
+      // 4. decrement stock + build draft items
+      let subtotal = 0;
+      const drafts: Array<{
+        productId: string; storeId: string; nameSnapshot: string;
+        priceSnapshot: string; quantity: number;
+      }> = [];
       for (const row of cartRows) {
         const product = byId.get(row.productId);
         if (!product) throw new NotFoundException(`Product ${row.productId} missing`);
@@ -51,12 +54,10 @@ export class OrdersService {
           [row.quantity, row.productId, row.quantity],
         );
         const affected = (res as { affectedRows?: number }).affectedRows ?? 0;
-        if (affected !== 1) {
-          throw new ConflictException(`Insufficient stock for ${product.name}`);
-        }
+        if (affected !== 1) throw new ConflictException(`Insufficient stock for ${product.name}`);
         const line = Math.round(Number(product.price) * row.quantity * 100) / 100;
         subtotal += line;
-        orderItemDrafts.push({
+        drafts.push({
           productId: row.productId,
           storeId: product.storeId,
           nameSnapshot: product.name,
@@ -65,22 +66,39 @@ export class OrdersService {
         });
       }
 
+      // 5. totals
       const subtotalRounded = Math.round(subtotal * 100) / 100;
-      const shipping = subtotalRounded > 0 ? 12.5 : 0;
+      const shippingCost = dto.shippingMethod === 'Express' ? 15 : 5;
       const tax = Math.round(subtotalRounded * 0.08 * 100) / 100;
-      const total = Math.round((subtotalRounded + shipping + tax) * 100) / 100;
+      const total = Math.round((subtotalRounded + shippingCost + tax) * 100) / 100;
 
+      // 6. order row
+      const now = new Date();
       const orderEntity = manager.create(Order, {
         buyerId,
         subtotal: subtotalRounded.toFixed(2),
-        shipping: shipping.toFixed(2),
+        shipping: shippingCost.toFixed(2),
         tax: tax.toFixed(2),
         total: total.toFixed(2),
-        status: 'Processing',
+        status: 'Paid',
+        shippingMethod: dto.shippingMethod,
+        shippingRecipient: addr.recipientName,
+        shippingPhone: addr.phone,
+        shippingLine1: addr.line1,
+        shippingLine2: addr.line2,
+        shippingCity: addr.city,
+        shippingRegion: addr.region,
+        shippingPostal: addr.postalCode,
+        shippingCountry: addr.country,
+        paymentMethod: dto.payment.method,
+        paymentLast4: dto.payment.method === 'card' ? dto.payment.cardLast4 ?? null : null,
+        paymentTxnId: `MOCK-${randomUUID()}`,
+        paidAt: now,
       });
       const savedOrder = await manager.save(orderEntity);
 
-      const itemEntities = orderItemDrafts.map((d) =>
+      // 7. items
+      const itemEntities = drafts.map((d) =>
         manager.create(OrderItem, {
           orderId: savedOrder.id,
           productId: d.productId,
@@ -92,12 +110,10 @@ export class OrdersService {
       );
       await manager.save(itemEntities);
 
-      await manager.delete(CartItem, {
-        userId: buyerId,
-        productId: In(productIds),
-      });
+      // 8. clear cart rows
+      await manager.delete(CartItem, { userId: buyerId, productId: In(productIds) });
 
-      return { orderId: String(savedOrder.id), total };
+      return { orderId: String(savedOrder.id), total, status: 'Paid' };
     });
   }
 
