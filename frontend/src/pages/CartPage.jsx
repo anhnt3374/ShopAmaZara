@@ -1,14 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useCart } from '../context/CartContext.jsx';
-import { checkout as checkoutApi } from '../services/orders.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useToast } from '../context/ToastContext.jsx';
 
 const SHIPPING_RATE = 12.5;
 const TAX_RATE = 0.08;
 
 export default function CartPage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const toast = useToast();
   const {
     items,
     subtotal,
@@ -18,10 +21,8 @@ export default function CartPage() {
     toggleSelected,
     setAllSelected,
     removeItem,
-    clearSelected,
   } = useCart();
 
-  const [submitting, setSubmitting] = useState(false);
   const totals = useMemo(() => {
     const sub = subtotal;
     const shipping = sub > 0 ? SHIPPING_RATE : 0;
@@ -31,14 +32,14 @@ export default function CartPage() {
 
   async function onCheckout() {
     if (selectedItems.length === 0) return;
-    setSubmitting(true);
-    try {
-      const res = await checkoutApi({ items: selectedItems });
-      clearSelected();
-      navigate('/', { state: { lastOrder: res.orderId } });
-    } finally {
-      setSubmitting(false);
+    if (!isAuthenticated) {
+      toast.error('Please sign in before checking out');
+      navigate('/auth', { state: { from: '/cart' } });
+      return;
     }
+    navigate('/checkout', {
+      state: { productIds: selectedItems.map((i) => i.id) },
+    });
   }
 
   return (
@@ -171,11 +172,11 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={onCheckout}
-                disabled={selectedItems.length === 0 || submitting}
+                disabled={selectedItems.length === 0}
                 className="btn-primary w-full py-3 px-6 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? 'Processing…' : `Checkout Selected (${selectedItems.length})`}
-                {!submitting && <Icon name="arrow_forward" size={16} />}
+                {`Checkout Selected (${selectedItems.length})`}
+                <Icon name="arrow_forward" size={16} />
               </button>
               <div className="mt-4 flex items-center justify-center gap-2 text-body-sm text-on-surface-variant">
                 <Icon name="lock" size={16} />
