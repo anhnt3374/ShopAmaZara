@@ -44,18 +44,19 @@ describe('OrdersService.checkout', () => {
 
   it('throws BadRequest when productIds is empty after cart filter', async () => {
     manager.find.mockResolvedValue([]); // cart_items
-    await expect(service.checkout('u1', { productIds: ['p1'] } as any)).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
+    await expect(
+      service.checkout('u1', { productIds: ['p1'], addressId: '1', shippingMethod: 'Standard', payment: { method: 'card', cardLast4: '4242' } } as any),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('throws Conflict when stock UPDATE affects zero rows', async () => {
     manager.find
       .mockResolvedValueOnce([{ productId: 'p1', quantity: 2 }]) // cart_items
       .mockResolvedValueOnce([{ id: 'p1', name: 'A', price: '10.00', storeId: 's1' }]); // products
+    manager.findOne.mockResolvedValueOnce({ id: '1', userId: 'u1', recipientName: 'R', phone: 'P', line1: 'L1', line2: null, city: 'C', region: 'R', postalCode: '00000', country: 'US' }); // address
     manager.query.mockResolvedValueOnce({ affectedRows: 0 } as any);
     await expect(
-      service.checkout('u1', { productIds: ['p1'] } as any),
+      service.checkout('u1', { productIds: ['p1'], addressId: '1', shippingMethod: 'Standard', payment: { method: 'card', cardLast4: '4242' } } as any),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
@@ -63,15 +64,16 @@ describe('OrdersService.checkout', () => {
     manager.find
       .mockResolvedValueOnce([{ productId: 'p1', quantity: 2 }]) // cart_items
       .mockResolvedValueOnce([{ id: 'p1', name: 'A', price: '10.00', storeId: 's1' }]); // products
+    manager.findOne.mockResolvedValueOnce({ id: '1', userId: 'u1', recipientName: 'R', phone: 'P', line1: 'L1', line2: null, city: 'C', region: 'R', postalCode: '00000', country: 'US' }); // address
     manager.query.mockResolvedValueOnce({ affectedRows: 1 });
     manager.save
       .mockResolvedValueOnce({ id: '101', total: '20.00' }) // order
       .mockResolvedValueOnce([{ id: '500' }]); // order items
     manager.delete.mockResolvedValue({ affected: 1 });
 
-    const result = await service.checkout('u1', { productIds: ['p1'] } as any);
+    const result = await service.checkout('u1', { productIds: ['p1'], addressId: '1', shippingMethod: 'Standard', payment: { method: 'card', cardLast4: '4242' } } as any);
     expect(result.orderId).toBe('101');
-    expect(result.total).toBe(34.1);
+    expect(result.total).toBe(26.6);
     expect(manager.delete).toHaveBeenCalled();
   });
 });
