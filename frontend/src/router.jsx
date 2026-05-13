@@ -14,6 +14,11 @@ import StoreInventoryPage from './pages/store/StoreInventoryPage.jsx';
 import StoreOrderManagementPage from './pages/store/StoreOrderManagementPage.jsx';
 import StoreChatPage from './pages/store/StoreChatPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
+import CheckoutPage from './pages/CheckoutPage.jsx';
+import OrderManagementPage from './pages/OrderManagementPage.jsx';
+import OrderDetailPage from './pages/OrderDetailPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import AddressesPage from './pages/AddressesPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +33,11 @@ export const router = createBrowserRouter([
       { path: '/messages/:conversationId', element: <UserChatPage /> },
       { path: '/policy', element: <PolicyPage /> },
       { path: '/policy/:section', element: <PolicyPage /> },
+      { path: '/checkout', element: <CheckoutPage /> },
+      { path: '/orders', element: <OrderManagementPage /> },
+      { path: '/orders/:id', element: <OrderDetailPage /> },
+      { path: '/account', element: <ProfilePage /> },
+      { path: '/account/addresses', element: <AddressesPage /> },
     ],
   },
   {
