@@ -117,21 +117,18 @@ export class OrdersService {
     });
   }
 
-  async listForBuyer(buyerId: string) {
+  async listForBuyer(buyerId: string, status?: string) {
+    const where: any = { buyerId };
+    if (status && ['Paid', 'Shipped', 'Delivered', 'Cancelled'].includes(status)) {
+      where.status = status;
+    }
     const orders = await this.orders.find({
-      where: { buyerId },
+      where,
       order: { createdAt: 'DESC' },
+      relations: { items: true },
     });
     return {
-      items: orders.map((o) => ({
-        id: String(o.id),
-        subtotal: Number(o.subtotal),
-        shipping: Number(o.shipping),
-        tax: Number(o.tax),
-        total: Number(o.total),
-        status: o.status,
-        createdAt: o.createdAt,
-      })),
+      items: orders.map((o) => this.toBuyerListView(o)),
     };
   }
 
@@ -142,24 +139,51 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException('Order not found');
     if (order.buyerId !== buyerId) throw new ForbiddenException('Not your order');
+    return this.toBuyerDetailView(order);
+  }
+
+  private toBuyerListView(o: Order) {
     return {
-      id: String(order.id),
-      buyerId: order.buyerId,
-      subtotal: Number(order.subtotal),
-      shipping: Number(order.shipping),
-      tax: Number(order.tax),
-      total: Number(order.total),
-      status: order.status,
-      createdAt: order.createdAt,
-      items: (order.items ?? []).map((it) => ({
+      id: String(o.id),
+      subtotal: Number(o.subtotal),
+      shipping: Number(o.shipping),
+      tax: Number(o.tax),
+      total: Number(o.total),
+      status: o.status,
+      shippingMethod: o.shippingMethod,
+      createdAt: o.createdAt,
+      paidAt: o.paidAt,
+      shippedAt: o.shippedAt,
+      deliveredAt: o.deliveredAt,
+      cancelledAt: o.cancelledAt,
+      items: (o.items ?? []).map((it) => ({
         id: String(it.id),
         productId: it.productId,
-        storeId: it.storeId,
         name: it.nameSnapshot,
         price: Number(it.priceSnapshot),
         quantity: it.quantity,
-        lineTotal: Math.round(Number(it.priceSnapshot) * it.quantity * 100) / 100,
       })),
+    };
+  }
+
+  private toBuyerDetailView(o: Order) {
+    return {
+      ...this.toBuyerListView(o),
+      shipping_address: {
+        recipientName: o.shippingRecipient,
+        phone: o.shippingPhone,
+        line1: o.shippingLine1,
+        line2: o.shippingLine2,
+        city: o.shippingCity,
+        region: o.shippingRegion,
+        postalCode: o.shippingPostal,
+        country: o.shippingCountry,
+      },
+      payment: {
+        method: o.paymentMethod,
+        last4: o.paymentLast4,
+        txnId: o.paymentTxnId,
+      },
     };
   }
 
