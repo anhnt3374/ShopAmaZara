@@ -12,8 +12,8 @@ import {
 } from 'class-validator';
 
 export class CheckoutPaymentDto {
-  @IsEnum(['card', 'ewallet', 'bank'])
-  method!: 'card' | 'ewallet' | 'bank';
+  @IsEnum(['card', 'ewallet', 'bank', 'cod'])
+  method!: 'card' | 'ewallet' | 'bank' | 'cod';
 
   @IsOptional()
   @IsString()

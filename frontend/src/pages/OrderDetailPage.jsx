@@ -120,7 +120,9 @@ export default function OrderDetailPage() {
                   ? `Card ending in ${order.payment.last4 ?? '----'}`
                   : order.payment.method === 'ewallet'
                   ? 'E-wallet'
-                  : 'Bank transfer'}
+                  : order.payment.method === 'bank'
+                  ? 'Bank transfer'
+                  : 'Cash on delivery'}
               </p>
               <p className="text-body-sm text-on-surface-variant mt-1">
                 Txn: {order.payment.txnId}

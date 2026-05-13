@@ -21,6 +21,11 @@ Schemas:
 
 Status enum: `Paid | Shipped | Delivered | Cancelled`.
 
+Payment method enum: `card | ewallet | bank | cod`. `cod` (cash on delivery)
+skips card validation on the frontend — buyer pays the courier on arrival.
+The order is still created with `status = 'Paid'` in v1 for simplicity (we
+don't track an outstanding-cash state yet).
+
 ## Seller routes
 
 | Method | Path | Description |

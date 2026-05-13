@@ -14,6 +14,7 @@ const SHIPPING_OPTIONS = [
 ];
 
 const PAYMENT_TABS = [
+  { id: 'cod', label: 'Cash on Delivery', icon: 'local_shipping' },
   { id: 'card', label: 'Credit Card', icon: 'credit_card' },
   { id: 'ewallet', label: 'E-wallet', icon: 'account_balance_wallet' },
   { id: 'bank', label: 'Bank Transfer', icon: 'account_balance' },
@@ -40,7 +41,7 @@ export default function CheckoutPage() {
   const [addresses, setAddresses] = useState([]);
   const [addressId, setAddressId] = useState(null);
   const [shippingMethod, setShippingMethod] = useState('Standard');
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('cod');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
@@ -242,7 +243,7 @@ export default function CheckoutPage() {
               <Icon name="payments" className="text-primary" size={20} />
               Payment Method
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {PAYMENT_TABS.map((p) => (
                 <button
                   key={p.id}
@@ -294,7 +295,16 @@ export default function CheckoutPage() {
                 </div>
               </div>
             )}
-            {paymentMethod !== 'card' && (
+            {paymentMethod === 'cod' && (
+              <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4 flex gap-3">
+                <Icon name="info" size={20} className="text-primary shrink-0" />
+                <div className="text-body-sm text-on-surface-variant">
+                  Pay the courier in cash (or QR) when the order arrives.
+                  No card details required — you can place the order right away.
+                </div>
+              </div>
+            )}
+            {(paymentMethod === 'ewallet' || paymentMethod === 'bank') && (
               <p className="text-body-sm text-on-surface-variant">
                 You will be redirected to a mock {paymentMethod === 'ewallet' ? 'e-wallet' : 'bank transfer'}{' '}
                 confirmation after you place the order.

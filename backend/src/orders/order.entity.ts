@@ -11,7 +11,7 @@ import { OrderItem } from './order-item.entity';
 
 export type OrderStatus = 'Paid' | 'Shipped' | 'Delivered' | 'Cancelled';
 export type ShippingMethod = 'Standard' | 'Express';
-export type PaymentMethod = 'card' | 'ewallet' | 'bank';
+export type PaymentMethod = 'card' | 'ewallet' | 'bank' | 'cod';
 
 @Entity({ name: 'orders' })
 export class Order {
@@ -76,7 +76,7 @@ export class Order {
   @Column({
     name: 'payment_method',
     type: 'enum',
-    enum: ['card', 'ewallet', 'bank'],
+    enum: ['card', 'ewallet', 'bank', 'cod'],
     default: 'card',
   })
   paymentMethod!: PaymentMethod;
