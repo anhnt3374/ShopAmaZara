@@ -18,6 +18,9 @@ import { CartItem } from './cart/cart-item.entity';
 import { Order } from './orders/order.entity';
 import { OrderItem } from './orders/order-item.entity';
 import { UserAddress } from './addresses/address.entity';
+import { Conversation } from './chats/conversation.entity';
+import { Message } from './chats/message.entity';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -31,7 +34,7 @@ import { UserAddress } from './addresses/address.entity';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress],
+        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress, Conversation, Message],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -44,6 +47,7 @@ import { UserAddress } from './addresses/address.entity';
     CartModule,
     OrdersModule,
     AddressesModule,
+    ChatsModule,
   ],
   controllers: [AppController],
 })
