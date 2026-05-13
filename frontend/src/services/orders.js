@@ -1,15 +1,13 @@
 import { api } from './api.js';
-import { mockOrders } from '../mocks/orders.js';
 
-const USE_MOCKS = !import.meta.env.VITE_API_BASE_URL;
+export const listOrders = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return api.get(`/me/orders${qs ? `?${qs}` : ''}`);
+};
 
-export async function listOrders(params = {}) {
-  if (USE_MOCKS) return Promise.resolve({ items: mockOrders });
-  const search = new URLSearchParams(params).toString();
-  return api.get(`/orders${search ? `?${search}` : ''}`);
-}
+export const getOrder = (id) => api.get(`/me/orders/${id}`);
 
-export async function checkout(payload) {
-  if (USE_MOCKS) return Promise.resolve({ ok: true, orderId: `ORD-${Date.now()}` });
-  return api.post('/orders/checkout', payload);
-}
+export const checkout = ({ productIds, addressId, shippingMethod, payment }) =>
+  api.post('/orders/checkout', { productIds, addressId, shippingMethod, payment });
+
+export const cancelOrder = (id) => api.patch(`/me/orders/${id}/cancel`);
