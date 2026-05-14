@@ -19,3 +19,4 @@ under `superpowers/plans/`.
 | 2026-05-13 | Addresses (CRUD)               | [features/addresses.md](features/addresses.md) |
 | 2026-05-14 | Chat (buyer↔store + system echo) | [features/chat.md](features/chat.md) |
 | 2026-05-14 | Seller product CRUD + image upload + bulk import | [features/products.md](features/products.md) |
+| 2026-05-14 | Reviews (CRUD + product detail aggregate) | [features/reviews.md](features/reviews.md) |
