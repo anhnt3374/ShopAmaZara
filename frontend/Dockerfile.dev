@@ -1,5 +1,8 @@
 # Dev container: runs the Vite dev server with HMR. Source is mounted via
 # docker-compose so edits on the host are picked up live.
+#
+# CMD re-runs `npm install` on every start so the container picks up new deps
+# when package.json changes — without requiring a `docker compose build` cycle.
 
 FROM node:20-alpine
 WORKDIR /app
@@ -10,4 +13,4 @@ RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 COPY . .
 EXPOSE 5173
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm install --no-audit --no-fund --silent && exec npm run dev"]

@@ -43,6 +43,8 @@ services:
     volumes:
       - ./backend:/app
       - amazara_backend_node_modules:/app/node_modules
+      - ./products.enriched.csv:/app/products.enriched.csv:ro
+      - ./products.csv:/app/products.csv:ro
 
   frontend:
     build:

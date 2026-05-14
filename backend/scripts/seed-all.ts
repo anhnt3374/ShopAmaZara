@@ -13,7 +13,18 @@ import { Order } from '../src/orders/order.entity';
 import { OrderItem } from '../src/orders/order-item.entity';
 import { Review } from '../src/reviews/review.entity';
 
-const CSV_PATH = path.resolve(__dirname, '..', '..', 'products.enriched.csv');
+function findCsv(): string {
+  // Look for products.enriched.csv in either the host layout (parent of backend/)
+  // or the docker layout (mounted into /app — backend container).
+  const candidates = [
+    path.resolve(__dirname, '..', 'products.enriched.csv'),
+    path.resolve(__dirname, '..', '..', 'products.enriched.csv'),
+  ];
+  for (const p of candidates) if (fs.existsSync(p)) return p;
+  throw new Error(`CSV not found in any of: ${candidates.join(', ')}`);
+}
+
+const CSV_PATH = findCsv();
 const SAMPLE_PATH = path.resolve(__dirname, '..', '1200_sample_review.json');
 const BATCH = 500;
 

@@ -1,5 +1,9 @@
 # Dev container for the NestJS backend. Source is mounted via docker-compose
 # so edits on the host are picked up by `nest start --watch`.
+#
+# CMD re-runs `npm install` on every start (idempotent + fast when up-to-date)
+# so the container picks up new deps when package.json changes — without
+# requiring a `docker compose build` cycle.
 
 FROM node:20-alpine
 WORKDIR /app
@@ -9,4 +13,4 @@ RUN npm ci
 
 COPY . .
 EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+CMD ["sh", "-c", "npm install --no-audit --no-fund --silent && exec npm run start:dev"]

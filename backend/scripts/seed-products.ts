@@ -8,7 +8,18 @@ import { AppModule } from '../src/app.module';
 import { User } from '../src/users/user.entity';
 import { Store } from '../src/stores/store.entity';
 
-const CSV_PATH = path.resolve(__dirname, '..', '..', 'products.enriched.csv');
+function findCsv(): string {
+  // Host layout: products.enriched.csv lives next to backend/.
+  // Docker layout: docker-compose mounts it into /app/products.enriched.csv.
+  const candidates = [
+    path.resolve(__dirname, '..', 'products.enriched.csv'),
+    path.resolve(__dirname, '..', '..', 'products.enriched.csv'),
+  ];
+  for (const p of candidates) if (fs.existsSync(p)) return p;
+  throw new Error(`CSV not found in any of: ${candidates.join(', ')}`);
+}
+
+const CSV_PATH = findCsv();
 const SELLER_PASSWORD = 'seller123';
 const BCRYPT_ROUNDS = 12;
 
