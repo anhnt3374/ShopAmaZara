@@ -26,6 +26,12 @@ export interface ListResult {
   total: number;
   page: number;
   limit: number;
+  kpi?: {
+    total: number;
+    inStock: number;
+    lowStock: number;
+    outOfStock: number;
+  };
 }
 
 @Injectable()
@@ -128,7 +134,7 @@ export class ProductsService {
 
   async listForStore(
     storeId: string,
-    opts: { q?: string; page?: number; limit?: number },
+    opts: { q?: string; page?: number; limit?: number; status?: 'all' | 'published' | 'drafts' },
   ): Promise<ListResult> {
     const page = opts.page ?? 1;
     const limit = Math.min(opts.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
@@ -137,15 +143,39 @@ export class ProductsService {
       .where('p.store_id = :storeId', { storeId });
     if (opts.q) {
       const like = `%${opts.q.toLowerCase()}%`;
-      qb.andWhere('(LOWER(p.name) LIKE :like OR LOWER(p.brand) LIKE :like)', {
-        like,
-      });
+      qb.andWhere(
+        '(LOWER(p.name) LIKE :like OR LOWER(p.brand) LIKE :like OR LOWER(p.sku) LIKE :like)',
+        { like },
+      );
     }
+    if (opts.status === 'published') qb.andWhere('p.is_published = 1');
+    if (opts.status === 'drafts') qb.andWhere('p.is_published = 0');
     qb.orderBy('p.updated_at', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
     const [rows, total] = await qb.getManyAndCount();
-    return { items: rows.map(toProductSummary), total, page, limit };
+
+    const kpiRaw = await this.products
+      .createQueryBuilder('p')
+      .select('COUNT(*)', 'total')
+      .addSelect('SUM(CASE WHEN p.stock > 10 THEN 1 ELSE 0 END)', 'in_stock')
+      .addSelect('SUM(CASE WHEN p.stock > 0 AND p.stock <= 10 THEN 1 ELSE 0 END)', 'low_stock')
+      .addSelect('SUM(CASE WHEN p.stock = 0 THEN 1 ELSE 0 END)', 'out_of_stock')
+      .where('p.store_id = :storeId', { storeId })
+      .getRawOne<{ total: string; in_stock: string; low_stock: string; out_of_stock: string }>();
+
+    return {
+      items: rows.map(toProductSummary),
+      total,
+      page,
+      limit,
+      kpi: {
+        total: Number(kpiRaw?.total ?? 0),
+        inStock: Number(kpiRaw?.in_stock ?? 0),
+        lowStock: Number(kpiRaw?.low_stock ?? 0),
+        outOfStock: Number(kpiRaw?.out_of_stock ?? 0),
+      },
+    };
   }
 
   async createForStore(storeId: string, dto: CreateProductDto): Promise<Product> {
