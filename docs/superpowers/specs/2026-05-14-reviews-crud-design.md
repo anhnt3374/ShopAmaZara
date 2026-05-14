@@ -36,9 +36,9 @@ Cho phép buyer đã mua sản phẩm (có order ở trạng thái `Delivered` c
 
 | Cột | Kiểu | Note |
 |---|---|---|
-| `id` | `char(36)` PK | UUID v4 |
+| `id` | `char(36)` PK | UUID v4 (theo pattern của `products`) |
 | `product_id` | `char(36)` | FK `products(id)` ON DELETE CASCADE, **index** |
-| `user_id` | `char(36)` | FK `users(id)` ON DELETE CASCADE, **index** |
+| `user_id` | `bigint unsigned` | FK `users(id)` ON DELETE CASCADE, **index** (User.id là `bigint`) |
 | `rating` | `tinyint unsigned` | 1..5, validated ở DTO |
 | `comment` | `text` | nullable, ≤ 2000 ký tự |
 | `created_at` | `timestamp` | auto |
@@ -89,7 +89,7 @@ Implement bằng subquery `LEFT JOIN (SELECT product_id, AVG(rating) avg, COUNT(
   "user": { "id": "uuid", "name": "Anh N." }
 }
 ```
-`user.name` lấy từ `users.name`, không lộ email/phone.
+`user.name` lấy từ `users.full_name`, expose dưới key `name` trong response. Không lộ email/phone.
 
 **Validation DTOs:**
 - `CreateReviewDto`: `rating` integer 1..5 required, `comment` optional string ≤ 2000 chars, trimmed.
