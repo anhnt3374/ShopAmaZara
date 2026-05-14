@@ -7,17 +7,22 @@ export interface ProductSummary {
   brand: string;
   category: string;
   storeId: string;
+  sku: string | null;
   price: number;
+  salePrice: number | null;
   discount: number;
   originalPrice: number | null;
   image: string;
   inStock: boolean;
   stock: number;
+  isPublished: boolean;
   colors: string[];
 }
 
 export interface ProductDetail extends ProductSummary {
   description: string | null;
+  model: string | null;
+  trackInventory: boolean;
   images: string[];
   highlights: unknown;
   availableColors: unknown;
@@ -50,18 +55,20 @@ function asJson(value: unknown): unknown {
   }
 }
 
-function originalPrice(price: number, discount: number): number | null {
-  if (!discount || discount <= 0) return null;
-  return Math.round((price / (1 - discount / 100)) * 100) / 100;
-}
-
 function colorHexes(availableColors: unknown): string[] {
   const arr = asArray<{ hex?: string }>(availableColors);
   return arr.map((c) => c?.hex).filter((h): h is string => typeof h === 'string');
 }
 
+function imagesArray(p: Product): string[] {
+  const arr = asArray<string>(p.images);
+  if (arr.length) return arr;
+  return p.imageFirst ? [p.imageFirst] : [];
+}
+
 export function toProductSummary(p: Product): ProductSummary {
   const price = Number(p.price);
+  const salePrice = p.salePrice == null ? null : Number(p.salePrice);
   return {
     id: p.id,
     name: p.name,
@@ -69,12 +76,15 @@ export function toProductSummary(p: Product): ProductSummary {
     brand: p.brand,
     category: p.category,
     storeId: p.storeId,
+    sku: p.sku,
     price,
+    salePrice,
     discount: p.discount,
-    originalPrice: originalPrice(price, p.discount),
+    originalPrice: salePrice == null ? null : price,
     image: p.imageFirst,
     inStock: p.stock > 0,
     stock: p.stock,
+    isPublished: p.isPublished,
     colors: colorHexes(p.availableColors),
   };
 }
@@ -83,7 +93,9 @@ export function toProductDetail(p: Product): ProductDetail {
   return {
     ...toProductSummary(p),
     description: p.longDescription,
-    images: [p.imageFirst],
+    model: p.model,
+    trackInventory: p.trackInventory,
+    images: imagesArray(p),
     highlights: asJson(p.highlights),
     availableColors: asJson(p.availableColors),
     availableSizes: asJson(p.availableSizes),
