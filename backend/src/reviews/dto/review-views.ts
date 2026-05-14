@@ -24,3 +24,22 @@ export function toReviewItem(r: Review, user: ReviewUserRef): ReviewItem {
     user: { id: String(user.id), name: user.fullName },
   };
 }
+
+export interface ReviewSummary {
+  average: number;
+  count: number;
+  breakdown: Record<'1' | '2' | '3' | '4' | '5', number>;
+}
+
+export interface ReviewListResult {
+  items: ReviewItem[];
+  total: number;
+  page: number;
+  limit: number;
+  summary: ReviewSummary;
+}
+
+export interface MyReviewResult {
+  review: ReviewItem | null;
+  canReview: boolean;
+}

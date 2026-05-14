@@ -152,4 +152,76 @@ describe('ReviewsService', () => {
       await expect(service.remove('r-1', '99')).rejects.toMatchObject({ status: 403 });
     });
   });
+
+  describe('listForProduct', () => {
+    it('returns paginated items, summary and breakdown', async () => {
+      const listQb: any = {
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([
+          [{ id: 'r-1', productId: 'p-1', userId: '42', rating: 5, comment: 'a', createdAt: new Date(), updatedAt: new Date() }],
+          1,
+        ]),
+      };
+      const summaryQb: any = {
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([
+          { rating: '5', cnt: '3' },
+          { rating: '4', cnt: '1' },
+        ]),
+      };
+      reviews.createQueryBuilder = jest.fn()
+        .mockImplementationOnce(() => listQb)
+        .mockImplementationOnce(() => summaryQb);
+      users.find = jest.fn().mockResolvedValue([{ id: '42', fullName: 'Anh' }]);
+
+      const out = await service.listForProduct('p-1', { page: 1, limit: 10 });
+
+      expect(out.total).toBe(1);
+      expect(out.items).toHaveLength(1);
+      expect(out.summary.count).toBe(4);
+      expect(out.summary.average).toBeCloseTo((5 * 3 + 4 * 1) / 4, 1);
+      expect(out.summary.breakdown['5']).toBe(3);
+      expect(out.summary.breakdown['1']).toBe(0);
+    });
+  });
+
+  describe('myReviewForProduct', () => {
+    it('returns review + canReview=false when review exists', async () => {
+      const review = {
+        id: 'r-1', productId: 'p-1', userId: '42', rating: 5, comment: 'a',
+        createdAt: new Date(), updatedAt: new Date(),
+      };
+      reviews.findOne.mockResolvedValue(review);
+      users.findOne.mockResolvedValue({ id: '42', fullName: 'Anh' });
+
+      const out = await service.myReviewForProduct('42', 'p-1');
+      expect(out.review?.id).toBe('r-1');
+      expect(out.canReview).toBe(false);
+    });
+
+    it('returns null review + canReview=true when no review and eligible', async () => {
+      reviews.findOne.mockResolvedValue(null);
+      orderItemsQb.getCount.mockResolvedValue(1);
+
+      const out = await service.myReviewForProduct('42', 'p-1');
+      expect(out.review).toBeNull();
+      expect(out.canReview).toBe(true);
+    });
+
+    it('returns null review + canReview=false when no review and not eligible', async () => {
+      reviews.findOne.mockResolvedValue(null);
+      orderItemsQb.getCount.mockResolvedValue(0);
+
+      const out = await service.myReviewForProduct('42', 'p-1');
+      expect(out.review).toBeNull();
+      expect(out.canReview).toBe(false);
+    });
+  });
 });
