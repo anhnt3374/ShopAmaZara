@@ -22,6 +22,8 @@ import { Conversation } from './chats/conversation.entity';
 import { Message } from './chats/message.entity';
 import { ChatsModule } from './chats/chats.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { Review } from './reviews/review.entity';
 
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { UploadsModule } from './uploads/uploads.module';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress, Conversation, Message],
+        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress, Conversation, Message, Review],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -50,6 +52,7 @@ import { UploadsModule } from './uploads/uploads.module';
     AddressesModule,
     ChatsModule,
     UploadsModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
 })
