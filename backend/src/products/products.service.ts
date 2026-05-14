@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
+import { Review } from '../reviews/review.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -38,6 +39,7 @@ export interface ListResult {
 export class ProductsService {
   constructor(
     @InjectRepository(Product) private readonly products: Repository<Product>,
+    @InjectRepository(Review) private readonly reviewsRepo: Repository<Review>,
   ) {}
 
   async list(dto: ListProductsDto): Promise<ListResult> {
@@ -90,7 +92,16 @@ export class ProductsService {
   async findOne(id: string): Promise<ProductDetail> {
     const row = await this.products.findOne({ where: { id, isPublished: true } });
     if (!row) throw new NotFoundException('Product not found');
-    return toProductDetail(row);
+    const stats = await this.reviewsRepo
+      .createQueryBuilder('r')
+      .select('COUNT(*)', 'cnt')
+      .addSelect('AVG(r.rating)', 'avg')
+      .where('r.product_id = :id', { id })
+      .getRawOne<{ cnt: string; avg: string | null }>();
+    return toProductDetail(row, {
+      rating: stats?.avg ? Math.round(Number(stats.avg) * 10) / 10 : 0,
+      reviewCount: Number(stats?.cnt ?? 0),
+    });
   }
 
   async facets(q?: string): Promise<{

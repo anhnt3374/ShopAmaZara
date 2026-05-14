@@ -31,6 +31,8 @@ export interface ProductDetail extends ProductSummary {
   targetGender: string | null;
   targetAgeGroup: string | null;
   tags: unknown;
+  rating: number;
+  reviewCount: number;
 }
 
 function asArray<T>(value: unknown): T[] {
@@ -89,7 +91,10 @@ export function toProductSummary(p: Product): ProductSummary {
   };
 }
 
-export function toProductDetail(p: Product): ProductDetail {
+export function toProductDetail(
+  p: Product,
+  stats: { rating: number; reviewCount: number } = { rating: 0, reviewCount: 0 },
+): ProductDetail {
   return {
     ...toProductSummary(p),
     description: p.longDescription,
@@ -103,5 +108,7 @@ export function toProductDetail(p: Product): ProductDetail {
     targetGender: p.targetGender,
     targetAgeGroup: p.targetAgeGroup,
     tags: asJson(p.tags),
+    rating: stats.rating,
+    reviewCount: stats.reviewCount,
   };
 }

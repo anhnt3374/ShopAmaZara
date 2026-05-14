@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { SelectQueryBuilder } from 'typeorm';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
+import { Review } from '../reviews/review.entity';
 
 function makeQb(): jest.Mocked<SelectQueryBuilder<Product>> & {
   resolveResult: (rows: Product[], total: number) => void;
@@ -38,6 +39,17 @@ describe('ProductsService', () => {
       providers: [
         ProductsService,
         { provide: getRepositoryToken(Product), useValue: repo },
+        {
+          provide: getRepositoryToken(Review),
+          useValue: {
+            createQueryBuilder: jest.fn().mockReturnValue({
+              select: jest.fn().mockReturnThis(),
+              addSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              getRawOne: jest.fn().mockResolvedValue({ cnt: '0', avg: null }),
+            }),
+          },
+        },
       ],
     }).compile();
     service = moduleRef.get(ProductsService);
