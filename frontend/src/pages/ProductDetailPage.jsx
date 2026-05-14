@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useChat } from '../context/ChatContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { getProduct } from '../services/products.js';
+import { reviewsService } from '../services/reviews.js';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -14,6 +15,14 @@ export default function ProductDetailPage() {
   const [activeImg, setActiveImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [color, setColor] = useState(0);
+  const [reviewsState, setReviewsState] = useState({ items: [], total: 0, page: 1, summary: null });
+  const [reviewsSort, setReviewsSort] = useState('newest');
+  const [reviewsFilter, setReviewsFilter] = useState('');
+  const [myReview, setMyReview] = useState(null);
+  const [canReview, setCanReview] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ rating: 5, comment: '' });
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
@@ -40,6 +49,74 @@ export default function ProductDetailPage() {
     setActiveImg(0);
     setQty(1);
   }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    loadReviews(1);
+    if (isAuthenticated) loadMyReview();
+    else { setMyReview(null); setCanReview(false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isAuthenticated, reviewsSort, reviewsFilter]);
+
+  async function loadReviews(page) {
+    const params = { page, limit: 10, sort: reviewsSort };
+    if (reviewsFilter) params.rating = Number(reviewsFilter);
+    const res = await reviewsService.list(id, params);
+    setReviewsState((prev) => ({
+      ...res,
+      items: page === 1 ? res.items : [...prev.items, ...res.items],
+    }));
+  }
+
+  async function loadMyReview() {
+    try {
+      const res = await reviewsService.myReview(id);
+      setMyReview(res.review);
+      setCanReview(res.canReview);
+      if (res.review) setDraft({ rating: res.review.rating, comment: res.review.comment ?? '' });
+    } catch {
+      setMyReview(null);
+      setCanReview(false);
+    }
+  }
+
+  async function submitReview(e) {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      navigate('/auth', { state: { from: `/products/${id}` } });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      if (myReview) {
+        await reviewsService.update(myReview.id, draft);
+        toast.success('Review updated');
+      } else {
+        await reviewsService.create(id, draft);
+        toast.success('Review posted');
+      }
+      setEditing(false);
+      await Promise.all([loadReviews(1), loadMyReview(), getProduct(id).then(setProduct)]);
+    } catch (err) {
+      toast.error(err?.message ?? 'Failed to save review');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function deleteReview() {
+    if (!myReview) return;
+    if (!window.confirm('Delete your review?')) return;
+    try {
+      await reviewsService.remove(myReview.id);
+      toast.success('Review deleted');
+      setEditing(false);
+      setDraft({ rating: 5, comment: '' });
+      await Promise.all([loadReviews(1), loadMyReview(), getProduct(id).then(setProduct)]);
+    } catch (err) {
+      toast.error(err?.message ?? 'Failed to delete review');
+    }
+  }
 
   if (!product) {
     return (
@@ -266,59 +343,172 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* Reviews — backend has no review storage yet, only render when an API supplies them */}
-      {product.reviews?.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-          <div className="lg:col-span-4">
-            <h2 className="text-headline-md text-on-surface mb-6">Customer Reviews</h2>
+      {/* Reviews */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+        <div className="lg:col-span-4">
+          <h2 className="text-headline-md text-on-surface mb-6">Customer Reviews</h2>
+          {reviewsState.summary && reviewsState.summary.count > 0 ? (
             <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 mb-6">
               <div className="flex items-center gap-4 mb-4">
-                <span className="text-display-lg text-on-surface">{product.rating}</span>
+                <span className="text-display-lg text-on-surface">{reviewsState.summary.average}</span>
                 <div>
                   <div className="flex text-secondary-container mb-1">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Icon
                         key={s}
-                        name={s <= Math.round(product.rating) ? 'star' : 'star_half'}
+                        name={s <= Math.round(reviewsState.summary.average) ? 'star' : 'star_outline'}
                         filled
                         size={18}
                       />
                     ))}
                   </div>
                   <span className="text-body-sm text-on-surface-variant">
-                    Based on {product.reviewCount} reviews
+                    Based on {reviewsState.summary.count} reviews
                   </span>
                 </div>
               </div>
+              <div className="space-y-1">
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const c = reviewsState.summary.breakdown[String(star)] ?? 0;
+                  const pct = reviewsState.summary.count ? Math.round((c / reviewsState.summary.count) * 100) : 0;
+                  return (
+                    <div key={star} className="flex items-center gap-2 text-body-sm">
+                      <span className="w-6 text-on-surface">{star}★</span>
+                      <div className="flex-1 h-2 bg-surface-container rounded">
+                        <div className="h-2 bg-secondary-container rounded" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="w-8 text-on-surface-variant text-right">{c}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-          <div className="lg:col-span-8 space-y-6">
-            {product.reviews.map((r) => (
+          ) : (
+            <p className="text-body-md text-on-surface-variant mb-6">No reviews yet.</p>
+          )}
+
+          {myReview && !editing && (
+            <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/50 mb-4">
+              <div className="text-label-md text-on-surface mb-1">Your review</div>
+              <div className="flex text-secondary-container mb-2">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Icon key={s} name={s <= myReview.rating ? 'star' : 'star_outline'} filled size={16} />
+                ))}
+              </div>
+              {myReview.comment && <p className="text-body-sm text-on-surface mb-3">{myReview.comment}</p>}
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setEditing(true)} className="text-label-md text-primary">Edit</button>
+                <button type="button" onClick={deleteReview} className="text-label-md text-error">Delete</button>
+              </div>
+            </div>
+          )}
+
+          {(canReview || (myReview && editing)) && (
+            <form onSubmit={submitReview} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/50 space-y-3">
+              <div className="text-label-md text-on-surface">{myReview ? 'Edit your review' : 'Write a review'}</div>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setDraft((d) => ({ ...d, rating: s }))}
+                    aria-label={`${s} star`}
+                    className="text-secondary-container"
+                  >
+                    <Icon name={s <= draft.rating ? 'star' : 'star_outline'} filled size={24} />
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={draft.comment}
+                onChange={(e) => setDraft((d) => ({ ...d, comment: e.target.value }))}
+                maxLength={2000}
+                rows={3}
+                placeholder="Share your experience (optional)"
+                className="w-full p-3 rounded-lg border border-outline-variant bg-surface text-body-md"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 rounded-lg bg-primary text-on-primary text-label-md disabled:opacity-50"
+                >
+                  {submitting ? 'Saving…' : myReview ? 'Save' : 'Post review'}
+                </button>
+                {editing && (
+                  <button
+                    type="button"
+                    onClick={() => { setEditing(false); setDraft({ rating: myReview.rating, comment: myReview.comment ?? '' }); }}
+                    className="px-4 py-2 rounded-lg border border-outline-variant text-label-md"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
+
+        <div className="lg:col-span-8 space-y-6">
+          {reviewsState.total > 0 && (
+            <div className="flex flex-wrap gap-3 items-center">
+              <select
+                value={reviewsSort}
+                onChange={(e) => setReviewsSort(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-outline-variant bg-surface text-body-sm"
+              >
+                <option value="newest">Newest</option>
+                <option value="highest">Highest rating</option>
+                <option value="lowest">Lowest rating</option>
+              </select>
+              <select
+                value={reviewsFilter}
+                onChange={(e) => setReviewsFilter(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-outline-variant bg-surface text-body-sm"
+              >
+                <option value="">All ratings</option>
+                <option value="5">5 stars</option>
+                <option value="4">4 stars</option>
+                <option value="3">3 stars</option>
+                <option value="2">2 stars</option>
+                <option value="1">1 star</option>
+              </select>
+            </div>
+          )}
+
+          {reviewsState.items
+            .filter((r) => !myReview || r.id !== myReview.id)
+            .map((r) => (
               <div key={r.id} className="border-b border-outline-variant pb-6">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-md">
-                      {r.initials}
+                      {(r.user?.name ?? '?').slice(0, 1).toUpperCase()}
                     </div>
-                    <div>
-                      <span className="block text-label-md text-on-surface">{r.author}</span>
-                      {r.verified && <span className="text-body-sm text-on-surface-variant">Verified Buyer</span>}
-                    </div>
+                    <span className="block text-label-md text-on-surface">{r.user?.name ?? 'Unknown'}</span>
                   </div>
-                  <span className="text-body-sm text-outline">{r.date}</span>
+                  <span className="text-body-sm text-outline">{new Date(r.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex text-secondary-container mb-3">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Icon key={s} name={s <= r.rating ? 'star' : 'star_outline'} filled size={18} />
                   ))}
                 </div>
-                <h4 className="text-body-md font-semibold text-on-surface mb-2">{r.title}</h4>
-                <p className="text-body-md text-on-surface-variant">{r.body}</p>
+                {r.comment && <p className="text-body-md text-on-surface-variant">{r.comment}</p>}
               </div>
             ))}
-          </div>
+
+          {reviewsState.items.length < reviewsState.total && (
+            <button
+              type="button"
+              onClick={() => loadReviews(reviewsState.page + 1)}
+              className="px-4 py-2 rounded-lg border border-outline-variant text-label-md"
+            >
+              Load more
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
