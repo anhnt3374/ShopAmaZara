@@ -21,6 +21,7 @@ import { UserAddress } from './addresses/address.entity';
 import { Conversation } from './chats/conversation.entity';
 import { Message } from './chats/message.entity';
 import { ChatsModule } from './chats/chats.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ChatsModule } from './chats/chats.module';
     OrdersModule,
     AddressesModule,
     ChatsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
 })
