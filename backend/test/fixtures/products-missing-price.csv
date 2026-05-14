@@ -1,0 +1,3 @@
+name,sku,category,price,stock
+Good,GOOD,Audio,10.00,5
+Bad,BAD,Audio,,5

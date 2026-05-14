@@ -1,5 +1,6 @@
 import request from 'supertest';
 import * as bcrypt from 'bcrypt';
+import * as path from 'node:path';
 import { DataSource } from 'typeorm';
 import { Product } from '../src/products/product.entity';
 import { Store } from '../src/stores/store.entity';
@@ -180,5 +181,71 @@ describe('Store products (e2e)', () => {
     expect(statuses).toEqual(
       expect.arrayContaining(['In Stock', 'Low Stock', 'Out of Stock']),
     );
+  });
+
+  describe('bulk import', () => {
+    it('imports 3 rows', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/store/products/bulk')
+        .set('Authorization', `Bearer ${token}`)
+        .attach('file', path.join(__dirname, 'fixtures/products-sample.csv'));
+      expect(res.status).toBe(201);
+      expect(res.body.created).toBe(3);
+      expect(res.body.skippedRows).toEqual([]);
+    });
+
+    it('skips duplicate SKU within upload', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/store/products/bulk')
+        .set('Authorization', `Bearer ${token}`)
+        .attach('file', path.join(__dirname, 'fixtures/products-with-duplicate.csv'));
+      expect(res.body.created).toBe(1);
+      expect(res.body.skippedRows).toEqual([{ row: 2, reason: 'Duplicate SKU' }]);
+    });
+
+    it('skips invalid price', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/store/products/bulk')
+        .set('Authorization', `Bearer ${token}`)
+        .attach('file', path.join(__dirname, 'fixtures/products-missing-price.csv'));
+      expect(res.body.created).toBe(1);
+      expect(res.body.skippedRows).toEqual([{ row: 2, reason: 'Invalid price' }]);
+    });
+  });
+
+  describe('isPublished filter', () => {
+    it('drafts are hidden from public catalog', async () => {
+      const created = await request(ctx.app.getHttpServer())
+        .post('/store/products')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: 'Hidden',
+          brand: 'B',
+          category: 'C',
+          price: 10,
+          stock: 5,
+          imageFirst: '/static/products/x.png',
+          isPublished: false,
+        });
+      expect(created.status).toBe(201);
+      const productId = created.body.product.id;
+
+      const publicList = await request(ctx.app.getHttpServer()).get('/products');
+      expect(publicList.body.items.find((p: any) => p.id === productId)).toBeUndefined();
+
+      const publicDetail = await request(ctx.app.getHttpServer()).get(`/products/${productId}`);
+      expect(publicDetail.status).toBe(404);
+    });
+  });
+
+  describe('upload', () => {
+    it('accepts PNG, returns /static URL', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/uploads/product-image')
+        .set('Authorization', `Bearer ${token}`)
+        .attach('file', path.join(__dirname, 'fixtures/sample.png'));
+      expect(res.status).toBe(201);
+      expect(res.body.url).toMatch(/^\/static\/products\/.+\.png$/);
+    });
   });
 });

@@ -77,8 +77,9 @@ export class ProductsBulkService {
         skipped.push({ row: rowNum, reason: 'Missing name' });
         return;
       }
-      const price = Number(row.price);
-      if (!Number.isFinite(price) || price < 0) {
+      const priceRaw = (row.price ?? '').trim();
+      const price = Number(priceRaw);
+      if (!priceRaw || !Number.isFinite(price) || price < 0) {
         skipped.push({ row: rowNum, reason: 'Invalid price' });
         return;
       }

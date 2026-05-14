@@ -1,0 +1,4 @@
+name,sku,category,price,stock
+Sample A,SAMP-A,Audio,10.00,5
+Sample B,SAMP-B,Apparel,20.00,3
+Sample C,SAMP-C,Home,30.00,1
