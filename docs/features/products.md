@@ -56,3 +56,18 @@ All require `Authorization: Bearer <token>` from a seller who owns a store.
 - `Product.color` JSON column is mapped from CSV but never read by any response shape. Either expose or drop.
 - Multi-item checkout rollback is not exercised by an e2e test.
 - Frontend is still on mocks; wiring the storefront/seller pages to these APIs is a separate plan.
+
+## Seller product CRUD (extended)
+
+New product columns: `sku`, `model`, `sale_price`, `track_inventory`, `is_published`, `images` (JSON).
+
+- Public `/products` and `/products/:id` filter `is_published = 1`.
+- `GET /store/products?status=all|published|drafts&q=&page=&limit=` returns paginated items plus `kpi: { total, inStock, lowStock, outOfStock }`.
+- `POST /store/products`, `PATCH /store/products/:id`, `DELETE /store/products/:id` accept the new fields; SKU auto-generates when blank (`NX-<storeShortId>-<random>`); `salePrice` must be `< price`.
+- `GET /store/products/:id` returns the full ProductDetail for the seller's own product (returns drafts).
+- `POST /store/products/bulk` accepts a `multipart/form-data` file (`.csv`, `.xls`, `.xlsx`, up to 10 MB, 500 rows). Returns `{ created, skippedRows: [{ row, reason }] }`. Required columns: `name`, `sku`, `category`, `price`, `stock`. Optional: `brand`, `salePrice`, `model`, `description`, `imageUrl`, `isPublished`.
+- `GET /store/products/bulk/template` streams a sample CSV.
+
+## Uploads
+
+- `POST /uploads/product-image` (seller-only, multipart `file`) returns `{ url: '/static/products/<uuid>.<ext>' }`. Files saved under `backend/uploads/products/` (gitignored). Static served at `/static/*`. Mimetype whitelist: `image/png`, `image/jpeg`, `image/webp`. 5 MB cap.

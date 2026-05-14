@@ -18,3 +18,4 @@ under `superpowers/plans/`.
 | 2026-05-13 | Profile (PATCH /me, addresses) | [features/profile.md](features/profile.md) |
 | 2026-05-13 | Addresses (CRUD)               | [features/addresses.md](features/addresses.md) |
 | 2026-05-14 | Chat (buyer↔store + system echo) | [features/chat.md](features/chat.md) |
+| 2026-05-14 | Seller product CRUD + image upload + bulk import | [features/products.md](features/products.md) |
