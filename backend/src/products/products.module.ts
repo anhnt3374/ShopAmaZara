@@ -8,6 +8,7 @@ import { StoreProductsController } from './store-products.controller';
 import { StoreInventoryController } from './store-inventory.controller';
 import { StoreMeController } from './store-me.controller';
 import { SellerStoreGuard } from '../common/guards/seller-store.guard';
+import { ProductsBulkService } from './products.bulk.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Product]), StoresModule],
@@ -17,7 +18,7 @@ import { SellerStoreGuard } from '../common/guards/seller-store.guard';
     StoreInventoryController,
     StoreMeController,
   ],
-  providers: [ProductsService, SellerStoreGuard],
+  providers: [ProductsService, SellerStoreGuard, ProductsBulkService],
   exports: [ProductsService],
 })
 export class ProductsModule {}

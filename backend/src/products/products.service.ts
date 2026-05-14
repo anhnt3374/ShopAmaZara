@@ -291,6 +291,83 @@ export class ProductsService {
     await this.products.remove(product);
   }
 
+  async createManyForStore(
+    storeId: string,
+    rows: import('./products.bulk.service').ValidRow[],
+  ): Promise<{ created: number; skippedDuringInsert: { row: number; reason: string }[] }> {
+    let created = 0;
+    const skippedDuringInsert: { row: number; reason: string }[] = [];
+    const existing = rows
+      .map((r, i) => ({ sku: r.sku, row: i + 1 }))
+      .filter((x): x is { sku: string; row: number } => Boolean(x.sku));
+    let existingSkus = new Set<string>();
+    if (existing.length) {
+      const found = await this.products
+        .createQueryBuilder('p')
+        .select('p.sku', 'sku')
+        .where('p.store_id = :storeId', { storeId })
+        .andWhere('p.sku IN (:...skus)', { skus: existing.map((e) => e.sku) })
+        .getRawMany<{ sku: string }>();
+      existingSkus = new Set(found.map((f) => f.sku));
+    }
+    for (let i = 0; i < rows.length; i += 100) {
+      const chunk = rows.slice(i, i + 100);
+      const entities = chunk
+        .filter((r, idx) => {
+          if (r.sku && existingSkus.has(r.sku)) {
+            skippedDuringInsert.push({ row: i + idx + 1, reason: 'Duplicate SKU' });
+            return false;
+          }
+          return true;
+        })
+        .map((r) => {
+          const imgs = r.imageUrl ? [r.imageUrl] : [];
+          return this.products.create({
+            id: randomUUID(),
+            name: r.name,
+            brand: r.brand,
+            category: r.category,
+            storeId,
+            sku: r.sku ?? this.generateSku(storeId),
+            model: r.model,
+            price: r.price.toFixed(2),
+            salePrice: r.salePrice != null ? r.salePrice.toFixed(2) : null,
+            discount:
+              r.salePrice != null && r.salePrice < r.price
+                ? Math.round(((r.price - r.salePrice) / r.price) * 100)
+                : 0,
+            stock: r.stock,
+            trackInventory: true,
+            isPublished: r.isPublished,
+            imageFirst: imgs[0] ?? '',
+            images: imgs,
+            shortDescription: null,
+            longDescription: r.description,
+            highlights: null,
+            color: null,
+            availableColors: null,
+            availableSizes: null,
+            material: null,
+            targetGender: null,
+            targetAgeGroup: null,
+            tags: null,
+          });
+        });
+      if (entities.length) {
+        await this.products.save(entities);
+        created += entities.length;
+      }
+    }
+    return { created, skippedDuringInsert };
+  }
+
+  async findOneForStore(storeId: string, id: string): Promise<ProductDetail> {
+    const product = await this.products.findOne({ where: { id } });
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.storeId !== storeId) throw new ForbiddenException('Not your product');
+    return toProductDetail(product);
+  }
+
   private generateSku(storeId: string): string {
     const storeShort = storeId.replace(/-/g, '').slice(0, 6).toUpperCase();
     const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
