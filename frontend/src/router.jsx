@@ -13,6 +13,7 @@ import AuthPage from './pages/AuthPage.jsx';
 import StoreInventoryPage from './pages/store/StoreInventoryPage.jsx';
 import StoreOrderManagementPage from './pages/store/StoreOrderManagementPage.jsx';
 import StoreChatPage from './pages/store/StoreChatPage.jsx';
+import StoreProductFormPage from './pages/store/StoreProductFormPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
 import OrderManagementPage from './pages/OrderManagementPage.jsx';
@@ -46,6 +47,8 @@ export const router = createBrowserRouter([
       { path: '/store', element: <StoreOrderManagementPage /> },
       { path: '/store/orders', element: <StoreOrderManagementPage /> },
       { path: '/store/inventory', element: <StoreInventoryPage /> },
+      { path: '/store/products/new', element: <StoreProductFormPage /> },
+      { path: '/store/products/:id', element: <StoreProductFormPage /> },
       { path: '/store/messages', element: <StoreChatPage /> },
     ],
   },
