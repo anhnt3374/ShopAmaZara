@@ -26,6 +26,8 @@ describe('ProductsService', () => {
   const repo = {
     createQueryBuilder: jest.fn(),
     findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -62,6 +64,7 @@ describe('ProductsService', () => {
       category: 'Shirts',
       storeId: 's1',
       price: '40.00',
+      salePrice: '32.00',
       discount: 20,
       stock: 5,
       imageFirst: 'https://img/x.png',
@@ -74,8 +77,9 @@ describe('ProductsService', () => {
     expect(out.items[0]).toMatchObject({
       id: 'p1',
       price: 40,
+      salePrice: 32,
       discount: 20,
-      originalPrice: 50,
+      originalPrice: 40,
       inStock: true,
       colors: ['#000', '#fff'],
     });
@@ -84,5 +88,43 @@ describe('ProductsService', () => {
   it('findOne() throws NotFound when product is missing', async () => {
     repo.findOne.mockResolvedValue(null);
     await expect(service.findOne('missing')).rejects.toMatchObject({ status: 404 });
+  });
+
+  describe('createForStore (new fields)', () => {
+    it('auto-generates SKU when blank', async () => {
+      (repo.create as jest.Mock).mockImplementation((d) => d);
+      (repo.save as jest.Mock).mockImplementation((p) => ({ ...p, id: 'p1' }));
+      const out = await service.createForStore('store-abc-def', {
+        name: 'X', brand: 'B', category: 'C', price: 10, stock: 5, imageFirst: '/x.png',
+      } as any);
+      expect(out.sku).toMatch(/^NX-[A-Z0-9]+-[A-Z0-9]{6}$/);
+    });
+
+    it('rejects salePrice >= price', async () => {
+      await expect(
+        service.createForStore('store-1', {
+          name: 'X', brand: 'B', category: 'C', price: 10, salePrice: 10, stock: 5, imageFirst: '/x.png',
+        } as any),
+      ).rejects.toMatchObject({ status: 400 });
+      await expect(
+        service.createForStore('store-1', {
+          name: 'X', brand: 'B', category: 'C', price: 10, salePrice: 15, stock: 5, imageFirst: '/x.png',
+        } as any),
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it('defaults isPublished to true and trackInventory to true', async () => {
+      let saved: any = null;
+      (repo.create as jest.Mock).mockImplementation((d) => d);
+      (repo.save as jest.Mock).mockImplementation((p) => {
+        saved = p;
+        return { ...p, id: 'p2' };
+      });
+      await service.createForStore('store-1', {
+        name: 'X', brand: 'B', category: 'C', price: 10, stock: 5, imageFirst: '/x.png',
+      } as any);
+      expect(saved.isPublished).toBe(true);
+      expect(saved.trackInventory).toBe(true);
+    });
   });
 });

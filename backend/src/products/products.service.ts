@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -148,16 +149,32 @@ export class ProductsService {
   }
 
   async createForStore(storeId: string, dto: CreateProductDto): Promise<Product> {
+    if (dto.salePrice != null && dto.salePrice >= dto.price) {
+      throw new BadRequestException('salePrice must be less than price');
+    }
+    const images = dto.images ?? (dto.imageFirst ? [dto.imageFirst] : []);
+    const imageFirst = images[0] ?? dto.imageFirst;
+    const sku = dto.sku?.trim() || this.generateSku(storeId);
+    const computedDiscount =
+      dto.salePrice != null && dto.salePrice < dto.price
+        ? Math.round(((dto.price - dto.salePrice) / dto.price) * 100)
+        : dto.discount ?? 0;
     const entity = this.products.create({
       id: randomUUID(),
       name: dto.name,
       brand: dto.brand,
       category: dto.category,
       storeId,
+      sku,
+      model: dto.model ?? null,
       price: dto.price.toFixed(2),
-      discount: dto.discount ?? 0,
+      salePrice: dto.salePrice != null ? dto.salePrice.toFixed(2) : null,
+      discount: computedDiscount,
       stock: dto.stock,
-      imageFirst: dto.imageFirst,
+      trackInventory: dto.trackInventory ?? true,
+      isPublished: dto.isPublished ?? true,
+      imageFirst,
+      images,
       shortDescription: dto.shortDescription ?? null,
       longDescription: dto.longDescription ?? null,
       highlights: dto.highlights ?? null,
@@ -180,36 +197,57 @@ export class ProductsService {
     if (!product) throw new NotFoundException('Product not found');
     if (product.storeId !== storeId)
       throw new ForbiddenException('Not your product');
-    Object.assign(product, {
-      ...(dto.name !== undefined && { name: dto.name }),
-      ...(dto.brand !== undefined && { brand: dto.brand }),
-      ...(dto.category !== undefined && { category: dto.category }),
-      ...(dto.price !== undefined && { price: dto.price.toFixed(2) }),
-      ...(dto.discount !== undefined && { discount: dto.discount }),
-      ...(dto.stock !== undefined && { stock: dto.stock }),
-      ...(dto.imageFirst !== undefined && { imageFirst: dto.imageFirst }),
-      ...(dto.shortDescription !== undefined && {
-        shortDescription: dto.shortDescription,
-      }),
-      ...(dto.longDescription !== undefined && {
-        longDescription: dto.longDescription,
-      }),
-      ...(dto.highlights !== undefined && { highlights: dto.highlights }),
-      ...(dto.availableColors !== undefined && {
-        availableColors: dto.availableColors,
-      }),
-      ...(dto.availableSizes !== undefined && {
-        availableSizes: dto.availableSizes,
-      }),
-      ...(dto.material !== undefined && { material: dto.material }),
-      ...(dto.targetGender !== undefined && {
-        targetGender: dto.targetGender,
-      }),
-      ...(dto.targetAgeGroup !== undefined && {
-        targetAgeGroup: dto.targetAgeGroup,
-      }),
-      ...(dto.tags !== undefined && { tags: dto.tags }),
-    });
+
+    const nextPrice = dto.price ?? Number(product.price);
+    const nextSale =
+      dto.salePrice === undefined
+        ? product.salePrice == null
+          ? null
+          : Number(product.salePrice)
+        : dto.salePrice;
+    if (nextSale != null && nextSale >= nextPrice) {
+      throw new BadRequestException('salePrice must be less than price');
+    }
+
+    const fields: Partial<Product> = {};
+    if (dto.name !== undefined) fields.name = dto.name;
+    if (dto.brand !== undefined) fields.brand = dto.brand;
+    if (dto.category !== undefined) fields.category = dto.category;
+    if (dto.sku !== undefined) fields.sku = dto.sku.trim() || null;
+    if (dto.model !== undefined) fields.model = dto.model ?? null;
+    if (dto.price !== undefined) fields.price = dto.price.toFixed(2);
+    if (dto.salePrice !== undefined)
+      fields.salePrice = dto.salePrice == null ? null : dto.salePrice.toFixed(2);
+    if (dto.stock !== undefined) fields.stock = dto.stock;
+    if (dto.trackInventory !== undefined) fields.trackInventory = dto.trackInventory;
+    if (dto.isPublished !== undefined) fields.isPublished = dto.isPublished;
+    if (dto.images !== undefined) {
+      fields.images = dto.images;
+      fields.imageFirst = dto.images[0] ?? product.imageFirst;
+    }
+    if (dto.imageFirst !== undefined && dto.images === undefined) {
+      fields.imageFirst = dto.imageFirst;
+    }
+    if (dto.shortDescription !== undefined) fields.shortDescription = dto.shortDescription;
+    if (dto.longDescription !== undefined) fields.longDescription = dto.longDescription;
+    if (dto.highlights !== undefined) fields.highlights = dto.highlights;
+    if (dto.availableColors !== undefined) fields.availableColors = dto.availableColors;
+    if (dto.availableSizes !== undefined) fields.availableSizes = dto.availableSizes;
+    if (dto.material !== undefined) fields.material = dto.material;
+    if (dto.targetGender !== undefined) fields.targetGender = dto.targetGender;
+    if (dto.targetAgeGroup !== undefined) fields.targetAgeGroup = dto.targetAgeGroup;
+    if (dto.tags !== undefined) fields.tags = dto.tags;
+
+    if (dto.price !== undefined || dto.salePrice !== undefined) {
+      fields.discount =
+        nextSale != null && nextSale < nextPrice
+          ? Math.round(((nextPrice - nextSale) / nextPrice) * 100)
+          : 0;
+    } else if (dto.discount !== undefined) {
+      fields.discount = dto.discount;
+    }
+
+    Object.assign(product, fields);
     return this.products.save(product);
   }
 
@@ -219,6 +257,12 @@ export class ProductsService {
     if (product.storeId !== storeId)
       throw new ForbiddenException('Not your product');
     await this.products.remove(product);
+  }
+
+  private generateSku(storeId: string): string {
+    const storeShort = storeId.replace(/-/g, '').slice(0, 6).toUpperCase();
+    const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+    return `NX-${storeShort}-${rand}`;
   }
 
   async inventoryForStore(
