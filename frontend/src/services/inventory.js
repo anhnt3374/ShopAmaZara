@@ -1,9 +1,18 @@
 import { api } from './api.js';
-import { mockInventory } from '../mocks/inventory.js';
 
-const USE_MOCKS = !import.meta.env.VITE_API_BASE_URL;
+export const listInventory = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return api.get(`/store/inventory${qs ? `?${qs}` : ''}`);
+};
 
-export async function listInventory() {
-  if (USE_MOCKS) return Promise.resolve({ items: mockInventory });
-  return api.get('/inventory');
-}
+export const listStoreProducts = (params = {}) => {
+  const qs = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== '' && v != null)),
+  ).toString();
+  return api.get(`/store/products${qs ? `?${qs}` : ''}`);
+};
+
+export const getStoreProduct = (id) => api.get(`/store/products/${id}`);
+export const createStoreProduct = (payload) => api.post('/store/products', payload);
+export const updateStoreProduct = (id, payload) => api.patch(`/store/products/${id}`, payload);
+export const deleteStoreProduct = (id) => api.delete(`/store/products/${id}`);
