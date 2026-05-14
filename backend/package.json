@@ -12,7 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
-    "seed:products": "ts-node -P scripts/tsconfig.json scripts/seed-products.ts"
+    "seed:products": "ts-node -P scripts/tsconfig.json scripts/seed-products.ts",
+    "seed:reviews": "ts-node -P scripts/tsconfig.json scripts/seed-reviews.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",
