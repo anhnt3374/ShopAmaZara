@@ -4,3 +4,6 @@ dist/
 .env.local
 coverage/
 *.log
+
+# Local product image uploads (gitignored — orphan cleanup is out of scope in v1)
+uploads/
