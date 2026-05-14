@@ -1,12 +1,13 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
-  IsUrl,
   Length,
   Max,
   Min,
@@ -25,9 +26,24 @@ export class CreateProductDto {
   @Length(1, 255)
   category!: string;
 
+  @IsOptional()
+  @IsString()
+  @Length(1, 64)
+  sku?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 128)
+  model?: string;
+
   @IsNumber()
   @Min(0)
   price!: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  salePrice?: number;
 
   @IsOptional()
   @IsInt()
@@ -39,8 +55,22 @@ export class CreateProductDto {
   @Min(0)
   stock!: number;
 
-  @IsUrl({ require_tld: false })
+  @IsOptional()
+  @IsBoolean()
+  trackInventory?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
+
+  @IsString()
   imageFirst!: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  images?: string[];
 
   @IsOptional()
   @IsString()
