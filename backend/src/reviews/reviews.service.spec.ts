@@ -104,4 +104,52 @@ describe('ReviewsService', () => {
       });
     });
   });
+
+  describe('update', () => {
+    const dbReview = {
+      id: 'r-1', productId: 'p-1', userId: '42', rating: 4, comment: 'x',
+      createdAt: new Date('2026-05-14T10:00:00Z'), updatedAt: new Date('2026-05-14T10:00:00Z'),
+    };
+
+    it('updates when caller is owner', async () => {
+      reviews.findOne.mockResolvedValue(dbReview);
+      users.findOne.mockResolvedValue({ id: '42', fullName: 'Anh' });
+      reviews.save.mockResolvedValue({ ...dbReview, rating: 5, comment: 'better' });
+
+      const result = await service.update('r-1', '42', { rating: 5, comment: 'better' });
+      expect(result.rating).toBe(5);
+      expect(result.comment).toBe('better');
+    });
+
+    it('throws 404 when review missing', async () => {
+      reviews.findOne.mockResolvedValue(null);
+      await expect(service.update('r-x', '42', { rating: 5 })).rejects.toMatchObject({ status: 404 });
+    });
+
+    it('throws 403 when caller is not owner', async () => {
+      reviews.findOne.mockResolvedValue(dbReview);
+      await expect(service.update('r-1', '99', { rating: 5 })).rejects.toMatchObject({ status: 403 });
+    });
+  });
+
+  describe('remove', () => {
+    const dbReview = { id: 'r-1', productId: 'p-1', userId: '42' };
+
+    it('removes when caller is owner', async () => {
+      reviews.findOne.mockResolvedValue(dbReview);
+      reviews.remove.mockResolvedValue(undefined);
+      await service.remove('r-1', '42');
+      expect(reviews.remove).toHaveBeenCalledWith(dbReview);
+    });
+
+    it('throws 404 when review missing', async () => {
+      reviews.findOne.mockResolvedValue(null);
+      await expect(service.remove('r-x', '42')).rejects.toMatchObject({ status: 404 });
+    });
+
+    it('throws 403 when caller is not owner', async () => {
+      reviews.findOne.mockResolvedValue(dbReview);
+      await expect(service.remove('r-1', '99')).rejects.toMatchObject({ status: 403 });
+    });
+  });
 });
