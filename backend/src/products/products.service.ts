@@ -45,6 +45,7 @@ export class ProductsService {
     const limit = Math.min(dto.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
 
     const qb = this.products.createQueryBuilder('p');
+    qb.andWhere('p.is_published = 1');
 
     if (dto.q) {
       const like = `%${dto.q.toLowerCase()}%`;
@@ -87,7 +88,7 @@ export class ProductsService {
   }
 
   async findOne(id: string): Promise<ProductDetail> {
-    const row = await this.products.findOne({ where: { id } });
+    const row = await this.products.findOne({ where: { id, isPublished: true } });
     if (!row) throw new NotFoundException('Product not found');
     return toProductDetail(row);
   }
@@ -98,6 +99,7 @@ export class ProductsService {
     priceRange: { min: number; max: number };
   }> {
     const qb = this.products.createQueryBuilder('p');
+    qb.andWhere('p.is_published = 1');
     if (q) {
       const like = `%${q.toLowerCase()}%`;
       qb.andWhere(
