@@ -1,96 +1,90 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon.jsx';
-import { listInventory } from '../../services/inventory.js';
+import { useToast } from '../../context/ToastContext.jsx';
+import { listStoreProducts } from '../../services/inventory.js';
+import ImportProductModal from './ImportProductModal.jsx';
+import InventoryKpiCards from './InventoryKpiCards.jsx';
 
-const STATUS_STYLES = {
-  'In Stock': 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-  'Low Stock': 'bg-secondary-container/20 text-secondary border border-secondary-container/40',
-  'Out of Stock': 'bg-error-container text-on-error-container border border-error/30',
-};
+const TABS = [
+  { id: 'all', label: 'All' },
+  { id: 'published', label: 'Published' },
+  { id: 'drafts', label: 'Drafts' },
+];
 
 export default function StoreInventoryPage() {
-  const [items, setItems] = useState([]);
-  const [query, setQuery] = useState('');
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [status, setStatus] = useState('all');
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState({ items: [], total: 0, kpi: null });
+  const [loading, setLoading] = useState(true);
+  const [importOpen, setImportOpen] = useState(false);
+
+  async function reload() {
+    setLoading(true);
+    try {
+      const res = await listStoreProducts({ status, q, page, limit: 20 });
+      setData(res);
+    } catch (err) {
+      toast.error(err?.message ?? 'Could not load inventory');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    listInventory().then((res) => setItems(res.items));
-  }, []);
+    const t = setTimeout(reload, 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, q, page]);
 
-  const filtered = useMemo(
-    () =>
-      items.filter(
-        (i) =>
-          !query ||
-          i.name.toLowerCase().includes(query.toLowerCase()) ||
-          i.sku.toLowerCase().includes(query.toLowerCase()),
-      ),
-    [items, query],
-  );
-
-  const kpis = useMemo(() => {
-    const totalSku = items.length;
-    const low = items.filter((i) => i.status === 'Low Stock').length;
-    const out = items.filter((i) => i.status === 'Out of Stock').length;
-    const value = items.reduce((sum, i) => sum + i.stock * i.price, 0);
-    return { totalSku, low, out, value };
-  }, [items]);
+  const pageCount = useMemo(() => Math.max(1, Math.ceil(data.total / 20)), [data.total]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-gutter">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-headline-lg text-on-surface">Inventory</h1>
-          <p className="text-body-sm text-on-surface-variant">
-            Track stock levels and restock alerts across your catalog.
-          </p>
+          <h1 className="text-headline-lg">Inventory Management</h1>
+          <p className="text-body-sm text-on-surface-variant">Manage your catalog and stock.</p>
         </div>
-        <div className="flex gap-2">
-          <button className="btn-secondary px-3 py-2 text-body-sm">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setImportOpen(true)} className="btn-secondary px-3 py-2 inline-flex items-center gap-1 text-body-sm">
             <Icon name="upload" size={18} /> Import
           </button>
-          <button className="btn-primary px-3 py-2 text-body-sm">
-            <Icon name="add" size={18} /> New SKU
-          </button>
+          <Link to="/store/products/new" className="btn-primary px-4 py-2 inline-flex items-center gap-2">
+            <Icon name="add" size={18} /> Add Product
+          </Link>
         </div>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        <div className="md:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Kpi label="Total SKUs" value={kpis.totalSku} icon="inventory_2" />
-          <Kpi label="Low stock" value={kpis.low} icon="trending_down" accent="secondary" />
-          <Kpi label="Out of stock" value={kpis.out} icon="warning" accent="error" />
-          <Kpi
-            label="Stock value"
-            value={`$${kpis.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-            icon="payments"
-            accent="primary"
-          />
-        </div>
-        <div className="md:col-span-4 bg-primary-container/10 border border-primary-container/30 text-primary rounded-xl p-4 flex flex-col gap-2">
-          <Icon name="auto_awesome" />
-          <h2 className="text-label-md">Auto-restock suggestion</h2>
-          <p className="text-body-sm">
-            3 SKUs are projected to run out within 5 days based on the last 14-day velocity.
-          </p>
-          <button className="text-label-md self-start mt-2 inline-flex items-center gap-1 hover:underline">
-            Review forecast <Icon name="arrow_forward" size={16} />
-          </button>
-        </div>
-      </section>
+      <InventoryKpiCards kpi={data.kpi} />
 
-      <div className="bg-surface border border-outline-variant rounded-xl p-4 flex flex-wrap items-center gap-3">
+      <div className="bg-surface border border-outline-variant rounded-xl p-3 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by SKU or product name…"
-            className="field w-full py-2 pl-10 pr-3 text-body-sm"
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setPage(1); }}
+            placeholder="Search SKU, name, or brand…"
+            className="field w-full pl-10 pr-3 py-2 text-body-sm"
           />
           <Icon name="search" size={20} className="absolute left-3 top-2.5 text-outline" />
         </div>
-        <button className="btn-secondary px-3 py-2 text-body-sm">
-          <Icon name="filter_list" size={18} /> Filter
-        </button>
+        <div className="flex gap-1 overflow-x-auto">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => { setStatus(t.id); setPage(1); }}
+              className={`px-3 py-1.5 rounded-full text-body-sm whitespace-nowrap transition-colors ${
+                status === t.id ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="bg-surface border border-outline-variant rounded-xl overflow-hidden">
@@ -98,61 +92,117 @@ export default function StoreInventoryPage() {
           <table className="w-full text-body-sm">
             <thead className="bg-surface-container-low text-on-surface-variant text-label-md uppercase tracking-wider">
               <tr>
-                <th className="text-left px-4 py-3">SKU</th>
                 <th className="text-left px-4 py-3">Product</th>
-                <th className="text-left px-4 py-3 hidden md:table-cell">Category</th>
-                <th className="text-right px-4 py-3">Stock</th>
-                <th className="text-right px-4 py-3 hidden sm:table-cell">Price</th>
+                <th className="text-left px-4 py-3 hidden md:table-cell">SKU</th>
+                <th className="text-left px-4 py-3 hidden lg:table-cell">Category</th>
+                <th className="text-right px-4 py-3">Price</th>
+                <th className="text-right px-4 py-3 hidden sm:table-cell">Stock</th>
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-right px-4 py-3 w-12"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant">
-              {filtered.map((i, idx) => (
+              {data.items.map((p) => (
                 <tr
-                  key={i.sku}
-                  className={idx % 2 === 0 ? 'bg-surface' : 'bg-surface-container-low/50'}
+                  key={p.id}
+                  className="hover:bg-surface-container-low cursor-pointer"
+                  onClick={() => navigate(`/store/products/${p.id}`)}
                 >
-                  <td className="px-4 py-3 text-data-mono text-primary">{i.sku}</td>
-                  <td className="px-4 py-3 text-on-surface">{i.name}</td>
-                  <td className="px-4 py-3 text-on-surface-variant hidden md:table-cell">{i.category}</td>
-                  <td className="px-4 py-3 text-right text-data-mono text-on-surface font-semibold">{i.stock}</td>
-                  <td className="px-4 py-3 text-right text-data-mono text-on-surface-variant hidden sm:table-cell">${i.price.toFixed(2)}</td>
+                  <td className="px-4 py-3 flex items-center gap-3">
+                    {p.image ? (
+                      <img src={p.image} alt="" className="w-12 h-12 rounded object-cover bg-surface-container-low" />
+                    ) : (
+                      <div className="w-12 h-12 rounded bg-surface-container-low flex items-center justify-center">
+                        <Icon name="image" className="text-outline" size={18} />
+                      </div>
+                    )}
+                    <span className="text-on-surface">{p.name}</span>
+                  </td>
+                  <td className="px-4 py-3 hidden md:table-cell text-data-mono text-on-surface-variant">{p.sku ?? '—'}</td>
+                  <td className="px-4 py-3 hidden lg:table-cell text-on-surface-variant">{p.category}</td>
+                  <td className="px-4 py-3 text-right text-data-mono">${Number(p.price).toFixed(2)}</td>
+                  <td className={`px-4 py-3 text-right hidden sm:table-cell text-data-mono ${p.stock === 0 ? 'text-error' : p.stock <= 10 ? 'text-secondary' : 'text-on-surface'}`}>
+                    {p.stock}
+                  </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center text-[11px] font-bold px-2 py-1 rounded-full ${STATUS_STYLES[i.status]}`}>
-                      {i.status}
-                    </span>
+                    <StatusBadge product={p} />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button className="p-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary">
-                      <Icon name="edit" size={18} />
-                    </button>
+                    <Link
+                      to={`/store/products/${p.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-primary hover:underline text-body-sm"
+                    >
+                      Edit
+                    </Link>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        {!loading && data.items.length === 0 && (
+          <div className="p-10 text-center text-on-surface-variant">No products match those filters.</div>
+        )}
+        {pageCount > 1 && (
+          <div className="px-4 py-3 border-t border-outline-variant flex justify-between items-center">
+            <span className="text-body-sm text-on-surface-variant">
+              Page {page} of {pageCount} · {data.total} products
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="px-3 py-1 rounded border border-outline-variant disabled:opacity-50 text-body-sm"
+              >
+                Prev
+              </button>
+              <button
+                disabled={page >= pageCount}
+                onClick={() => setPage((p) => p + 1)}
+                className="px-3 py-1 rounded border border-outline-variant disabled:opacity-50 text-body-sm"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      <ImportProductModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onDone={reload}
+      />
     </div>
   );
 }
 
-function Kpi({ label, value, icon, accent = 'primary' }) {
-  const accents = {
-    primary: 'bg-primary-container/10 text-primary',
-    secondary: 'bg-secondary-container/20 text-secondary',
-    error: 'bg-error-container text-on-error-container',
-  };
+function StatusBadge({ product }) {
+  if (!product.isPublished) {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold bg-surface-container text-on-surface-variant">
+        Draft
+      </span>
+    );
+  }
+  if (product.stock === 0) {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold bg-error-container text-on-error-container">
+        Out of Stock
+      </span>
+    );
+  }
+  if (product.stock <= 10) {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold bg-secondary-container/20 text-secondary">
+        Low Stock
+      </span>
+    );
+  }
   return (
-    <div className="bg-surface border border-outline-variant rounded-xl p-4 flex items-start justify-between">
-      <div>
-        <div className="text-body-sm text-on-surface-variant">{label}</div>
-        <div className="text-headline-md text-on-surface font-bold mt-1">{value}</div>
-      </div>
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${accents[accent]}`}>
-        <Icon name={icon} />
-      </div>
-    </div>
+    <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+      Active
+    </span>
   );
 }
