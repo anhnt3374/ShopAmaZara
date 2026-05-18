@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Product } from './product.entity';
 import { Review } from '../reviews/review.entity';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -107,6 +107,33 @@ export class ProductsService {
   async findManyByIds(ids: string[]): Promise<Product[]> {
     if (ids.length === 0) return [];
     return this.products.findBy({ id: In(ids) });
+  }
+
+  async suggest(
+    seedIds: string[],
+    mode: 'similar' | 'complementary',
+    limit = 6,
+  ): Promise<Product[]> {
+    if (seedIds.length === 0) return [];
+    const seeds = await this.findManyByIds(seedIds);
+    if (seeds.length === 0) return [];
+    const seedCategory = seeds[0].category;
+    const seedIdSet = seeds.map((s) => s.id);
+    if (mode === 'similar') {
+      return this.products.find({
+        where: { category: seedCategory, id: Not(In(seedIdSet)), isPublished: true },
+        take: limit,
+      });
+    }
+    return this.products.find({
+      where: {
+        category: Not(seedCategory),
+        storeId: seeds[0].storeId,
+        isPublished: true,
+        id: Not(In(seedIdSet)),
+      },
+      take: limit,
+    });
   }
 
   async facets(q?: string): Promise<{
