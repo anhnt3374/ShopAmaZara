@@ -140,3 +140,42 @@ describe('ProductsService', () => {
     });
   });
 });
+
+describe('ProductsService.findManyByIds', () => {
+  let svc: ProductsService;
+  let findBy: jest.Mock;
+
+  beforeEach(async () => {
+    findBy = jest.fn();
+    const mod = await Test.createTestingModule({
+      providers: [
+        ProductsService,
+        { provide: getRepositoryToken(Product), useValue: { findBy } },
+        {
+          provide: getRepositoryToken(Review),
+          useValue: {
+            createQueryBuilder: jest.fn().mockReturnValue({
+              select: jest.fn().mockReturnThis(),
+              addSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              getRawOne: jest.fn().mockResolvedValue({ cnt: '0', avg: null }),
+            }),
+          },
+        },
+      ],
+    }).compile();
+    svc = mod.get(ProductsService);
+  });
+
+  it('returns an empty array for empty ids', async () => {
+    expect(await svc.findManyByIds([])).toEqual([]);
+    expect(findBy).not.toHaveBeenCalled();
+  });
+
+  it('queries the repo with In(ids) when present', async () => {
+    findBy.mockResolvedValue([{ id: '1' }, { id: '2' }]);
+    const out = await svc.findManyByIds(['1', '2']);
+    expect(findBy).toHaveBeenCalledWith({ id: expect.anything() });
+    expect(out).toHaveLength(2);
+  });
+});

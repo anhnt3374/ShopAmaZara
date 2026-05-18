@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Product } from './product.entity';
 import { Review } from '../reviews/review.entity';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -102,6 +102,11 @@ export class ProductsService {
       rating: stats?.avg ? Math.round(Number(stats.avg) * 10) / 10 : 0,
       reviewCount: Number(stats?.cnt ?? 0),
     });
+  }
+
+  async findManyByIds(ids: string[]): Promise<Product[]> {
+    if (ids.length === 0) return [];
+    return this.products.findBy({ id: In(ids) });
   }
 
   async facets(q?: string): Promise<{
