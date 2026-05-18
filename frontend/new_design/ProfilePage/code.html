@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Account | NexusMarket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#684000",
+                    "secondary-fixed-dim": "#ffb95f",
+                    "tertiary-fixed": "#ffd8e7",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "primary": "#00288e",
+                    "on-tertiary-fixed": "#3d0026",
+                    "inverse-primary": "#b8c4ff",
+                    "secondary": "#855300",
+                    "surface-dim": "#cbdbf5",
+                    "on-primary": "#ffffff",
+                    "background": "#f8f9ff",
+                    "on-background": "#0b1c30",
+                    "surface-variant": "#d3e4fe",
+                    "on-primary-container": "#a8b8ff",
+                    "primary-fixed": "#dde1ff",
+                    "on-tertiary-container": "#ff9dcc",
+                    "tertiary-fixed-dim": "#ffafd3",
+                    "surface-container-highest": "#d3e4fe",
+                    "primary-fixed-dim": "#b8c4ff",
+                    "on-tertiary-fixed-variant": "#85145a",
+                    "tertiary": "#6a0045",
+                    "secondary-fixed": "#ffddb8",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#2a1700",
+                    "surface-container": "#e5eeff",
+                    "surface-container-high": "#dce9ff",
+                    "on-primary-fixed-variant": "#173bab",
+                    "on-primary-fixed": "#001453",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f8f9ff",
+                    "outline-variant": "#c4c5d5",
+                    "surface-container-low": "#eff4ff",
+                    "outline": "#757684",
+                    "on-secondary-fixed-variant": "#653e00",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#8b1a5e",
+                    "primary-container": "#1e40af",
+                    "on-surface": "#0b1c30",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-tint": "#3755c3",
+                    "secondary-container": "#fea619",
+                    "on-surface-variant": "#444653",
+                    "inverse-surface": "#213145"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "unit": "8px",
+                    "gutter": "24px",
+                    "container-max": "1280px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "data-mono": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .bento-card {
+            transition: transform 150ms ease-in-out, box-shadow 150ms ease-in-out;
+        }
+        .bento-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0px 4px 20px rgba(30, 64, 175, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md border-b border-outline-variant dark:border-outline shadow-sm docked full-width top-0 z-50 sticky h-20">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-gutter">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">NexusMarket</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant dark:text-surface-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Shop</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Categories</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Deals</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Wishlist</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+<button class="p-2 text-primary border-b-2 border-primary pb-1">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex max-w-container-max mx-auto px-margin-desktop gap-gutter py-10">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col gap-2 w-64 shrink-0">
+<div class="mb-6 px-4">
+<h3 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">Welcome back</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Manage your account</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="bg-primary-container text-on-primary-container font-bold rounded-lg px-4 py-3 flex items-center gap-3 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="devices">devices</span>
+<span class="font-label-md text-label-md">Electronics</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="checkroom">checkroom</span>
+<span class="font-label-md text-label-md">Fashion</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home &amp; Living</span>
+</a>
+<div class="my-2 border-t border-outline-variant"></div>
+<a class="text-on-surface-variant dark:text-surface-variant px-4 py-3 flex items-center gap-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">View Dashboard</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow space-y-gutter">
+<!-- Profile Header Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col md:flex-row items-center gap-8 shadow-sm">
+<div class="relative">
+<img class="w-32 h-32 rounded-full object-cover border-4 border-surface-container shadow-md" data-alt="A professional headshot of a middle-aged man with a friendly expression, set against a blurred corporate office background. The lighting is soft and natural, emphasizing a high-end, professional light-mode aesthetic. The composition is clean and modern, consistent with a premium market identity using deep blues and soft whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5jFtQ9-HUStkmfwLKjvto183-pScsBloa0j1Un1vm4tr854KQA4Ky4S96vj3qAF2DqeBSvUyw82LyJ2V8WeuiuKtzJGqsKexugu0Ky5HQ03IbpWHju_7HWzY_g_4HC4-oqKMbkHtYJAnpWO9eB1xOq_hfd-uaWqpFa24ohThQmNssQTNyoQj8liQWo5PN_M31ScLJbhiW19jN6zSwhhTNqzjB5YgdNw6tMo3CoIvNOgHniavHKNhNVbnenlaRwF-SfGlunlUVOB8"/>
+<button class="absolute bottom-0 right-0 bg-primary text-on-primary p-2 rounded-full shadow-lg hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="text-center md:text-left">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Alexander Vance</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">alexander.vance@nexusmarket.com</p>
+<div class="flex flex-wrap gap-2 justify-center md:justify-start">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-full font-label-md text-label-md">Pro Member</span>
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed rounded-full font-label-md text-label-md">Verified Account</span>
+</div>
+</div>
+</section>
+<!-- Bento Dashboard Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- My Orders -->
+<a class="bento-card md:col-span-1 bg-surface-container-low border border-outline-variant p-6 rounded-xl flex flex-col justify-between" href="SCREEN_7">
+<div>
+<span class="material-symbols-outlined text-primary mb-4" data-icon="shopping_bag">shopping_bag</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">My Orders</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Track, return, or buy things again.</p>
+</div>
+<div class="mt-8 flex items-center text-primary font-label-md text-label-md group">
+                        View History
+                        <span class="material-symbols-outlined ml-1 group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</a>
+<!-- Manage Addresses -->
+<a class="bento-card md:col-span-1 bg-surface-container-low border border-outline-variant p-6 rounded-xl flex flex-col justify-between" href="#">
+<div>
+<span class="material-symbols-outlined text-primary mb-4" data-icon="location_on">location_on</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Addresses</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Edit addresses for orders and gifts.</p>
+</div>
+<div class="mt-8 flex items-center text-primary font-label-md text-label-md group">
+                        Manage 3 saved
+                        <span class="material-symbols-outlined ml-1 group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</a>
+<!-- Security Settings -->
+<a class="bento-card md:col-span-1 bg-surface-container-low border border-outline-variant p-6 rounded-xl flex flex-col justify-between" href="#">
+<div>
+<span class="material-symbols-outlined text-primary mb-4" data-icon="shield">shield</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Security</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Manage passwords and 2FA.</p>
+</div>
+<div class="mt-8 flex items-center text-primary font-label-md text-label-md group">
+                        Secure Account
+                        <span class="material-symbols-outlined ml-1 group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</a>
+</section>
+<!-- Personal Information Form -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<div class="px-8 py-6 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Personal Information</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Update your account details and contact info.</p>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-sm">Save Changes</button>
+</div>
+<div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block">Full Name</label>
+<input class="w-full bg-surface border border-outline rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md text-body-md" type="text" value="Alexander Vance"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block">Email Address</label>
+<input class="w-full bg-surface border border-outline rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md text-body-md" type="email" value="alexander.vance@nexusmarket.com"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block">Phone Number</label>
+<input class="w-full bg-surface border border-outline rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md text-body-md" type="tel" value="+1 (555) 123-4567"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block">Preferred Language</label>
+<select class="w-full bg-surface border border-outline rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md text-body-md">
+<option>English (US)</option>
+<option>Spanish</option>
+<option>French</option>
+<option>German</option>
+</select>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block">Biography (Optional)</label>
+<textarea class="w-full bg-surface border border-outline rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md text-body-md" rows="4">Senior Product Manager with a passion for high-end technology and minimalist design trends. Frequent traveler and tech enthusiast.</textarea>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-low border-t border-outline-variant dark:border-outline w-full py-margin-desktop mt-20">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto px-margin-desktop gap-gutter">
+<div class="flex flex-col gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface dark:text-inverse-on-surface font-bold">NexusMarket</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-xs">© 2024 NexusMarket E-commerce. Built for professional excellence.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Shipping Information</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Returns &amp; Exchanges</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+<!-- Chatbot FAB -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-2xl" data-icon="forum">forum</span>
+</button>
+</body></html>

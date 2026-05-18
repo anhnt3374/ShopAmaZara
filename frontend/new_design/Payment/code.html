@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Checkout | NexusMarket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#00288e",
+                    "secondary-container": "#fea619",
+                    "surface-container-low": "#eff4ff",
+                    "on-error-container": "#93000a",
+                    "on-background": "#0b1c30",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#b8c4ff",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary-container": "#a8b8ff",
+                    "inverse-surface": "#213145",
+                    "on-tertiary-fixed-variant": "#85145a",
+                    "on-surface-variant": "#444653",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#653e00",
+                    "outline-variant": "#c4c5d5",
+                    "inverse-primary": "#b8c4ff",
+                    "on-tertiary-fixed": "#3d0026",
+                    "tertiary": "#6a0045",
+                    "outline": "#757684",
+                    "secondary-fixed-dim": "#ffb95f",
+                    "on-secondary-fixed": "#2a1700",
+                    "primary-container": "#1e40af",
+                    "tertiary-fixed": "#ffd8e7",
+                    "primary-fixed": "#dde1ff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "tertiary-fixed-dim": "#ffafd3",
+                    "on-surface": "#0b1c30",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#ff9dcc",
+                    "secondary": "#855300",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed": "#001453",
+                    "surface-tint": "#3755c3",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#d3e4fe",
+                    "surface-dim": "#cbdbf5",
+                    "tertiary-container": "#8b1a5e",
+                    "surface-container": "#e5eeff",
+                    "surface": "#f8f9ff",
+                    "on-primary-fixed-variant": "#173bab",
+                    "error-container": "#ffdad6",
+                    "background": "#f8f9ff",
+                    "secondary-fixed": "#ffddb8",
+                    "on-secondary-container": "#684000"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "container-max": "1280px",
+                    "unit": "8px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "data-mono": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- TopNavBar (Simplified for Checkout flow) -->
+<nav class="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md border-b border-outline-variant dark:border-outline shadow-sm docked full-width top-0 z-50 h-20">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">NexusMarket</span>
+<div class="hidden md:flex gap-6 items-center">
+<span class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">shopping_cart</span> Cart
+                    </span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+<span class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim border-b-2 border-primary pb-1">Checkout</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+<span class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant">Payment</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="help_outline">help_outline</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Need help?</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop flex flex-col lg:flex-row gap-gutter">
+<!-- Form Section: 8 columns on desktop -->
+<div class="lg:w-2/3 flex flex-col gap-8">
+<!-- Delivery Address Selection -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Delivery Address</h2>
+</div>
+<button class="font-label-md text-label-md text-primary hover:underline transition-all">Add New Address</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Address Card Active -->
+<div class="border-2 border-primary bg-surface-container-low rounded-lg p-4 relative cursor-pointer">
+<div class="absolute top-4 right-4 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="font-label-md text-label-md text-primary mb-1 uppercase tracking-wider">Home</p>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Jonathan Doe</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 leading-relaxed">
+                            4521 Riverside Avenue, Suite 100<br/>
+                            San Francisco, CA 94103<br/>
+                            United States
+                        </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">+1 (555) 012-3456</p>
+</div>
+<!-- Address Card Inactive -->
+<div class="border border-outline-variant hover:border-primary/50 transition-colors bg-surface-bright rounded-lg p-4 cursor-pointer group">
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Office</p>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Jonathan Doe</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 leading-relaxed">
+                            Market Street, Nexus Tower<br/>
+                            Floor 12, Office 1204<br/>
+                            San Francisco, CA 94103
+                        </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">+1 (555) 987-6543</p>
+</div>
+</div>
+</section>
+<!-- Shipping Method Selection -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="local_shipping">local_shipping</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Shipping Method</h2>
+</div>
+<div class="flex flex-col gap-3">
+<label class="flex items-center justify-between p-4 border border-primary bg-surface-container-low rounded-lg cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<input checked="" class="w-5 h-5 text-primary border-outline focus:ring-primary" name="shipping" type="radio"/>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Standard Delivery</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Estimated arrival: Oct 24 - Oct 26</p>
+</div>
+</div>
+<span class="font-label-md text-label-md text-on-surface">$5.00</span>
+</label>
+<label class="flex items-center justify-between p-4 border border-outline-variant hover:border-outline transition-all rounded-lg cursor-pointer">
+<div class="flex items-center gap-4">
+<input class="w-5 h-5 text-primary border-outline focus:ring-primary" name="shipping" type="radio"/>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Express Delivery</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Estimated arrival: Oct 22 - Oct 23</p>
+</div>
+</div>
+<span class="font-label-md text-label-md text-on-surface">$15.00</span>
+</label>
+</div>
+</section>
+<!-- Payment Method Selection -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Payment Method</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<button class="flex flex-col items-center justify-center p-4 border-2 border-primary bg-surface-container-low rounded-lg gap-2 group transition-all">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="credit_card">credit_card</span>
+<span class="font-label-md text-label-md text-primary">Credit Card</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant hover:border-outline rounded-lg gap-2 group transition-all">
+<span class="material-symbols-outlined text-on-surface-variant text-[32px]" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-md text-label-md text-on-surface-variant">E-wallet</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant hover:border-outline rounded-lg gap-2 group transition-all">
+<span class="material-symbols-outlined text-on-surface-variant text-[32px]" data-icon="account_balance">account_balance</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Bank Transfer</span>
+</button>
+</div>
+<!-- Credit Card Details Form -->
+<div class="space-y-4">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2">Card Number</label>
+<div class="relative">
+<input class="w-full px-4 py-3 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all outline-none" placeholder="0000 0000 0000 0000" type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
+<div class="w-8 h-5 bg-surface-container rounded-sm border border-outline-variant" title="Visa"></div>
+<div class="w-8 h-5 bg-surface-container rounded-sm border border-outline-variant" title="Mastercard"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2">Expiry Date</label>
+<input class="w-full px-4 py-3 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all outline-none" placeholder="MM/YY" type="text"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2">CVC</label>
+<input class="w-full px-4 py-3 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all outline-none" placeholder="123" type="text"/>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar: Order Summary (4 columns on desktop) -->
+<aside class="lg:w-1/3">
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm sticky top-24">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-6 border-b border-outline-variant pb-4">Order Summary</h3>
+<!-- Items List -->
+<div class="flex flex-col gap-4 mb-6">
+<div class="flex gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Premium Headphones" class="w-full h-full object-cover" data-alt="A pair of high-end over-ear headphones with a matte black finish, resting on a sleek minimalist desk. The studio lighting is soft and neutral, highlighting the premium texture of the materials against a clean professional background. The overall aesthetic is corporate modernism with a focus on product clarity and luxury appeal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2fCfhU9IDLJ1xR6iFkuAY5plEJqoPw0Xibi93meDwicwlrD6il2u9aGnDYvUwY786R8JeRCuf402CzVDrQiLUGr9iDmyqNb_YWZlfjz__MDkje342wE-HTchSUQpbLkcD5qHijV4h0Y6vcUpcL6asIAr38UZoNB6_dYRXMDb6VvOU-d1J0umovanDyklnBhakxyenc4IXMe3l2oJDDbKhYufRippQXHc0RcWNE6viwYTOZVzMWD8etVPk2mHvOaXXBixfrE0PasY"/>
+</div>
+<div class="flex-grow">
+<p class="font-label-md text-label-md text-on-surface line-clamp-1">Nexus Pro Headphones</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Qty: 1</p>
+<p class="font-body-md text-body-md text-primary font-semibold">$249.00</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Minimalist Watch" class="w-full h-full object-cover" data-alt="A minimalist white-faced wristwatch with a tan leather strap, displayed on a clean reflective surface. The image uses bright high-key lighting to emphasize the product's elegant design and clean lines. The background is a soft gradient of light blue and white, maintaining a professional and airy atmosphere consistent with a modern e-commerce interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMW91pTbVSBcEo4rqt5-SEAFmvURHqKEwmSME8tVXk4y939NVCC_4PzG2-E8vE772kCJbj6pL4xZY0Rj5DhOnoEO4mGnfTfsQK-2UlscwEjXzkFa7yWNsoxhYb_xprKd0TsqzRgRHdIoOyy3dBmkSVpRYs5D8owXuvs3NZwhSXdbDj4n3F0BZKQJy9ZTmI9bevXstLnTgjAksUHenQgb_2-Ccb5-5dQNrTgStWjldkFPVnGChOzymqZWV2B-HVDrTlSrGEnPvBg9A"/>
+</div>
+<div class="flex-grow">
+<p class="font-label-md text-label-md text-on-surface line-clamp-1">Nexus Hybrid Watch</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Qty: 1</p>
+<p class="font-body-md text-body-md text-primary font-semibold">$120.00</p>
+</div>
+</div>
+</div>
+<!-- Price Breakdown -->
+<div class="space-y-3 border-t border-outline-variant pt-4 mb-6">
+<div class="flex justify-between">
+<span class="font-body-md text-body-md text-on-surface-variant">Subtotal</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">$369.00</span>
+</div>
+<div class="flex justify-between">
+<span class="font-body-md text-body-md text-on-surface-variant">Shipping</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">$5.00</span>
+</div>
+<div class="flex justify-between">
+<span class="font-body-md text-body-md text-on-surface-variant">Estimated Tax (8%)</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">$29.52</span>
+</div>
+<div class="flex justify-between pt-3 border-t border-outline-variant">
+<span class="font-headline-md text-headline-md text-on-surface">Total</span>
+<span class="font-headline-md text-headline-md text-primary">$403.52</span>
+</div>
+</div>
+<!-- Promo Code -->
+<div class="mb-8">
+<div class="flex gap-2">
+<input class="flex-grow px-4 py-2 bg-surface-bright border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary outline-none text-sm" placeholder="Promo code" type="text"/>
+<button class="px-4 py-2 bg-surface-container-highest text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors">Apply</button>
+</div>
+</div>
+<!-- Place Order CTA -->
+<button class="w-full bg-primary text-on-primary font-headline-md text-headline-md py-4 rounded-lg shadow-md hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span>Place Order</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<p class="mt-4 text-center font-body-sm text-body-sm text-on-surface-variant">
+                    By placing your order, you agree to NexusMarket's <a class="text-primary underline" href="#">Terms of Use</a> and <a class="text-primary underline" href="#">Privacy Policy</a>.
+                </p>
+</div>
+</aside>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-low border-t border-outline-variant dark:border-outline w-full py-margin-desktop mt-12">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto px-margin-desktop gap-gutter">
+<div class="flex flex-col gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface dark:text-inverse-on-surface font-bold">NexusMarket</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">© 2024 NexusMarket E-commerce. Built for professional excellence.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Shipping Information</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Returns &amp; Exchanges</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+</body></html>

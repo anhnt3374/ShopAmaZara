@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Product | NexusMarket Merchant Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-primary-fixed": "#001453",
+                  "tertiary-fixed": "#ffd8e7",
+                  "secondary-fixed": "#ffddb8",
+                  "tertiary-container": "#8b1a5e",
+                  "secondary-container": "#fea619",
+                  "on-secondary-fixed-variant": "#653e00",
+                  "surface-dim": "#cbdbf5",
+                  "primary": "#00288e",
+                  "background": "#f8f9ff",
+                  "surface-container-lowest": "#ffffff",
+                  "surface-variant": "#d3e4fe",
+                  "on-background": "#0b1c30",
+                  "surface-container": "#e5eeff",
+                  "surface-container-low": "#eff4ff",
+                  "surface": "#f8f9ff",
+                  "secondary": "#855300",
+                  "tertiary": "#6a0045",
+                  "on-secondary-fixed": "#2a1700",
+                  "inverse-on-surface": "#eaf1ff",
+                  "on-primary": "#ffffff",
+                  "inverse-primary": "#b8c4ff",
+                  "primary-fixed": "#dde1ff",
+                  "error-container": "#ffdad6",
+                  "on-tertiary": "#ffffff",
+                  "surface-container-high": "#dce9ff",
+                  "on-error-container": "#93000a",
+                  "on-error": "#ffffff",
+                  "tertiary-fixed-dim": "#ffafd3",
+                  "surface-tint": "#3755c3",
+                  "on-surface": "#0b1c30",
+                  "primary-fixed-dim": "#b8c4ff",
+                  "on-tertiary-fixed": "#3d0026",
+                  "surface-container-highest": "#d3e4fe",
+                  "on-primary-fixed-variant": "#173bab",
+                  "on-secondary": "#ffffff",
+                  "error": "#ba1a1a",
+                  "secondary-fixed-dim": "#ffb95f",
+                  "on-tertiary-container": "#ff9dcc",
+                  "outline-variant": "#c4c5d5",
+                  "outline": "#757684",
+                  "on-primary-container": "#a8b8ff",
+                  "on-tertiary-fixed-variant": "#85145a",
+                  "on-surface-variant": "#444653",
+                  "on-secondary-container": "#684000",
+                  "surface-bright": "#f8f9ff",
+                  "primary-container": "#1e40af",
+                  "inverse-surface": "#213145"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "unit": "8px",
+                  "margin-mobile": "16px",
+                  "gutter": "24px",
+                  "margin-desktop": "40px",
+                  "container-max": "1280px"
+          },
+          "fontFamily": {
+                  "headline-lg": ["Inter"],
+                  "body-sm": ["Inter"],
+                  "body-md": ["Inter"],
+                  "label-md": ["Inter"],
+                  "headline-md": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "data-mono": ["Inter"],
+                  "display-lg": ["Inter"],
+                  "headline-lg-mobile": ["Inter"]
+          },
+          "fontSize": {
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                  "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                  "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="bg-surface dark:bg-surface-dim text-primary dark:text-inverse-primary docked h-screen left-0 sticky w-64 border-r border-outline-variant dark:border-outline flex flex-col gap-unit p-4 hidden md:flex">
+<div class="mb-6 px-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">storefront</span>
+</div>
+<div>
+<h2 class="text-label-md font-label-md font-bold text-primary dark:text-primary-fixed-dim">Merchant Portal</h2>
+<p class="text-xs text-on-surface-variant">Verified Seller</p>
+</div>
+</div>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+<span class="text-label-md font-label-md">Orders</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-lg font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-label-md font-label-md">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-label-md font-label-md">Customers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="text-label-md font-label-md">Messages</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</nav>
+<button class="mt-auto w-full py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">add</span>
+<span>Add Product</span>
+</button>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col bg-background">
+<!-- Sticky Header -->
+<header class="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-outline-variant h-16 flex items-center justify-between px-margin-mobile md:px-margin-desktop">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2 text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex flex-col">
+<h1 class="text-headline-md font-headline-md text-primary">Edit Product</h1>
+<p class="text-xs text-on-surface-variant hidden md:block">SKU: NXS-PRO-HD-001</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<a class="hidden md:flex items-center gap-1 text-label-md font-label-md text-primary hover:underline" href="#">
+<span class="material-symbols-outlined text-sm">open_in_new</span>
+            View on Store
+          </a>
+<button class="px-4 py-2 bg-error-container text-on-error-container rounded-lg font-bold text-label-md flex items-center gap-2 hover:bg-error hover:text-on-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+<span class="hidden sm:inline">Archive</span>
+</button>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-lg font-bold text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95">
+            Update Product
+          </button>
+</div>
+</header>
+<!-- Content Area: Bento Grid Layout -->
+<div class="p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Media & Visuals -->
+<div class="lg:col-span-5 space-y-gutter">
+<!-- Gallery Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-headline-md font-headline-md text-on-surface">Product Gallery</h3>
+<button class="text-primary text-label-md font-label-md flex items-center gap-1">
+<span class="material-symbols-outlined">upload</span>
+                Replace
+              </button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="relative group col-span-2 aspect-video rounded-lg overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="High-resolution close-up shot of professional black noise-canceling headphones resting on a minimalist concrete surface. The lighting is dramatic and directional, highlighting the matte finish and metallic accents of the Nexus Pro series. The scene is clean and sophisticated, aligning with a corporate modernist aesthetic using soft shadows and a neutral color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdUtaLhVsTQbEHEKm6P6-URTCSXxlTFS_pN0L8GdRBs3_H6sF7vntQL2KYwN67NcGDxxIMXelRxbHDiaYrwDxUeCU1tiA5p3yST7tOQ9NRnWqDKqUeQOnIOChVrSfFfh_5OuTsmebofgQGvpX9gDOoS8v1GgV2TlRqFQDbbsjs35Tylsx0gBRK8OVIGO6FaY-ykR1vnjn0Ed1vVnNRzIwQ8PB8m11J-fgIt1TxlX7NDXnurmIG6FRylhlqNwgqV4mjsV0S-p79dl4"/>
+<div class="absolute inset-0 bg-on-background/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<button class="bg-surface p-2 rounded-full text-error"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+<div class="relative group aspect-square rounded-lg overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="Alternative angle of studio-grade headphones showing the plush leather ear cups and adjustable headband. The shot is captured in a bright studio environment with high-key lighting that emphasizes textures and premium materials. The overall feel is professional and high-end, featuring a clean background and subtle blue lighting accents that match the brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFz7KBRsDgXTsvV1Cbfnjj_CY19ghnm5cteTcCOtpAW8aWHIJAdja-S39aFrEUEA3aC1Z4t7QQSsTGCw-28U1WwwGRd9z0JUVBl7Cwad6DiMWLA5oPYY7M32-QmGTOHaBR79xdW85WVLjMiYKKgztc5hpe4InebDDMrJBNzd7ewydPn-frYfyc_C3kzbmoWnQpBm2zKAmRTC7KUPTFyAXJ1DdBD1OSQrnyu6soFtflfIDGaFcFHbWN885DA5MKSI1g5gJGO_lUF_E"/>
+<div class="absolute inset-0 bg-on-background/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<button class="bg-surface p-2 rounded-full text-error"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+<div class="border-2 border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center aspect-square text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl mb-2">add_a_photo</span>
+<span class="text-label-md">Add Image</span>
+</div>
+</div>
+</section>
+<!-- Status & Categorization -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<h3 class="text-label-md font-label-md text-on-surface mb-4 uppercase tracking-wider">Product Status</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-2">Publication Status</label>
+<select class="w-full bg-surface border border-outline rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all">
+<option selected="">Active - Live on Store</option>
+<option>Draft</option>
+<option>Archived</option>
+</select>
+</div>
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-2">Category</label>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-primary-container text-on-primary-container rounded-full text-xs font-bold flex items-center gap-1">
+                    Electronics <button><span class="material-symbols-outlined text-xs">close</span></button>
+</span>
+<span class="px-3 py-1 bg-primary-container text-on-primary-container rounded-full text-xs font-bold flex items-center gap-1">
+                    Audio <button><span class="material-symbols-outlined text-xs">close</span></button>
+</span>
+<button class="px-3 py-1 border border-outline text-on-surface-variant rounded-full text-xs font-bold hover:bg-surface-container transition-colors">+ Add</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Details & Inventory -->
+<div class="lg:col-span-7 space-y-gutter">
+<!-- Basic Information Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<h3 class="text-headline-md font-headline-md text-on-surface mb-6">Product Information</h3>
+<div class="grid grid-cols-1 gap-6">
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-2">Product Name</label>
+<input class="w-full bg-surface border border-outline rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none text-body-md" type="text" value="Nexus Pro Headphones"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-2">Price (USD)</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
+<input class="w-full bg-surface border border-outline rounded-lg pl-8 pr-4 py-3 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none" type="number" value="299.00"/>
+</div>
+</div>
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-2">Discount Price</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
+<input class="w-full bg-surface border border-outline rounded-lg pl-8 pr-4 py-3 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none" placeholder="Optional" type="number"/>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-2">Description</label>
+<div class="border border-outline rounded-lg overflow-hidden">
+<div class="bg-surface-container-low border-b border-outline-variant p-2 flex gap-2">
+<button class="p-1 hover:bg-surface-container-high rounded transition-colors"><span class="material-symbols-outlined text-sm">format_bold</span></button>
+<button class="p-1 hover:bg-surface-container-high rounded transition-colors"><span class="material-symbols-outlined text-sm">format_italic</span></button>
+<button class="p-1 hover:bg-surface-container-high rounded transition-colors"><span class="material-symbols-outlined text-sm">format_list_bulleted</span></button>
+<button class="p-1 hover:bg-surface-container-high rounded transition-colors ml-auto"><span class="material-symbols-outlined text-sm">link</span></button>
+</div>
+<textarea class="w-full bg-surface border-none px-4 py-3 focus:ring-0 outline-none text-body-md resize-none" rows="6">The Nexus Pro Headphones offer unparalleled sound clarity and industry-leading active noise cancellation. Designed for professionals who demand the best, featuring 40-hour battery life and ergonomic memory foam cushions for all-day comfort.
+
+Key Features:
+- Hybrid Active Noise Cancellation
+- High-Fidelity Audio Drivers
+- Seamless Multi-point Bluetooth Connectivity</textarea>
+</div>
+</div>
+</div>
+</section>
+<!-- Inventory & Variants -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm overflow-hidden">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-headline-md font-headline-md text-on-surface">Inventory &amp; Variants</h3>
+<button class="text-primary text-label-md font-label-md font-bold">+ Add Variant</button>
+</div>
+<div class="overflow-x-auto -mx-6">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container text-on-surface-variant">
+<th class="px-6 py-3 text-label-md font-label-md">Variant</th>
+<th class="px-6 py-3 text-label-md font-label-md">SKU</th>
+<th class="px-6 py-3 text-label-md font-label-md">Price</th>
+<th class="px-6 py-3 text-label-md font-label-md">Stock</th>
+<th class="px-6 py-3"></th>
+</tr>
+</thead>
+<tbody class="text-body-sm">
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4 font-bold">Midnight Black</td>
+<td class="px-6 py-4 font-data-mono">NXS-PRO-BLK</td>
+<td class="px-6 py-4">$299.00</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                        12 units
+                      </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4 font-bold">Arctic White</td>
+<td class="px-6 py-4 font-data-mono">NXS-PRO-WHT</td>
+<td class="px-6 py-4">$299.00</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                        2 units
+                      </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+<!-- Footer (Persistent Bottom Bar for Mobile) -->
+<footer class="md:hidden mt-auto bg-surface-container-low border-t border-outline-variant p-4 flex justify-between items-center sticky bottom-0">
+<button class="p-2 text-error">
+<span class="material-symbols-outlined">delete</span>
+</button>
+<div class="flex gap-2">
+<button class="px-4 py-2 border border-outline text-on-surface rounded-lg text-label-md font-bold">Cancel</button>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-lg text-label-md font-bold">Save Changes</button>
+</div>
+</footer>
+<footer class="hidden md:flex bg-surface-container-low dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline py-8 px-margin-desktop max-w-container-max mx-auto w-full flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-body-sm font-body-sm text-on-surface-variant">© 2024 NexusMarket. Professional Excellence in Commerce.</p>
+<div class="flex gap-6">
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Privacy Policy</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Terms of Use</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Vendor Rules</a>
+</div>
+</footer>
+</main>
+</div>
+<!-- Chatbot Floating Toggle -->
+<div class="fixed bottom-8 right-8 z-50">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-2xl">smart_toy</span>
+</button>
+</div>
+</body></html>

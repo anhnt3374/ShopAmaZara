@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#00288e",
+                      "secondary-container": "#fea619",
+                      "surface-container-low": "#eff4ff",
+                      "on-error-container": "#93000a",
+                      "on-background": "#0b1c30",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed-dim": "#b8c4ff",
+                      "surface-bright": "#f8f9ff",
+                      "on-primary-container": "#a8b8ff",
+                      "inverse-surface": "#213145",
+                      "on-tertiary-fixed-variant": "#85145a",
+                      "on-surface-variant": "#444653",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#653e00",
+                      "outline-variant": "#c4c5d5",
+                      "inverse-primary": "#b8c4ff",
+                      "on-tertiary-fixed": "#3d0026",
+                      "tertiary": "#6a0045",
+                      "outline": "#757684",
+                      "secondary-fixed-dim": "#ffb95f",
+                      "on-secondary-fixed": "#2a1700",
+                      "primary-container": "#1e40af",
+                      "tertiary-fixed": "#ffd8e7",
+                      "primary-fixed": "#dde1ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "tertiary-fixed-dim": "#ffafd3",
+                      "on-surface": "#0b1c30",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-container": "#ff9dcc",
+                      "secondary": "#855300",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed": "#001453",
+                      "surface-tint": "#3755c3",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-variant": "#d3e4fe",
+                      "surface-dim": "#cbdbf5",
+                      "tertiary-container": "#8b1a5e",
+                      "surface-container": "#e5eeff",
+                      "surface": "#f8f9ff",
+                      "on-primary-fixed-variant": "#173bab",
+                      "error-container": "#ffdad6",
+                      "background": "#f8f9ff",
+                      "secondary-fixed": "#ffddb8",
+                      "on-secondary-container": "#684000"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "margin-mobile": "16px",
+                      "container-max": "1280px",
+                      "unit": "8px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "label-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "data-mono": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Inter"]
+              },
+              "fontSize": {
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md border-b border-outline-variant dark:border-outline shadow-sm docked full-width top-0 z-50 h-20">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">NexusMarket</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Shop</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Categories</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Deals</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150" href="#">Wishlist</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+<button class="p-2 text-primary border-b-2 border-primary pb-1">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-margin-desktop">
+<!-- Breadcrumb / Header Actions -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div>
+<nav class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md mb-2">
+<a class="hover:text-primary transition-colors" href="#">Account</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Orders</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-on-surface">Order #NEX-882910</span>
+</nav>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Order Details</h1>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none border border-outline px-6 py-2 rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors">
+                    Return/Refund
+                </button>
+<button class="flex-1 md:flex-none bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="support_agent">support_agent</span>
+                    Contact Support
+                </button>
+</div>
+</div>
+<!-- Bento Grid Layout for Order Info -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Order Timeline Card -->
+<div class="md:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm">
+<div class="flex items-center justify-between mb-10">
+<h2 class="font-headline-md text-headline-md">Status: Shipped</h2>
+<span class="font-label-md text-label-md px-3 py-1 bg-surface-container-high text-primary rounded-full">Arriving Dec 14</span>
+</div>
+<div class="relative flex items-center justify-between w-full">
+<!-- Progress Line -->
+<div class="absolute top-5 left-0 w-full h-1 bg-surface-container-highest">
+<div class="h-full bg-primary w-2/3"></div>
+</div>
+<!-- Steps -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="check" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Ordered</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dec 08</span>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="payments" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Paid</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dec 08</span>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="local_shipping" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<span class="font-label-md text-label-md text-primary">Shipped</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dec 10</span>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-outline flex items-center justify-center mb-2 border-2 border-outline-variant">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Delivered</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pending</span>
+</div>
+</div>
+</div>
+<!-- Shipping & Payment Details -->
+<div class="md:col-span-4 flex flex-col gap-gutter">
+<div class="bg-surface-container border border-outline-variant rounded-xl p-6 flex-1">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<h3 class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">Shipping Address</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface">Alex Thompson</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                        1284 Corporate Plaza, Suite 402<br/>
+                        Financial District, New York, NY 10005<br/>
+                        United States
+                    </p>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded-xl p-6 flex-1">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="credit_card">credit_card</span>
+<h3 class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">Payment Method</h3>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-6 bg-on-surface rounded flex items-center justify-center text-[10px] text-white font-bold">VISA</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Visa ending in 8841</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Transaction ID: 0021-99482</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Itemized List -->
+<div class="md:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="p-6 border-b border-outline-variant bg-surface-bright">
+<h3 class="font-headline-md text-headline-md">Order Items (3)</h3>
+</div>
+<div class="divide-y divide-outline-variant">
+<!-- Item 1 -->
+<div class="p-6 flex gap-6 hover:bg-surface-bright transition-colors">
+<div class="w-24 h-24 bg-surface-container rounded-lg overflow-hidden flex-shrink-0 border border-outline-variant">
+<img alt="Nexus Pro Headphones" class="w-full h-full object-cover" data-alt="High-end professional studio headphones in sleek matte black, resting on a clean white minimalist surface. The lighting is soft and cinematic, highlighting the premium leather and brushed metal textures. The aesthetic is modern corporate, matching a clean white and deep blue design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaoimQxxy6VYe5FEpMrPR0NuRsRlPz4QxI_MEsxuCaxogSK8cUH_iC1D6ifZtKYh_5lTaHzMZX1dN9QZcNRSAOPIvEvBKVf9II_33hoAQBBhYnlIuytEYxquuqAij5BS1x3udZoyJSpykQUfpvK9AhNX2scRMhcCJOxWUx9Nie2SnIlT6ZFoLE5uB7yX1bwcyncJ_U0L5b1gQ1uQTj8f38JNdGDmmpcOeAheVfuRk7ifXAknsjhBe25KKOKszIxZyMGx7-7Siwiz4"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h4 class="font-body-lg text-body-lg text-primary font-semibold">Nexus Pro Noise-Cancelling Headphones</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Midnight Black • Wireless • 40h Battery</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-md text-label-md text-on-surface-variant">Qty: 1</span>
+<span class="font-headline-md text-headline-md text-on-surface">$299.00</span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-6 flex gap-6 hover:bg-surface-bright transition-colors">
+<div class="w-24 h-24 bg-surface-container rounded-lg overflow-hidden flex-shrink-0 border border-outline-variant">
+<img alt="Nexus Smart Watch" class="w-full h-full object-cover" data-alt="A premium smart watch with a silver titanium case and a white silicon strap, positioned on a light gray background with soft-focus professional lighting. The watch face shows a clean data-driven dashboard. The image evokes a sense of technological excellence and corporate minimalism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbOtPB5lQjPMBuvfE5mFjjF-osu6lGr93Bseqcb5c_sHVBhjmIzOlZA_6vDXIx5u10K09y6-IAQDXRrM8Ud7RNGqNxdwj5H7aDeBYHGNLpZLW7-sd5GXNC2Kc-Jm_8r3ExJJn_6V6xwiuddp4ya039kMeFbpQWUprUoydUxDlJ5rEbc0dRByxRgH4qMllltNsM1VGSn0l8v7h_79gTg-CDvA7Fgw2mkNCQyggQNAPCULXztFTpvKwXN3-LFxa9eDQuMkLtm9zaM9o"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h4 class="font-body-lg text-body-lg text-primary font-semibold">Nexus Series 7 Smart Watch</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Titanium Silver • 45mm • LTE + GPS</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-md text-label-md text-on-surface-variant">Qty: 1</span>
+<span class="font-headline-md text-headline-md text-on-surface">$399.00</span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-6 flex gap-6 hover:bg-surface-bright transition-colors">
+<div class="w-24 h-24 bg-surface-container rounded-lg overflow-hidden flex-shrink-0 border border-outline-variant">
+<img alt="Nexus Charging Hub" class="w-full h-full object-cover" data-alt="A modern multi-device charging station in white ceramic and light wood, showcased on a bright corporate desk with soft shadows. The lighting is airy and clean, reflecting a professional high-key photography style. Minimalist aesthetic with a focus on organization and efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm3vQOicSHK17ivRtGPQPQHSZtb4lsiPQDzLxQJkZ_UpOsDnf0ZRbJ8kT0GJqI7juwz0pBUfu2xQBuzY8k1qrLU2MPj0NWTggfFPJ5F9YRj5cikLVPkr0pO_WAIrk1i5m5WektdR1ylGHR2iVX_VRmxhE-qohXnTHgKV0L-n40OTfIzYhtAKhwLFcNLOGYzk-2nNYCs556Fiq1QDXUp4VbRGTNBV9tlqOlH1dJQiIBjrt8I_KlGeVgH6ryRyPjQnRW6CLJnbFc9WQ"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h4 class="font-body-lg text-body-lg text-primary font-semibold">Universal Nexus Charging Hub</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Arctic White • 3-in-1 MagSafe</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-md text-label-md text-on-surface-variant">Qty: 1</span>
+<span class="font-headline-md text-headline-md text-on-surface">$89.00</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Price Summary -->
+<div class="md:col-span-4">
+<div class="bg-surface-container-high border border-outline-variant rounded-xl p-8 sticky top-24 shadow-sm">
+<h3 class="font-headline-md text-headline-md mb-6 text-on-surface">Order Summary</h3>
+<div class="space-y-4 mb-6">
+<div class="flex justify-between text-on-surface-variant font-body-md text-body-md">
+<span>Subtotal</span>
+<span>$787.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-body-md text-body-md">
+<span>Shipping</span>
+<span class="text-secondary font-bold">FREE</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-body-md text-body-md">
+<span>Tax (8%)</span>
+<span>$62.96</span>
+</div>
+<div class="flex justify-between text-secondary font-body-md text-body-md">
+<span>Promo Discount (WINTER24)</span>
+<span>-$25.00</span>
+</div>
+</div>
+<div class="border-t border-outline-variant pt-6 mb-8">
+<div class="flex justify-between items-center">
+<span class="font-headline-md text-headline-md text-on-surface">Total</span>
+<span class="font-headline-lg text-headline-lg text-primary">$824.96</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-right mt-1">Inclusive of VAT where applicable</p>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-primary transition-colors hover:text-on-primary">
+<span class="material-symbols-outlined text-xl" data-icon="receipt_long">receipt_long</span>
+                        Download Invoice (PDF)
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-low border-t border-outline-variant dark:border-outline w-full py-margin-desktop mt-20">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto px-margin-desktop gap-gutter">
+<div class="flex flex-col items-center md:items-start gap-4">
+<span class="font-headline-sm text-headline-sm text-on-surface dark:text-inverse-on-surface font-bold">NexusMarket</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-surface-variant max-w-md text-center md:text-left">
+                    © 2024 NexusMarket E-commerce. Built for professional excellence. All rights reserved.
+                </p>
+</div>
+<nav class="flex flex-wrap justify-center gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Shipping Information</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Returns &amp; Exchanges</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Contact Support</a>
+</nav>
+</div>
+</footer>
+<!-- Persistent Chatbot FAB -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-50">
+<span class="material-symbols-outlined" data-icon="chat" style="font-variation-settings: 'FILL' 1;">chat</span>
+</button>
+</body></html>
