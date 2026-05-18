@@ -94,7 +94,7 @@ describe('ChatsService', () => {
       expect(out.messages.length).toBe(2);
       expect(out.messages[0].senderKind).toBe('buyer');
       expect(out.messages[1].senderKind).toBe('system');
-      expect(out.messages[1].body).toContain('hi');
+      expect((out.messages[1].body ?? '')).toContain('hi');
     });
 
     it('403 for another buyer', async () => {

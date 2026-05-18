@@ -19,7 +19,7 @@ export interface ConversationSummary {
   kind: ConversationKind;
   storeId: string | null;
   buyerId: string;
-  lastMessage: { body: string; senderKind: SenderKind; createdAt: Date } | null;
+  lastMessage: { body: string | null; senderKind: SenderKind; createdAt: Date } | null;
   unread: number;
   updatedAt: Date;
 }
