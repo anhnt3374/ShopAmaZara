@@ -1,0 +1,41 @@
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { z } from 'zod';
+import type { ProductsService } from '../../../products/products.service';
+import type { ContentBlock } from '../../rich-message';
+import { ctxFromConfig } from './tool-context';
+
+const Schema = z.object({
+  productIds: z.array(z.string()).min(2).max(4),
+});
+
+export function makeCompareProductsTool(deps: { products: ProductsService }) {
+  return new DynamicStructuredTool({
+    name: 'compare_products',
+    description: 'Fetch full detail for 2-4 products to compare side by side.',
+    schema: Schema,
+    func: async (input, _r, config) => {
+      const ctx = ctxFromConfig(config);
+      const products = await deps.products.findManyByIds(input.productIds);
+      const items = products.map((p: any) => ({
+        id: String(p.id),
+        name: p.name,
+        price: String(p.price),
+        image: p.images?.[0] ?? null,
+        rating: p.rating,
+        storeName: p.storeName,
+        stock: (p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in_stock') as 'out' | 'low' | 'in_stock',
+        actions: ['view', 'wishlist', 'add_to_cart'] as Array<'view' | 'wishlist' | 'add_to_cart'>,
+      }));
+      const block: ContentBlock = { type: 'products', mode: 'compare', items };
+      ctx.pushBlock(block);
+      return JSON.stringify({
+        count: items.length,
+        items: products.map((p: any) => ({
+          id: p.id, name: p.name, price: p.price,
+          brand: p.brand, category: p.category, stock: p.stock,
+          rating: p.rating, highlights: p.highlights,
+        })),
+      });
+    },
+  });
+}
