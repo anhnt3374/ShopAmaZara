@@ -177,6 +177,48 @@ export class OrdersService {
     });
   }
 
+  async createFromPreorder(
+    userId: string,
+    draft: PreorderDraft,
+  ): Promise<{ orderId: string; total: string; status: 'Paid' }> {
+    if (Date.now() > draft.expiresAt) {
+      throw new BadRequestException('Preorder expired');
+    }
+    return this.dataSource.transaction(async (manager) => {
+      for (const it of draft.items) {
+        const res = await manager.query(
+          'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?',
+          [it.qty, it.productId, it.qty],
+        );
+        const affected = (res as { affectedRows?: number }).affectedRows ?? 0;
+        if (affected !== 1) {
+          throw new ConflictException(`Insufficient stock for ${it.name}`);
+        }
+      }
+      const orderEntity = manager.create(Order, {
+        buyerId: userId,
+        subtotal: draft.total,
+        total: draft.total,
+        status: 'Paid',
+        paymentMethod: draft.paymentMethod as any,
+        paidAt: new Date(),
+      });
+      const savedOrder = await manager.save(orderEntity);
+      const itemEntities = draft.items.map((it) =>
+        manager.create(OrderItem, {
+          orderId: savedOrder.id,
+          productId: it.productId,
+          storeId: '',
+          nameSnapshot: it.name,
+          priceSnapshot: it.unitPrice,
+          quantity: it.qty,
+        }),
+      );
+      await manager.save(itemEntities);
+      return { orderId: String(savedOrder.id), total: draft.total, status: 'Paid' as const };
+    });
+  }
+
   async listForBuyer(buyerId: string, status?: string) {
     const where: any = { buyerId };
     if (status && ['Paid', 'Shipped', 'Delivered', 'Cancelled'].includes(status)) {

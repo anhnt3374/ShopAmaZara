@@ -201,3 +201,89 @@ describe('OrdersService.buildPreorder', () => {
     expect(draft.expiresAt).toBeGreaterThan(Date.now());
   });
 });
+
+describe('OrdersService.createFromPreorder', () => {
+  let svc: OrdersService;
+
+  let stockDecrementAffected = 1;
+  let nextOrderId = 'o-1';
+
+  const manager = {
+    query: jest.fn(),
+    save: jest.fn(),
+    create: jest.fn((_entity: any, data: any) => data),
+  };
+
+  const dataSource = {
+    transaction: jest.fn().mockImplementation(async (cb: any) => cb(manager)),
+  } as unknown as DataSource;
+
+  function setStockDecrementAffected(n: number) {
+    stockDecrementAffected = n;
+  }
+  function setNextOrderId(id: string) {
+    nextOrderId = id;
+  }
+
+  const validDraft = {
+    preorderId: 'PRE-XXXXXX',
+    items: [{ productId: 'p1', qty: 2, unitPrice: '10.00', name: 'Widget' }],
+    addressId: 'a1',
+    paymentMethod: 'COD' as const,
+    total: '20.00',
+    expiresAt: Date.now() + 60_000,
+  };
+
+  beforeEach(async () => {
+    Object.values(manager).forEach((fn) => (fn as jest.Mock).mockReset());
+    manager.create.mockImplementation((_entity: any, data: any) => data);
+
+    // default: stock decrement succeeds
+    manager.query.mockResolvedValue({ affectedRows: stockDecrementAffected });
+    // default: save returns the object with the nextOrderId as id
+    manager.save.mockImplementation(async (entityOrArr: any) => {
+      if (Array.isArray(entityOrArr)) return entityOrArr;
+      return { ...entityOrArr, id: nextOrderId };
+    });
+
+    const mod = await Test.createTestingModule({
+      providers: [
+        OrdersService,
+        { provide: DataSource, useValue: dataSource },
+        { provide: getRepositoryToken(Order), useValue: { findOne: jest.fn(), find: jest.fn() } },
+        { provide: getRepositoryToken(OrderItem), useValue: {} },
+        { provide: getRepositoryToken(CartItem), useValue: {} },
+        { provide: getRepositoryToken(Product), useValue: { findOne: jest.fn() } },
+        { provide: getRepositoryToken(UserAddress), useValue: { findOne: jest.fn() } },
+      ],
+    }).compile();
+    svc = mod.get(OrdersService);
+
+    // reset to defaults
+    stockDecrementAffected = 1;
+    nextOrderId = 'o-1';
+  });
+
+  it('throws expired if expiresAt in past', async () => {
+    const draft = { ...validDraft, expiresAt: Date.now() - 1 };
+    await expect(svc.createFromPreorder('u1', draft)).rejects.toThrow(/expired/i);
+  });
+
+  it('throws Conflict when stock decrement affects 0 rows', async () => {
+    setStockDecrementAffected(0);
+    manager.query.mockResolvedValue({ affectedRows: 0 });
+    await expect(svc.createFromPreorder('u1', validDraft)).rejects.toThrow(/stock/i);
+  });
+
+  it('creates an order with Paid status', async () => {
+    setStockDecrementAffected(1);
+    setNextOrderId('o-7');
+    manager.query.mockResolvedValue({ affectedRows: 1 });
+    manager.save.mockImplementation(async (entityOrArr: any) => {
+      if (Array.isArray(entityOrArr)) return entityOrArr;
+      return { ...entityOrArr, id: 'o-7' };
+    });
+    const out = await svc.createFromPreorder('u1', validDraft);
+    expect(out).toEqual({ orderId: 'o-7', total: '20.00', status: 'Paid' });
+  });
+});
