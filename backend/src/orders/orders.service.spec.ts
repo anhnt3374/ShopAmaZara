@@ -177,28 +177,36 @@ describe('OrdersService.buildPreorder', () => {
   });
 
   it('throws if items empty', async () => {
-    await expect(svc.buildPreorder('u1', [], undefined, 'COD')).rejects.toThrow(/items/i);
+    await expect(svc.buildPreorder('u1', [], undefined, 'cod')).rejects.toThrow(/items/i);
   });
 
   it('throws if stock insufficient', async () => {
-    productRepo.findOne.mockResolvedValue({ id: 'p1', name: 'X', price: '10.00', stock: 0 });
-    addressRepo.findOne.mockResolvedValue({ id: 'a1', userId: 'u1' });
-    await expect(svc.buildPreorder('u1', [{ productId: 'p1', qty: 1 }], 'a1', 'COD'))
+    productRepo.findOne.mockResolvedValue({ id: 'p1', name: 'X', price: '10.00', stock: 0, storeId: 's1' });
+    addressRepo.findOne.mockResolvedValue({ id: 'a1', userId: 'u1', recipientName: 'R', phone: 'P', line1: 'L1', line2: null, city: 'C', region: 'R', postalCode: '00000', country: 'US' });
+    await expect(svc.buildPreorder('u1', [{ productId: 'p1', qty: 1 }], 'a1', 'cod'))
       .rejects.toThrow(/stock/i);
   });
 
   it('returns a preorder draft with computed total', async () => {
     productRepo.findOne.mockImplementation(async ({ where: { id } }: { where: { id: string } }) => ({
-      id, name: `prod-${id}`, price: '10.00', stock: 5,
+      id, name: `prod-${id}`, price: '10.00', stock: 5, storeId: `store-${id}`,
     }));
-    addressRepo.findOne.mockResolvedValue({ id: 'a1', userId: 'u1' });
+    addressRepo.findOne.mockResolvedValue({
+      id: 'a1', userId: 'u1',
+      recipientName: 'Alice', phone: '555-1234',
+      line1: '123 Main St', line2: null,
+      city: 'Springfield', region: 'IL', postalCode: '62701', country: 'US',
+    });
     const draft = await svc.buildPreorder('u1', [
       { productId: 'p1', qty: 2 }, { productId: 'p2', qty: 1 },
-    ], 'a1', 'COD');
+    ], 'a1', 'cod');
     expect(draft.total).toBe('30.00');
     expect(draft.items).toHaveLength(2);
     expect(draft.preorderId).toMatch(/^PRE-[A-Z0-9]{6}$/);
     expect(draft.expiresAt).toBeGreaterThan(Date.now());
+    expect(draft.items[0].storeId).toBe('store-p1');
+    expect(draft.shipping.line1).toBe('123 Main St');
+    expect(draft.shipping.recipientName).toBe('Alice');
   });
 });
 
@@ -227,9 +235,19 @@ describe('OrdersService.createFromPreorder', () => {
 
   const validDraft = {
     preorderId: 'PRE-XXXXXX',
-    items: [{ productId: 'p1', qty: 2, unitPrice: '10.00', name: 'Widget' }],
+    items: [{ productId: 'p1', storeId: 's1', qty: 2, unitPrice: '10.00', name: 'Widget' }],
     addressId: 'a1',
-    paymentMethod: 'COD' as const,
+    shipping: {
+      recipientName: 'Alice',
+      phone: '555-1234',
+      line1: '123 Main St',
+      line2: null,
+      city: 'Springfield',
+      region: 'IL',
+      postalCode: '62701',
+      country: 'US',
+    },
+    paymentMethod: 'cod' as const,
     total: '20.00',
     expiresAt: Date.now() + 60_000,
   };
@@ -279,11 +297,31 @@ describe('OrdersService.createFromPreorder', () => {
     setStockDecrementAffected(1);
     setNextOrderId('o-7');
     manager.query.mockResolvedValue({ affectedRows: 1 });
+
+    const savedEntities: any[] = [];
     manager.save.mockImplementation(async (entityOrArr: any) => {
-      if (Array.isArray(entityOrArr)) return entityOrArr;
-      return { ...entityOrArr, id: 'o-7' };
+      if (Array.isArray(entityOrArr)) {
+        savedEntities.push(...entityOrArr);
+        return entityOrArr;
+      }
+      const saved = { ...entityOrArr, id: 'o-7' };
+      savedEntities.push(saved);
+      return saved;
     });
+
     const out = await svc.createFromPreorder('u1', validDraft);
     expect(out).toEqual({ orderId: 'o-7', total: '20.00', status: 'Paid' });
+
+    // Verify the saved Order has shipping fields populated
+    const savedOrder = savedEntities.find((e) => e.buyerId === 'u1');
+    expect(savedOrder).toBeDefined();
+    expect(savedOrder.shippingRecipient).toBe('Alice');
+    expect(savedOrder.shippingLine1).toBe('123 Main St');
+    expect(savedOrder.paymentMethod).toBe('cod');
+
+    // Verify the saved OrderItem has storeId from the draft
+    const savedItem = savedEntities.find((e) => e.productId === 'p1');
+    expect(savedItem).toBeDefined();
+    expect(savedItem.storeId).toBe('s1');
   });
 });

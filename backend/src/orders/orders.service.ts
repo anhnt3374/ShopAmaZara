@@ -17,11 +17,28 @@ import { OrderItem } from './order-item.entity';
 import { Order } from './order.entity';
 
 export type PreorderItemInput = { productId: string; qty: number };
+
 export type PreorderDraft = {
   preorderId: string;
-  items: { productId: string; qty: number; unitPrice: string; name: string }[];
+  items: {
+    productId: string;
+    storeId: string;
+    qty: number;
+    unitPrice: string;
+    name: string;
+  }[];
   addressId: string;
-  paymentMethod: 'COD' | 'card';
+  shipping: {
+    recipientName: string;
+    phone: string;
+    line1: string;
+    line2: string | null;
+    city: string;
+    region: string;
+    postalCode: string;
+    country: string;
+  };
+  paymentMethod: 'card' | 'ewallet' | 'bank' | 'cod';
   total: string;
   expiresAt: number;
 };
@@ -41,24 +58,25 @@ export class OrdersService {
   async buildPreorder(
     userId: string,
     items: PreorderItemInput[],
-    addressId: string | undefined,
-    paymentMethod: 'COD' | 'card' = 'COD',
+    addressId?: string,
+    paymentMethod: 'card' | 'ewallet' | 'bank' | 'cod' = 'cod',
   ): Promise<PreorderDraft> {
     if (items.length === 0) throw new BadRequestException('items must not be empty');
 
-    let resolvedAddressId = addressId;
-    if (!resolvedAddressId) {
+    let resolvedAddr: UserAddress;
+    if (!addressId) {
       const defaultAddr = await this.addresses.findOne({
         where: { userId, isDefault: true },
       });
       if (!defaultAddr) {
         throw new BadRequestException('No default address; please provide addressId');
       }
-      resolvedAddressId = defaultAddr.id;
+      resolvedAddr = defaultAddr;
     } else {
-      const addr = await this.addresses.findOne({ where: { id: resolvedAddressId } });
+      const addr = await this.addresses.findOne({ where: { id: addressId } });
       if (!addr) throw new NotFoundException('Address not found');
       if (addr.userId !== userId) throw new ForbiddenException('Not your address');
+      resolvedAddr = addr;
     }
 
     const lines: PreorderDraft['items'] = [];
@@ -69,13 +87,23 @@ export class OrdersService {
       if (p.stock < it.qty) throw new BadRequestException(`Insufficient stock for ${p.name}`);
       const unit = Number(p.price);
       total += unit * it.qty;
-      lines.push({ productId: p.id, qty: it.qty, unitPrice: p.price, name: p.name });
+      lines.push({ productId: p.id, storeId: p.storeId, qty: it.qty, unitPrice: p.price, name: p.name });
     }
 
     return {
       preorderId: makePreorderId(),
       items: lines,
-      addressId: resolvedAddressId,
+      addressId: resolvedAddr.id,
+      shipping: {
+        recipientName: resolvedAddr.recipientName,
+        phone: resolvedAddr.phone,
+        line1: resolvedAddr.line1,
+        line2: resolvedAddr.line2,
+        city: resolvedAddr.city,
+        region: resolvedAddr.region,
+        postalCode: resolvedAddr.postalCode,
+        country: resolvedAddr.country,
+      },
       paymentMethod,
       total: total.toFixed(2),
       expiresAt: Date.now() + PREORDER_TTL_MS,
@@ -198,17 +226,27 @@ export class OrdersService {
       const orderEntity = manager.create(Order, {
         buyerId: userId,
         subtotal: draft.total,
+        shipping: '0.00',
+        tax: '0.00',
         total: draft.total,
         status: 'Paid',
-        paymentMethod: draft.paymentMethod as any,
+        paymentMethod: draft.paymentMethod,
         paidAt: new Date(),
+        shippingRecipient: draft.shipping.recipientName,
+        shippingPhone: draft.shipping.phone,
+        shippingLine1: draft.shipping.line1,
+        shippingLine2: draft.shipping.line2,
+        shippingCity: draft.shipping.city,
+        shippingRegion: draft.shipping.region,
+        shippingPostal: draft.shipping.postalCode,
+        shippingCountry: draft.shipping.country,
       });
       const savedOrder = await manager.save(orderEntity);
       const itemEntities = draft.items.map((it) =>
         manager.create(OrderItem, {
           orderId: savedOrder.id,
           productId: it.productId,
-          storeId: '',
+          storeId: it.storeId,
           nameSnapshot: it.name,
           priceSnapshot: it.unitPrice,
           quantity: it.qty,
