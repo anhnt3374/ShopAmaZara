@@ -408,25 +408,28 @@ export class OrdersService {
     });
   }
 
-  async cancelForBuyer(buyerId: string, id: string): Promise<{ id: string; status: 'Cancelled' }> {
-    return this.dataSource.transaction(async (manager) => {
-      const order = await manager.findOne(Order, {
-        where: { id },
-        relations: { items: true },
-      });
+  async cancelForBuyer(
+    userId: string,
+    orderId: string,
+    _reason?: string,
+  ): Promise<{ ok: true }> {
+    return this.dataSource.transaction(async (m) => {
+      const order = await m.findOne(Order, { where: { id: orderId }, relations: ['items'] });
       if (!order) throw new NotFoundException('Order not found');
-      if (order.buyerId !== buyerId) throw new ForbiddenException('Not your order');
-      if (order.status !== 'Paid') throw new ConflictException(`Cannot cancel an order with status ${order.status}`);
+      if (order.buyerId !== userId) throw new ForbiddenException('Not your order');
+      if (order.status === 'Delivered') {
+        throw new BadRequestException('Cannot cancel a delivered order');
+      }
+      if (order.status === 'Cancelled') return { ok: true as const };
+
       for (const it of order.items ?? []) {
-        await manager.query(
+        await m.query(
           'UPDATE products SET stock = stock + ? WHERE id = ?',
           [it.quantity, it.productId],
         );
       }
-      order.status = 'Cancelled';
-      order.cancelledAt = new Date();
-      await manager.save(order);
-      return { id: String(order.id), status: 'Cancelled' };
+      await m.update(Order, { id: order.id }, { status: 'Cancelled', cancelledAt: new Date() });
+      return { ok: true as const };
     });
   }
 }
