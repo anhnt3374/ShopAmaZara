@@ -4,6 +4,7 @@ import { BadRequestException, ConflictException, NotFoundException } from '@nest
 import { DataSource } from 'typeorm';
 import { CartItem } from '../cart/cart-item.entity';
 import { Product } from '../products/product.entity';
+import { UserAddress } from '../addresses/address.entity';
 import { OrderItem } from './order-item.entity';
 import { Order } from './order.entity';
 import { OrdersService } from './orders.service';
@@ -36,7 +37,8 @@ describe('OrdersService.checkout', () => {
         { provide: getRepositoryToken(Order), useValue: { findOne: jest.fn(), find: jest.fn() } },
         { provide: getRepositoryToken(OrderItem), useValue: {} },
         { provide: getRepositoryToken(CartItem), useValue: {} },
-        { provide: getRepositoryToken(Product), useValue: {} },
+        { provide: getRepositoryToken(Product), useValue: { findOne: jest.fn() } },
+        { provide: getRepositoryToken(UserAddress), useValue: { findOne: jest.fn() } },
       ],
     }).compile();
     service = moduleRef.get(OrdersService);
@@ -100,7 +102,8 @@ describe('OrdersService.cancel', () => {
         { provide: getRepositoryToken(Order), useValue: ordersRepo },
         { provide: getRepositoryToken(OrderItem), useValue: {} },
         { provide: getRepositoryToken(CartItem), useValue: {} },
-        { provide: getRepositoryToken(Product), useValue: {} },
+        { provide: getRepositoryToken(Product), useValue: { findOne: jest.fn() } },
+        { provide: getRepositoryToken(UserAddress), useValue: { findOne: jest.fn() } },
       ],
     }).compile();
     service = mod.get(OrdersService);
@@ -143,5 +146,58 @@ describe('OrdersService.cancel', () => {
       id: '1', buyerId: 'other', status: 'Paid', items: [],
     });
     await expect(service.cancelForBuyer('u', '1')).rejects.toMatchObject({ status: 403 });
+  });
+});
+
+describe('OrdersService.buildPreorder', () => {
+  let svc: OrdersService;
+  let productRepo: { findOne: jest.Mock };
+  let addressRepo: { findOne: jest.Mock };
+
+  const dataSource = {
+    transaction: jest.fn(),
+  } as unknown as DataSource;
+
+  beforeEach(async () => {
+    productRepo = { findOne: jest.fn() };
+    addressRepo = { findOne: jest.fn() };
+
+    const mod = await Test.createTestingModule({
+      providers: [
+        OrdersService,
+        { provide: DataSource, useValue: dataSource },
+        { provide: getRepositoryToken(Order), useValue: { findOne: jest.fn(), find: jest.fn() } },
+        { provide: getRepositoryToken(OrderItem), useValue: {} },
+        { provide: getRepositoryToken(CartItem), useValue: {} },
+        { provide: getRepositoryToken(Product), useValue: productRepo },
+        { provide: getRepositoryToken(UserAddress), useValue: addressRepo },
+      ],
+    }).compile();
+    svc = mod.get(OrdersService);
+  });
+
+  it('throws if items empty', async () => {
+    await expect(svc.buildPreorder('u1', [], undefined, 'COD')).rejects.toThrow(/items/i);
+  });
+
+  it('throws if stock insufficient', async () => {
+    productRepo.findOne.mockResolvedValue({ id: 'p1', name: 'X', price: '10.00', stock: 0 });
+    addressRepo.findOne.mockResolvedValue({ id: 'a1', userId: 'u1' });
+    await expect(svc.buildPreorder('u1', [{ productId: 'p1', qty: 1 }], 'a1', 'COD'))
+      .rejects.toThrow(/stock/i);
+  });
+
+  it('returns a preorder draft with computed total', async () => {
+    productRepo.findOne.mockImplementation(async ({ where: { id } }: { where: { id: string } }) => ({
+      id, name: `prod-${id}`, price: '10.00', stock: 5,
+    }));
+    addressRepo.findOne.mockResolvedValue({ id: 'a1', userId: 'u1' });
+    const draft = await svc.buildPreorder('u1', [
+      { productId: 'p1', qty: 2 }, { productId: 'p2', qty: 1 },
+    ], 'a1', 'COD');
+    expect(draft.total).toBe('30.00');
+    expect(draft.items).toHaveLength(2);
+    expect(draft.preorderId).toMatch(/^PRE-[A-Z0-9]{6}$/);
+    expect(draft.expiresAt).toBeGreaterThan(Date.now());
   });
 });

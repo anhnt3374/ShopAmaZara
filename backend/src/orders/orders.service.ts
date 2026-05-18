@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { randomUUID } from 'node:crypto';
+import { customAlphabet } from 'nanoid';
 import { CartItem } from '../cart/cart-item.entity';
 import { Product } from '../products/product.entity';
 import { UserAddress } from '../addresses/address.entity';
@@ -15,12 +16,71 @@ import { CheckoutDto } from './dto/checkout.dto';
 import { OrderItem } from './order-item.entity';
 import { Order } from './order.entity';
 
+export type PreorderItemInput = { productId: string; qty: number };
+export type PreorderDraft = {
+  preorderId: string;
+  items: { productId: string; qty: number; unitPrice: string; name: string }[];
+  addressId: string;
+  paymentMethod: 'COD' | 'card';
+  total: string;
+  expiresAt: number;
+};
+
+const PREORDER_TTL_MS = 10 * 60 * 1000;
+const makePreorderId = () => `PRE-${customAlphabet('ABCDEFGHJKMNPQRSTUVWXYZ23456789', 6)()}`;
+
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(Order) private readonly orders: Repository<Order>,
+    @InjectRepository(Product) private readonly products: Repository<Product>,
+    @InjectRepository(UserAddress) private readonly addresses: Repository<UserAddress>,
   ) {}
+
+  async buildPreorder(
+    userId: string,
+    items: PreorderItemInput[],
+    addressId: string | undefined,
+    paymentMethod: 'COD' | 'card' = 'COD',
+  ): Promise<PreorderDraft> {
+    if (items.length === 0) throw new BadRequestException('items must not be empty');
+
+    let resolvedAddressId = addressId;
+    if (!resolvedAddressId) {
+      const defaultAddr = await this.addresses.findOne({
+        where: { userId, isDefault: true },
+      });
+      if (!defaultAddr) {
+        throw new BadRequestException('No default address; please provide addressId');
+      }
+      resolvedAddressId = defaultAddr.id;
+    } else {
+      const addr = await this.addresses.findOne({ where: { id: resolvedAddressId } });
+      if (!addr) throw new NotFoundException('Address not found');
+      if (addr.userId !== userId) throw new ForbiddenException('Not your address');
+    }
+
+    const lines: PreorderDraft['items'] = [];
+    let total = 0;
+    for (const it of items) {
+      const p = await this.products.findOne({ where: { id: it.productId } });
+      if (!p) throw new NotFoundException(`Product ${it.productId} not found`);
+      if (p.stock < it.qty) throw new BadRequestException(`Insufficient stock for ${p.name}`);
+      const unit = Number(p.price);
+      total += unit * it.qty;
+      lines.push({ productId: p.id, qty: it.qty, unitPrice: p.price, name: p.name });
+    }
+
+    return {
+      preorderId: makePreorderId(),
+      items: lines,
+      addressId: resolvedAddressId,
+      paymentMethod,
+      total: total.toFixed(2),
+      expiresAt: Date.now() + PREORDER_TTL_MS,
+    };
+  }
 
   async checkout(buyerId: string, dto: CheckoutDto): Promise<{ orderId: string; total: number; status: 'Paid' }> {
     return this.dataSource.transaction(async (manager) => {
