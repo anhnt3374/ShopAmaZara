@@ -1,18 +1,18 @@
 import { Link } from 'react-router-dom';
-import { cartService } from '../../services/cart';
-import { wishlistService } from '../../services/wishlist';
+import { addCartItem } from '../../services/cart';
+import { addWishlistItem } from '../../services/wishlist';
 
 export function ProductListBlock({ block }) {
   const onAdd = async (id) => {
     try {
-      await cartService.add(id, 1);
+      await addCartItem(id, 1);
     } catch (_err) {
       // toast block from server already explains success/failure
     }
   };
   const onSave = async (id) => {
     try {
-      await wishlistService.add(id);
+      await addWishlistItem(id);
     } catch (_err) {
       // ignored
     }

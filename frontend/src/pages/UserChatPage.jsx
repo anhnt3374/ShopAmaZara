@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useChat } from '../context/ChatContext.jsx';
+import { MessageBubble } from '../components/chat/MessageBubble.jsx';
 
 export default function UserChatPage() {
   const { conversationId } = useParams();
@@ -135,20 +136,11 @@ export default function UserChatPage() {
 
               <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3 bg-surface-container-low">
                 {messages.map((m) => (
-                  <div
+                  <MessageBubble
                     key={m.id}
-                    className={`flex ${m.senderKind === 'buyer' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] sm:max-w-[60%] px-4 py-2 rounded-2xl text-body-sm ${
-                        m.senderKind === 'buyer'
-                          ? 'bg-primary text-on-primary rounded-br-md'
-                          : 'bg-surface text-on-surface border border-outline-variant rounded-bl-md'
-                      }`}
-                    >
-                      {m.body}
-                    </div>
-                  </div>
+                    message={m}
+                    conversationId={conversationId}
+                  />
                 ))}
               </div>
 
