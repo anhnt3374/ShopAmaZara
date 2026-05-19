@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Icon from '../Icon.jsx';
 import { addCartItem } from '../../services/cart';
 import { addWishlistItem } from '../../services/wishlist';
 
@@ -66,7 +67,11 @@ export function ProductListBlock({ block, compact = false }) {
                   aria-label="Save to wishlist"
                   title="Save to wishlist"
                 >
-                  {compact ? '♡' : '♡ Save'}
+                  {compact ? (
+                    <Icon name="favorite" size={18} />
+                  ) : (
+                    <>♡ Save</>
+                  )}
                 </button>
               )}
               {p.actions?.includes('view') && (
@@ -76,7 +81,11 @@ export function ProductListBlock({ block, compact = false }) {
                   aria-label="View details"
                   title="View details"
                 >
-                  {compact ? 'ⓘ' : 'Details'}
+                  {compact ? (
+                    <Icon name="info" size={18} />
+                  ) : (
+                    <>Details</>
+                  )}
                 </Link>
               )}
               {p.actions?.includes('add_to_cart') && p.stock !== 'out' && (
@@ -87,7 +96,11 @@ export function ProductListBlock({ block, compact = false }) {
                   aria-label="Add to cart"
                   title="Add to cart"
                 >
-                  {compact ? '+' : '+ Add to cart'}
+                  {compact ? (
+                    <Icon name="add_shopping_cart" size={18} />
+                  ) : (
+                    <>+ Add to cart</>
+                  )}
                 </button>
               )}
             </div>

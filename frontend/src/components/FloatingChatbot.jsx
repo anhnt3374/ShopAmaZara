@@ -27,19 +27,23 @@ export default function FloatingChatbot() {
   return (
     <>
       {open && <ChatPanel view={view} setView={setView} onClose={closeChat} />}
-      <button
-        type="button"
-        onClick={toggleChat}
-        aria-label="Open chat"
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-primary text-on-primary rounded-full shadow-overlay flex items-center justify-center hover:bg-primary-container transition-all duration-150 hover:scale-105 active:scale-95"
-      >
-        <Icon name={open ? 'close' : 'chat'} size={28} />
-        {!open && fabBadge && (
-          <span className="absolute -top-1 -right-1 bg-error text-on-error text-[10px] font-bold h-5 min-w-5 px-1 rounded-full flex items-center justify-center">
-            {unreadTotal}
-          </span>
-        )}
-      </button>
+      {/* FAB is only visible while the panel is closed. The panel header has
+          its own X button to close. */}
+      {!open && (
+        <button
+          type="button"
+          onClick={toggleChat}
+          aria-label="Open chat"
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-primary text-on-primary rounded-full shadow-overlay flex items-center justify-center hover:bg-primary-container transition-all duration-150 hover:scale-105 active:scale-95"
+        >
+          <Icon name="chat" size={28} />
+          {fabBadge && (
+            <span className="absolute -top-1 -right-1 bg-error text-on-error text-[10px] font-bold h-5 min-w-5 px-1 rounded-full flex items-center justify-center">
+              {unreadTotal}
+            </span>
+          )}
+        </button>
+      )}
     </>
   );
 }
@@ -51,7 +55,10 @@ function ChatPanel({ view, setView, onClose }) {
     <div
       role="dialog"
       aria-label="Chat assistant"
-      className="fixed bottom-24 right-4 sm:right-6 z-40 w-[calc(100vw-2rem)] sm:w-[380px] h-[calc(100vh-9rem)] sm:h-[600px] max-h-[80vh] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-overlay flex flex-col overflow-hidden"
+      // top-20 keeps the panel below the site header on small screens; the
+      // bottom-6 anchor makes it sit just above the (now hidden) FAB slot.
+      // max-h-[640px] caps it on tall screens so it doesn't stretch awkwardly.
+      className="fixed top-20 bottom-6 right-4 sm:right-6 sm:top-auto sm:bottom-24 z-40 w-[calc(100vw-2rem)] sm:w-[380px] sm:h-[600px] sm:max-h-[calc(100vh-8rem)] max-h-[640px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-overlay flex flex-col overflow-hidden"
     >
       <PanelHeader view={view} onClose={onClose} />
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin bg-surface-container-low">
