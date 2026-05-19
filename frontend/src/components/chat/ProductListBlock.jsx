@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { addCartItem } from '../../services/cart';
 import { addWishlistItem } from '../../services/wishlist';
 
-export function ProductListBlock({ block }) {
+export function ProductListBlock({ block, compact = false }) {
   const onAdd = async (id) => {
     try {
       await addCartItem(id, 1);
@@ -17,6 +17,17 @@ export function ProductListBlock({ block }) {
       // ignored
     }
   };
+
+  // In compact mode (floating chat) buttons collapse to single-character icons
+  // so three actions still fit on one row in the ~360px panel. The full page
+  // keeps the wordy variant unchanged.
+  const btnBase = compact
+    ? 'flex items-center justify-center w-8 h-8 text-base rounded-md border border-outline-variant bg-surface hover:bg-surface-container'
+    : 'text-body-xs px-2.5 py-1 rounded-md border border-outline-variant bg-surface hover:bg-surface-container';
+  const btnPrimary = compact
+    ? 'flex items-center justify-center w-8 h-8 text-base rounded-md bg-on-surface text-surface hover:opacity-90'
+    : 'text-body-xs px-2.5 py-1 rounded-md bg-on-surface text-surface hover:opacity-90';
+
   return (
     <div className="flex flex-col gap-2 mt-2">
       {block.items.map((p) => (
@@ -43,34 +54,40 @@ export function ProductListBlock({ block }) {
             <div className="flex gap-2 text-body-xs text-on-surface-variant items-center">
               <span className="font-semibold text-error">{p.price}</span>
               {p.rating != null && <span>★ {Number(p.rating).toFixed(1)}</span>}
-              {p.stock === 'out' && (
-                <span className="text-error">Out of stock</span>
-              )}
+              {p.stock === 'out' && <span className="text-error">Out of stock</span>}
               {p.stock === 'low' && <span>Low stock</span>}
             </div>
             <div className="flex gap-1.5 mt-1">
               {p.actions?.includes('wishlist') && (
                 <button
+                  type="button"
                   onClick={() => onSave(p.id)}
-                  className="text-body-xs px-2.5 py-1 rounded-md border border-outline-variant bg-surface hover:bg-surface-container"
+                  className={btnBase}
+                  aria-label="Save to wishlist"
+                  title="Save to wishlist"
                 >
-                  ♡ Save
+                  {compact ? '♡' : '♡ Save'}
                 </button>
               )}
               {p.actions?.includes('view') && (
                 <Link
                   to={`/product/${p.id}`}
-                  className="text-body-xs px-2.5 py-1 rounded-md border border-outline-variant bg-surface hover:bg-surface-container"
+                  className={btnBase}
+                  aria-label="View details"
+                  title="View details"
                 >
-                  Details
+                  {compact ? 'ⓘ' : 'Details'}
                 </Link>
               )}
               {p.actions?.includes('add_to_cart') && p.stock !== 'out' && (
                 <button
+                  type="button"
                   onClick={() => onAdd(p.id)}
-                  className="text-body-xs px-2.5 py-1 rounded-md bg-on-surface text-surface hover:opacity-90"
+                  className={btnPrimary}
+                  aria-label="Add to cart"
+                  title="Add to cart"
                 >
-                  + Add to cart
+                  {compact ? '+' : '+ Add to cart'}
                 </button>
               )}
             </div>

@@ -247,7 +247,12 @@ function SystemChat() {
           </div>
         )}
         {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} conversationId={conversationId} />
+          <MessageBubble
+            key={m.id}
+            message={m}
+            conversationId={conversationId}
+            compact
+          />
         ))}
         {streamingText && <StreamingBubble text={streamingText} />}
         {conversationId && typingByChat[conversationId] && !streamingText && (

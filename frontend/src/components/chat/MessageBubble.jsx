@@ -4,7 +4,7 @@ function isActionSentinel(body) {
   return typeof body === 'string' && /^\[action:[^\]]+\]$/.test(body);
 }
 
-export function MessageBubble({ message, conversationId }) {
+export function MessageBubble({ message, conversationId, compact = false }) {
   const isBuyer = message.senderKind === 'buyer';
 
   // Hide [action:...] sentinels from the visible thread — they exist to drive
@@ -35,6 +35,7 @@ export function MessageBubble({ message, conversationId }) {
             key={i}
             block={b}
             conversationId={conversationId}
+            compact={compact}
           />
         ))}
       </div>
