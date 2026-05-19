@@ -35,7 +35,7 @@ export function ProductListBlock({ block }) {
           )}
           <div className="flex-1 min-w-0 flex flex-col gap-1">
             <Link
-              to={`/products/${p.id}`}
+              to={`/product/${p.id}`}
               className="text-body-sm font-semibold text-on-surface hover:underline truncate"
             >
               {p.name}
@@ -59,7 +59,7 @@ export function ProductListBlock({ block }) {
               )}
               {p.actions?.includes('view') && (
                 <Link
-                  to={`/products/${p.id}`}
+                  to={`/product/${p.id}`}
                   className="text-body-xs px-2.5 py-1 rounded-md border border-outline-variant bg-surface hover:bg-surface-container"
                 >
                   Details

@@ -45,8 +45,12 @@ export function makeSearchProductsTool(deps: { products: ProductsService }) {
       ctx.pushBlock(block);
 
       return JSON.stringify({
+        ui_rendered: true,
         count: productItems.length,
+        // Compact handle for follow-up references ("the second one", etc.).
+        // Do NOT list these back to the user — the UI is already showing them.
         items: productItems.map((p) => ({ id: p.id, name: p.name, price: p.price })),
+        note: 'Carousel is already rendered in the chat UI. Reply in one short sentence and do not repeat product details.',
       });
     },
   });
