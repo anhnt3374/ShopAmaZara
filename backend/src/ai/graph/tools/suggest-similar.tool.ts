@@ -22,13 +22,19 @@ export function makeSuggestSimilarTool(deps: { products: ProductsService }) {
         id: string;
         name: string;
         price: string;
-        images?: string[] | null;
+        image?: string | null;
+        imageFirst?: string | null;
+        images?: unknown;
         stock: number;
       }>).map((p) => ({
         id: String(p.id),
         name: p.name,
         price: String(p.price),
-        image: p.images?.[0] ?? null,
+        image:
+          p.image ??
+          p.imageFirst ??
+          (Array.isArray(p.images) ? (p.images[0] as string) : null) ??
+          null,
         stock: (p.stock === 0
           ? 'out'
           : p.stock < 5

@@ -34,7 +34,14 @@ export function makeSearchProductsTool(deps: { products: ProductsService }) {
         id: String(p.id),
         name: p.name,
         price: String(p.price),
-        image: p.images?.[0] ?? null,
+        // ProductSummary exposes `image` (singular). Fall back to entity
+        // shapes (`imageFirst`, `images[0]`) in case the underlying service
+        // ever returns the raw row instead of the summary.
+        image:
+          p.image ??
+          p.imageFirst ??
+          (Array.isArray(p.images) ? p.images[0] : null) ??
+          null,
         rating: p.rating,
         storeName: p.storeName,
         stock: p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in_stock',

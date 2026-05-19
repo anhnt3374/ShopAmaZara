@@ -20,7 +20,11 @@ export function makeCompareProductsTool(deps: { products: ProductsService }) {
         id: String(p.id),
         name: p.name,
         price: String(p.price),
-        image: p.images?.[0] ?? null,
+        image:
+          p.image ??
+          p.imageFirst ??
+          (Array.isArray(p.images) ? p.images[0] : null) ??
+          null,
         rating: p.rating,
         storeName: p.storeName,
         stock: (p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in_stock') as 'out' | 'low' | 'in_stock',
