@@ -6,6 +6,7 @@ import { ChatsService } from './chats.service';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
 import { Store } from '../stores/store.entity';
+import { AiService } from '../ai/ai.service';
 
 describe('ChatsService', () => {
   let service: ChatsService;
@@ -26,12 +27,14 @@ describe('ChatsService', () => {
     createQueryBuilder: jest.fn(),
   };
   const storesRepo: any = { findOne: jest.fn() };
+  const aiService: any = { respond: jest.fn().mockResolvedValue(undefined) };
 
   beforeEach(async () => {
-    [manager, convoRepo, messageRepo, storesRepo].forEach((o: any) =>
+    [manager, convoRepo, messageRepo, storesRepo, aiService].forEach((o: any) =>
       Object.values(o).forEach((f: any) => (f as jest.Mock).mockReset?.()),
     );
     manager.create.mockImplementation((_e: any, d: any) => d);
+    aiService.respond.mockResolvedValue(undefined);
     const mod = await Test.createTestingModule({
       providers: [
         ChatsService,
@@ -39,6 +42,7 @@ describe('ChatsService', () => {
         { provide: getRepositoryToken(Conversation), useValue: convoRepo },
         { provide: getRepositoryToken(Message), useValue: messageRepo },
         { provide: getRepositoryToken(Store), useValue: storesRepo },
+        { provide: AiService, useValue: aiService },
       ],
     }).compile();
     service = mod.get(ChatsService);
@@ -85,16 +89,24 @@ describe('ChatsService', () => {
       expect(manager.update).toHaveBeenCalled();
     });
 
-    it('also inserts a system echo for kind=system', async () => {
+    it('kind=system: persists only the buyer message and kicks off AiService.respond', async () => {
       manager.findOne.mockResolvedValue({ id: '7', kind: 'system', buyerId: 'u', storeId: null });
-      manager.save
-        .mockResolvedValueOnce({ id: 'msg-1', senderKind: 'buyer', body: 'hi', createdAt: new Date() })
-        .mockResolvedValueOnce({ id: 'msg-2', senderKind: 'system', body: 'Thanks, we received your message: hi', createdAt: new Date() });
+      manager.save.mockResolvedValueOnce({
+        id: 'msg-1',
+        senderKind: 'buyer',
+        body: 'hi',
+        createdAt: new Date(),
+      });
       const out = await service.sendBuyerMessage('u', '7', 'hi');
-      expect(out.messages.length).toBe(2);
+      expect(out.messages.length).toBe(1);
       expect(out.messages[0].senderKind).toBe('buyer');
-      expect(out.messages[1].senderKind).toBe('system');
-      expect((out.messages[1].body ?? '')).toContain('hi');
+      // queueMicrotask defer — wait one tick
+      await new Promise((r) => setImmediate(r));
+      expect(aiService.respond).toHaveBeenCalledWith(
+        'u',
+        expect.objectContaining({ id: '7', kind: 'system' }),
+        'hi',
+      );
     });
 
     it('403 for another buyer', async () => {

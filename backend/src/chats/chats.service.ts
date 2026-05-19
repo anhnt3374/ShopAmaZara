@@ -1,13 +1,16 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Conversation, ConversationKind } from './conversation.entity';
 import { Message, SenderKind } from './message.entity';
 import { Store } from '../stores/store.entity';
+import { AiService } from '../ai/ai.service';
 
 export interface SendResult {
   conversation: Conversation;
@@ -34,6 +37,8 @@ export class ChatsService {
     private readonly messages: Repository<Message>,
     @InjectRepository(Store)
     private readonly stores: Repository<Store>,
+    @Inject(forwardRef(() => AiService))
+    private readonly ai: AiService,
   ) {}
 
   async ensureSystem(buyerId: string): Promise<Conversation> {
@@ -107,7 +112,7 @@ export class ChatsService {
     conversationId: string,
     body: string,
   ): Promise<SendResult> {
-    return this.ds.transaction(async (m) => {
+    const result = await this.ds.transaction(async (m) => {
       const convo = await m.findOne(Conversation, { where: { id: conversationId } });
       if (!convo) throw new NotFoundException('Conversation not found');
       if (convo.buyerId !== buyerId) throw new ForbiddenException('Not your chat');
@@ -120,22 +125,25 @@ export class ChatsService {
           body: trimmed,
         }),
       );
-      const results: Message[] = [buyerMsg as Message];
-      if (convo.kind === 'system') {
-        const echoBody = `Thanks, we received your message: ${trimmed.slice(0, 200)}`;
-        const systemMsg = await m.save(
-          m.create(Message, {
-            conversationId: convo.id,
-            senderKind: 'system',
-            senderId: '',
-            body: echoBody,
-          }),
-        );
-        results.push(systemMsg as Message);
-      }
       await m.update(Conversation, { id: convo.id }, { updatedAt: new Date() });
-      return { conversation: convo, messages: results };
+      return {
+        conversation: convo,
+        messages: [buyerMsg as Message],
+        trimmed,
+      };
     });
+    if (result.conversation.kind === 'system') {
+      queueMicrotask(() => {
+        this.ai
+          .respond(buyerId, result.conversation, result.trimmed)
+          .catch((e) => {
+            // logging happens inside AiService; swallow here to keep the
+            // fire-and-forget contract from leaking errors to the HTTP path.
+            void e;
+          });
+      });
+    }
+    return { conversation: result.conversation, messages: result.messages };
   }
 
   async sendStoreMessage(
