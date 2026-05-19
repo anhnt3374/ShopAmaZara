@@ -18,7 +18,13 @@ export function makeSuggestSimilarTool(deps: { products: ProductsService }) {
     func: async (input, _r, config) => {
       const ctx = ctxFromConfig(config);
       const out = await deps.products.suggest(input.seedProductIds, input.mode);
-      const items = out.map((p) => ({
+      const items = (out as Array<{
+        id: string;
+        name: string;
+        price: string;
+        images?: string[] | null;
+        stock: number;
+      }>).map((p) => ({
         id: String(p.id),
         name: p.name,
         price: String(p.price),
