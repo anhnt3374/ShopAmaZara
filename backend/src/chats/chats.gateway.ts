@@ -80,6 +80,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           senderKind: msg.senderKind,
           senderId: msg.senderId,
           body: msg.body ?? '',
+          contentBlocks: msg.contentBlocks ?? null,
           createdAt: msg.createdAt,
         },
       };
