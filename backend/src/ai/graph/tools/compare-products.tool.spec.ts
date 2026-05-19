@@ -10,7 +10,7 @@ describe('compare_products tool', () => {
     const tool = makeCompareProductsTool({ products: { findManyByIds } as any });
     const out = await tool.invoke(
       { productIds: ['1', '2'] },
-      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b) } },
+      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b), getPendingPreorder: () => null, setPendingPreorder: () => undefined } },
     );
     expect(findManyByIds).toHaveBeenCalledWith(['1', '2']);
     expect(pushed[0]).toMatchObject({ type: 'products', mode: 'compare' });

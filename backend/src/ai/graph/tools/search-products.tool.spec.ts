@@ -10,7 +10,7 @@ describe('search_products tool', () => {
     const tool = makeSearchProductsTool({ products: { list } as any });
     const out = await tool.invoke(
       { query: 'bluetooth', maxPrice: 1_000_000, limit: 5 },
-      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b) } },
+      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b), getPendingPreorder: () => null, setPendingPreorder: () => undefined } },
     );
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({ q: 'bluetooth', maxPrice: 1_000_000 }),
@@ -30,7 +30,7 @@ describe('search_products tool', () => {
     const tool = makeSearchProductsTool({ products: { list } as any });
     await tool.invoke(
       { query: 'shoes', category: 'Footwear', limit: 4 },
-      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b) } },
+      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b), getPendingPreorder: () => null, setPendingPreorder: () => undefined } },
     );
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({ category: ['Footwear'] }),
@@ -46,7 +46,7 @@ describe('search_products tool', () => {
     const tool = makeSearchProductsTool({ products: { list } as any });
     await tool.invoke(
       { query: 'item', limit: 2 },
-      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b) } },
+      { configurable: { userId: 'u1', conversationId: 'c1', pushBlock: (b: any) => pushed.push(b), getPendingPreorder: () => null, setPendingPreorder: () => undefined } },
     );
     expect(pushed[0].items[0].stock).toBe('out');
   });

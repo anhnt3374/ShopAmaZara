@@ -17,6 +17,8 @@ describe('cart tools', () => {
           userId: 'u1',
           conversationId: 'c1',
           pushBlock: (b: unknown) => pushed.push(b),
+          getPendingPreorder: () => null,
+          setPendingPreorder: () => undefined,
         },
       },
     );
@@ -37,6 +39,8 @@ describe('cart tools', () => {
           userId: 'u1',
           conversationId: 'c1',
           pushBlock: () => undefined,
+          getPendingPreorder: () => null,
+          setPendingPreorder: () => undefined,
         },
       },
     );
@@ -56,6 +60,8 @@ describe('cart tools', () => {
           userId: 'u1',
           conversationId: 'c1',
           pushBlock: (b: unknown) => pushed.push(b),
+          getPendingPreorder: () => null,
+          setPendingPreorder: () => undefined,
         },
       },
     );
