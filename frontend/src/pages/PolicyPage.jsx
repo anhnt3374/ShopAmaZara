@@ -5,86 +5,86 @@ import Icon from '../components/Icon.jsx';
 const sections = [
   {
     id: 'privacy',
-    title: 'Quy định bảo mật',
+    title: 'Privacy Policy',
     icon: 'shield_lock',
     content: [
       {
-        heading: 'Thu thập dữ liệu cá nhân',
+        heading: 'Personal data collection',
         body:
-          'AmaZara chỉ thu thập các dữ liệu cần thiết để hoàn tất giao dịch và cải thiện trải nghiệm mua sắm. Mọi dữ liệu nhạy cảm như thẻ thanh toán được mã hóa và xử lý qua đối tác đạt chuẩn PCI-DSS.',
+          'AmaZara only collects the data needed to complete transactions and improve the shopping experience. Sensitive data such as payment cards is encrypted and processed through PCI-DSS compliant partners.',
       },
       {
-        heading: 'Quyền của người dùng',
+        heading: 'Your rights',
         body:
-          'Bạn có quyền truy cập, chỉnh sửa hoặc xóa dữ liệu cá nhân của mình bất cứ lúc nào trong phần Cài đặt → Quyền riêng tư. Yêu cầu xóa được xử lý trong vòng 7 ngày làm việc.',
+          'You may access, update, or delete your personal data at any time under Settings → Privacy. Deletion requests are processed within 7 business days.',
       },
     ],
   },
   {
     id: 'terms',
-    title: 'Điều khoản sử dụng',
+    title: 'Terms of Service',
     icon: 'gavel',
     content: [
       {
-        heading: 'Tài khoản và bảo mật',
+        heading: 'Account & security',
         body:
-          'Người dùng có trách nhiệm bảo mật mật khẩu và toàn bộ hoạt động phát sinh từ tài khoản của mình. AmaZara có quyền tạm khóa tài khoản nếu phát hiện hành vi đáng ngờ.',
+          'You are responsible for keeping your password safe and for any activity that occurs under your account. AmaZara may temporarily suspend an account if suspicious behavior is detected.',
       },
       {
-        heading: 'Hành vi bị cấm',
+        heading: 'Prohibited conduct',
         body:
-          'Nghiêm cấm sử dụng nền tảng để rao bán hàng giả, vi phạm bản quyền hoặc tổ chức gian lận. Vi phạm sẽ dẫn tới khóa tài khoản vĩnh viễn và có thể bị xử lý theo pháp luật.',
+          'Using the platform to sell counterfeit goods, infringe copyright, or commit fraud is strictly forbidden. Violations lead to permanent account suspension and may be referred to law enforcement.',
       },
     ],
   },
   {
     id: 'shipping',
-    title: 'Hướng dẫn vận chuyển',
+    title: 'Shipping Guide',
     icon: 'local_shipping',
     content: [
       {
-        heading: 'Khu vực giao hàng',
+        heading: 'Delivery areas',
         body:
-          'AmaZara giao hàng tới 63 tỉnh thành tại Việt Nam và hơn 60 quốc gia. Thời gian giao nội địa từ 1-3 ngày làm việc, quốc tế từ 5-14 ngày tùy đối tác vận chuyển.',
+          'AmaZara ships to 63 provinces across Vietnam and to more than 60 countries worldwide. Domestic delivery typically takes 1–3 business days; international delivery takes 5–14 days depending on the carrier.',
       },
       {
-        heading: 'Phí vận chuyển',
+        heading: 'Shipping fees',
         body:
-          'Đơn hàng nội địa trên 500.000đ được miễn phí giao hàng tiêu chuẩn. Phí giao nhanh và quốc tế hiển thị tại bước thanh toán dựa trên trọng lượng và điểm đến.',
+          'Domestic orders over 500,000 VND ship free at the standard speed. Express and international rates are shown at checkout based on weight and destination.',
       },
     ],
   },
   {
     id: 'vendor',
-    title: 'Quy định người bán',
+    title: 'Seller Policy',
     icon: 'storefront',
     content: [
       {
-        heading: 'Đăng ký gian hàng',
+        heading: 'Store registration',
         body:
-          'Người bán phải cung cấp giấy phép kinh doanh hợp lệ và tài liệu xác minh nguồn gốc sản phẩm. Hồ sơ được duyệt trong 3 ngày làm việc.',
+          'Sellers must provide a valid business license and proof-of-origin documentation for their products. Applications are reviewed within 3 business days.',
       },
       {
-        heading: 'Chính sách hoa hồng',
+        heading: 'Commission policy',
         body:
-          'AmaZara thu phí dịch vụ 5-12% trên mỗi đơn hàng tùy ngành hàng, được hiển thị minh bạch trong dashboard và đối soát hàng tuần.',
+          'AmaZara charges a 5–12% service fee per order depending on the product category. The breakdown is shown transparently in the seller dashboard and reconciled weekly.',
       },
     ],
   },
   {
     id: 'support',
-    title: 'Liên hệ hỗ trợ',
+    title: 'Contact Support',
     icon: 'support_agent',
     content: [
       {
-        heading: 'Kênh hỗ trợ',
+        heading: 'Support channels',
         body:
-          'Bạn có thể liên hệ AmaZara qua chat trực tiếp 24/7, email support@amazara.com hoặc hotline 1900 1234 trong giờ hành chính.',
+          'You can reach AmaZara via 24/7 live chat, email at support@amazara.com, or by phone at 1900 1234 during business hours.',
       },
       {
-        heading: 'Thời gian phản hồi',
+        heading: 'Response times',
         body:
-          'Chúng tôi cam kết phản hồi mọi yêu cầu trong vòng 1 giờ qua chat và 24 giờ qua email. Khiếu nại được xử lý ưu tiên trong 72 giờ.',
+          'We aim to reply within 1 hour over chat and within 24 hours over email. Complaints are prioritized and resolved within 72 hours.',
       },
     ],
   },
@@ -102,9 +102,9 @@ export default function PolicyPage() {
       {/* Sticky side nav */}
       <aside className="lg:col-span-3">
         <div className="lg:sticky lg:top-24 bg-surface border border-outline-variant rounded-xl p-4">
-          <h2 className="text-headline-md text-on-surface mb-2">Trung tâm hỗ trợ</h2>
+          <h2 className="text-headline-md text-on-surface mb-2">Support Center</h2>
           <p className="text-body-sm text-on-surface-variant mb-4">
-            Các quy định, điều khoản và hướng dẫn của AmaZara.
+            AmaZara policies, terms, and how-to guides.
           </p>
           <nav className="flex lg:flex-col gap-1 overflow-x-auto scrollbar-thin">
             {sections.map((s) => (
@@ -144,9 +144,9 @@ export default function PolicyPage() {
         <div className="bg-surface-container-low border border-outline-variant rounded-xl p-6 flex items-start gap-4">
           <Icon name="info" className="text-primary mt-1" />
           <div className="text-body-sm text-on-surface-variant">
-            Bạn cần thêm trợ giúp? Mở chat AmaZara Assistant ở góc dưới bên phải, hoặc{' '}
+            Need more help? Open the AmaZara Assistant chat in the bottom-right corner, or{' '}
             <Link to="/messages" className="text-primary hover:underline">
-              gửi tin nhắn cho đội ngũ hỗ trợ
+              message our support team
             </Link>
             .
           </div>
