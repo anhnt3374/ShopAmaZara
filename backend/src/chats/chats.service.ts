@@ -161,6 +161,38 @@ export class ChatsService {
     });
   }
 
+  async loadRecentMessages(
+    conversationId: string,
+    limit: number,
+  ): Promise<Message[]> {
+    const rows = await this.messages.find({
+      where: { conversationId },
+      order: { id: 'DESC' },
+      take: limit,
+    });
+    return rows.reverse();
+  }
+
+  async appendBotMessage(
+    conversationId: string,
+    body: string,
+    contentBlocks: unknown[] | null,
+  ): Promise<Message> {
+    return this.ds.transaction(async (m) => {
+      const saved = await m.save(
+        m.create(Message, {
+          conversationId,
+          senderKind: 'system',
+          senderId: '',
+          body,
+          contentBlocks,
+        }),
+      );
+      await m.update(Conversation, { id: conversationId }, { updatedAt: new Date() });
+      return saved as Message;
+    });
+  }
+
   async markRead(
     conversationId: string,
     party: { party: 'buyer'; userId: string } | { party: 'store'; storeId: string },

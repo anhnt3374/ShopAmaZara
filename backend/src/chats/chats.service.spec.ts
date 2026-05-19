@@ -117,4 +117,46 @@ describe('ChatsService', () => {
       expect(manager.update).toHaveBeenCalled();
     });
   });
+
+  describe('loadRecentMessages', () => {
+    it('returns last N messages in chronological order', async () => {
+      const rows = [
+        { id: '3', createdAt: new Date('2026-01-03'), body: 'c' },
+        { id: '2', createdAt: new Date('2026-01-02'), body: 'b' },
+        { id: '1', createdAt: new Date('2026-01-01'), body: 'a' },
+      ];
+      messageRepo.find.mockResolvedValue(rows);
+      const out = await service.loadRecentMessages('c1', 20);
+      expect(messageRepo.find).toHaveBeenCalledWith({
+        where: { conversationId: 'c1' },
+        order: { id: 'DESC' },
+        take: 20,
+      });
+      expect(out.map((r: any) => r.id)).toEqual(['1', '2', '3']);
+    });
+  });
+
+  describe('appendBotMessage', () => {
+    it('persists a system message with body + content_blocks', async () => {
+      manager.save.mockResolvedValue({
+        id: 'm1',
+        body: 'hello',
+        contentBlocks: [{ type: 'toast', kind: 'info', text: 'x' }],
+      });
+      const blocks = [{ type: 'toast', kind: 'info', text: 'x' }] as never;
+      const out = await service.appendBotMessage('c1', 'hello', blocks);
+      expect(manager.create).toHaveBeenCalledWith(
+        Message,
+        expect.objectContaining({
+          conversationId: 'c1',
+          senderKind: 'system',
+          senderId: '',
+          body: 'hello',
+          contentBlocks: blocks,
+        }),
+      );
+      expect(out.body).toBe('hello');
+      expect(manager.update).toHaveBeenCalled();
+    });
+  });
 });
