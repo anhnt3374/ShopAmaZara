@@ -55,10 +55,10 @@ function ChatPanel({ view, setView, onClose }) {
     <div
       role="dialog"
       aria-label="Chat assistant"
-      // top-20 keeps the panel below the site header on small screens; the
-      // bottom-6 anchor makes it sit just above the (now hidden) FAB slot.
-      // max-h-[640px] caps it on tall screens so it doesn't stretch awkwardly.
-      className="fixed top-20 bottom-6 right-4 sm:right-6 sm:top-auto sm:bottom-24 z-40 w-[calc(100vw-2rem)] sm:w-[380px] sm:h-[600px] sm:max-h-[calc(100vh-8rem)] max-h-[640px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-overlay flex flex-col overflow-hidden"
+      // top-20 keeps the panel below the site header on small screens; on the
+      // ≥sm popover variant we anchor bottom-6 (same offset the FAB used) so
+      // the panel reclaims the FAB's slot instead of leaving a dead gap.
+      className="fixed top-20 bottom-6 right-4 sm:right-6 sm:top-auto sm:bottom-6 z-40 w-[calc(100vw-2rem)] sm:w-[380px] sm:h-[640px] sm:max-h-[calc(100vh-7rem)] max-h-[640px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-overlay flex flex-col overflow-hidden"
     >
       <PanelHeader view={view} onClose={onClose} />
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin bg-surface-container-low">
@@ -196,12 +196,25 @@ function SystemChat() {
 
   const messages = conversationId ? messagesByChat[conversationId] ?? [] : [];
 
+  const initialScrollDoneRef = useRef(false);
+  useEffect(() => {
+    initialScrollDoneRef.current = false;
+  }, [conversationId]);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-    if (distance < 80) el.scrollTop = el.scrollHeight;
-  }, [messages.length, streamingText]);
+    requestAnimationFrame(() => {
+      const node = scrollRef.current;
+      if (!node) return;
+      if (!initialScrollDoneRef.current && messages.length > 0) {
+        node.scrollTop = node.scrollHeight;
+        initialScrollDoneRef.current = true;
+        return;
+      }
+      const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
+      if (distance < 80) node.scrollTop = node.scrollHeight;
+    });
+  }, [conversationId, messages.length, streamingText]);
 
   useEffect(() => {
     if (!conversationId) return undefined;
@@ -301,12 +314,26 @@ function StoresTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeStoreChatId]);
 
+  const storeScrollDoneRef = useRef(null);
+  useEffect(() => {
+    storeScrollDoneRef.current = null; // reset when switching store chats
+  }, [activeStoreChatId]);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-    if (distance < 80) el.scrollTop = el.scrollHeight;
-  }, [activeStoreChatId, messagesByChat[activeStoreChatId]?.length]);
+    requestAnimationFrame(() => {
+      const node = scrollRef.current;
+      if (!node) return;
+      const len = messagesByChat[activeStoreChatId]?.length ?? 0;
+      if (storeScrollDoneRef.current !== activeStoreChatId && len > 0) {
+        node.scrollTop = node.scrollHeight;
+        storeScrollDoneRef.current = activeStoreChatId;
+        return;
+      }
+      const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
+      if (distance < 80) node.scrollTop = node.scrollHeight;
+    });
+  }, [activeStoreChatId, messagesByChat]);
 
   if (activeStoreChatId) {
     const messages = messagesByChat[activeStoreChatId] ?? [];

@@ -63,11 +63,29 @@ export default function UserChatPage() {
 
   const messages = conversationId ? messagesByChat[conversationId] ?? [] : [];
 
+  const initialScrollDoneRef = useRef(false);
+  useEffect(() => {
+    initialScrollDoneRef.current = false;
+  }, [conversationId]);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTop = el.scrollHeight;
-  }, [conversationId, messages.length]);
+    // Wait one frame so the message list has actually laid out before we read
+    // scrollHeight — otherwise React may not have committed the new bubbles yet.
+    requestAnimationFrame(() => {
+      if (!scrollRef.current) return;
+      if (!initialScrollDoneRef.current && messages.length > 0) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        initialScrollDoneRef.current = true;
+        return;
+      }
+      // After the initial jump, only auto-scroll when the user is near the
+      // bottom so they don't lose their place while reading history.
+      const node = scrollRef.current;
+      const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
+      if (distance < 120) node.scrollTop = node.scrollHeight;
+    });
+  }, [conversationId, messages.length, streamingText]);
 
   const onChange = (e) => {
     setText(e.target.value);
