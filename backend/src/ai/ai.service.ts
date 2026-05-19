@@ -10,15 +10,37 @@ import type { ContentBlock } from './rich-message';
 
 export const AI_GRAPH = 'AI_GRAPH';
 
+type GraphInput = {
+  messages: BaseMessage[];
+  contentBlocks: ContentBlock[];
+  pendingPreorder: PreorderDraft | null;
+};
+
+type GraphOutput = {
+  messages: BaseMessage[];
+  contentBlocks: ContentBlock[];
+  pendingPreorder: PreorderDraft | null;
+};
+
+type StreamEvent = {
+  event: string;
+  name?: string;
+  data?: { chunk?: { content?: unknown }; output?: GraphOutput };
+};
+
 type CompiledGraph = {
   invoke: (
-    input: { messages: BaseMessage[]; contentBlocks: ContentBlock[]; pendingPreorder: PreorderDraft | null },
+    input: GraphInput,
     config: { configurable: Record<string, unknown>; recursionLimit?: number },
-  ) => Promise<{
-    messages: BaseMessage[];
-    contentBlocks: ContentBlock[];
-    pendingPreorder: PreorderDraft | null;
-  }>;
+  ) => Promise<GraphOutput>;
+  streamEvents?: (
+    input: GraphInput,
+    config: {
+      version: 'v2';
+      configurable: Record<string, unknown>;
+      recursionLimit?: number;
+    },
+  ) => AsyncIterable<StreamEvent>;
 };
 
 @Injectable()
@@ -57,30 +79,57 @@ export class AiService {
     let pendingPreorder: PreorderDraft | null = null;
     const history = await this.loadHistory(conversation.id);
 
-    try {
-      const final = await this.graph.invoke(
-        { messages: history, contentBlocks: [], pendingPreorder: null },
-        {
-          recursionLimit: Number(this.config.get('AI_RECURSION_LIMIT') ?? 8),
-          configurable: {
-            thread_id: conversation.id,
-            userId,
-            conversationId: conversation.id,
-            pushBlock: (b: ContentBlock) => collected.push(b),
-            getPendingPreorder: () => pendingPreorder,
-            setPendingPreorder: (d: PreorderDraft | null) => {
-              pendingPreorder = d;
-            },
-          },
+    const cfg = {
+      recursionLimit: Number(this.config.get('AI_RECURSION_LIMIT') ?? 8),
+      configurable: {
+        thread_id: conversation.id,
+        userId,
+        conversationId: conversation.id,
+        pushBlock: (b: ContentBlock) => collected.push(b),
+        getPendingPreorder: () => pendingPreorder,
+        setPendingPreorder: (d: PreorderDraft | null) => {
+          pendingPreorder = d;
         },
-      );
+      },
+    };
 
-      const aiMessages = final.messages.filter((m) => m instanceof AIMessage) as AIMessage[];
+    try {
+      let buffered = '';
+      let finalState: GraphOutput | undefined;
+
+      if (this.graph.streamEvents) {
+        for await (const ev of this.graph.streamEvents(
+          { messages: history, contentBlocks: [], pendingPreorder: null },
+          { version: 'v2', ...cfg },
+        )) {
+          if (ev.event === 'on_chat_model_stream') {
+            const chunk = ev.data?.chunk?.content;
+            if (typeof chunk === 'string' && chunk.length > 0) {
+              buffered += chunk;
+              this.gateway.emitDelta(userId, conversation.id, requestId, chunk);
+            }
+          } else if (ev.event === 'on_chain_end' && ev.name === 'LangGraph') {
+            finalState = ev.data?.output;
+          }
+        }
+      } else {
+        finalState = await this.graph.invoke(
+          { messages: history, contentBlocks: [], pendingPreorder: null },
+          cfg,
+        );
+      }
+
+      const aiMessages = (finalState?.messages ?? []).filter(
+        (m) => m instanceof AIMessage,
+      ) as AIMessage[];
       const lastAi = aiMessages[aiMessages.length - 1];
-      const text = typeof lastAi?.content === 'string' ? lastAi.content : '';
+      const lastAiText = typeof lastAi?.content === 'string' ? lastAi.content : '';
+      // Prefer the streamed buffer when present (matches what the user already
+      // saw token-by-token); fall back to the final AI message content.
+      const text = buffered.length > 0 ? buffered : lastAiText;
       const blocks =
-        final.contentBlocks && final.contentBlocks.length > 0
-          ? final.contentBlocks
+        finalState?.contentBlocks && finalState.contentBlocks.length > 0
+          ? finalState.contentBlocks
           : collected;
       const saved = await this.chats.appendBotMessage(
         conversation.id,
@@ -88,6 +137,7 @@ export class AiService {
         blocks.length > 0 ? blocks : null,
       );
       this.gateway.fanOutMessages({ conversation, messages: [saved] });
+      this.gateway.emitDone(userId, conversation.id, requestId, String(saved.id));
 
       this.turnLogger.recordTurn({
         userId,
@@ -95,7 +145,7 @@ export class AiService {
         requestId,
         durationMs: Date.now() - start,
         tokensIn: 0,
-        tokensOut: 0,
+        tokensOut: buffered.length,
         toolsCalled: blocks.map((b) => b.type),
         outcome: 'ok',
       });
@@ -104,6 +154,14 @@ export class AiService {
         "Sorry, I'm having trouble right now. Please try again in a moment.";
       const saved = await this.chats.appendBotMessage(conversation.id, fallback, null);
       this.gateway.fanOutMessages({ conversation, messages: [saved] });
+      this.gateway.emitError(
+        userId,
+        conversation.id,
+        requestId,
+        'ai_error',
+        fallback,
+      );
+      this.gateway.emitDone(userId, conversation.id, requestId, String(saved.id));
       this.turnLogger.recordTurn({
         userId,
         conversationId: conversation.id,
