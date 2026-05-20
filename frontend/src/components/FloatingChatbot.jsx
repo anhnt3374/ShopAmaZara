@@ -61,7 +61,7 @@ function ChatPanel({ view, setView, onClose }) {
       className="fixed top-20 bottom-6 right-4 sm:right-6 sm:top-auto sm:bottom-6 z-40 w-[calc(100vw-2rem)] sm:w-[380px] sm:h-[640px] sm:max-h-[calc(100vh-7rem)] max-h-[640px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-overlay flex flex-col overflow-hidden"
     >
       <PanelHeader view={view} onClose={onClose} />
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin bg-surface-container-low">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin bg-surface-container-low">
         {view === 'system' && (isAuthenticated ? <SystemChat /> : <SignInState />)}
         {view === 'stores' && (isAuthenticated ? <StoresTab /> : <SignInState />)}
         {view === 'faq' && <FaqTab />}

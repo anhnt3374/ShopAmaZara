@@ -21,10 +21,10 @@ export function ConfirmCardBlock({ block, conversationId }) {
         {block.lines.map((l, i) => (
           <div
             key={i}
-            className="flex justify-between py-1 border-b border-dashed border-outline-variant"
+            className="flex justify-between gap-2 py-1 border-b border-dashed border-outline-variant min-w-0"
           >
-            <span>{l.label}</span>
-            <span>{l.value}</span>
+            <span className="min-w-0 break-words flex-1">{l.label}</span>
+            <span className="flex-none">{l.value}</span>
           </div>
         ))}
         <div className="flex justify-between py-1 mt-1 font-semibold text-error">

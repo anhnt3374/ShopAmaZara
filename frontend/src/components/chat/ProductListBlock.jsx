@@ -34,7 +34,7 @@ export function ProductListBlock({ block, compact = false }) {
       {block.items.map((p) => (
         <div
           key={p.id}
-          className="flex gap-3 p-2 bg-surface border border-outline-variant rounded-lg"
+          className="flex gap-3 p-2 bg-surface border border-outline-variant rounded-lg min-w-0"
         >
           {p.image ? (
             <img
@@ -52,13 +52,13 @@ export function ProductListBlock({ block, compact = false }) {
             >
               {p.name}
             </Link>
-            <div className="flex gap-2 text-body-xs text-on-surface-variant items-center">
+            <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-body-xs text-on-surface-variant items-center">
               <span className="font-semibold text-error">{p.price}</span>
               {p.rating != null && <span>★ {Number(p.rating).toFixed(1)}</span>}
               {p.stock === 'out' && <span className="text-error">Out of stock</span>}
               {p.stock === 'low' && <span>Low stock</span>}
             </div>
-            <div className="flex gap-1.5 mt-1">
+            <div className="flex flex-wrap gap-1.5 mt-1">
               {p.actions?.includes('wishlist') && (
                 <button
                   type="button"
