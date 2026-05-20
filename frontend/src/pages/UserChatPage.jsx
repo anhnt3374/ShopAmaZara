@@ -3,12 +3,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useChat } from '../context/ChatContext.jsx';
 import { MessageBubble } from '../components/chat/MessageBubble.jsx';
-import { StreamingBubble } from '../components/chat/StreamingBubble.jsx';
-import {
-  onMessageDelta,
-  onMessageDone,
-  onMessageError,
-} from '../services/chatSocket.js';
 
 export default function UserChatPage() {
   const { conversationId } = useParams();
@@ -20,7 +14,6 @@ export default function UserChatPage() {
   } = useChat();
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
-  const [streamingText, setStreamingText] = useState('');
   const scrollRef = useRef(null);
   const typingTimerRef = useRef(null);
 
@@ -37,29 +30,7 @@ export default function UserChatPage() {
     if (!conversationId) return;
     loadMessages(conversationId);
     markRead(conversationId);
-    setStreamingText('');
   }, [conversationId, loadMessages, markRead]);
-
-  useEffect(() => {
-    if (!conversationId) return undefined;
-    const offDelta = onMessageDelta(({ conversationId: cid, textDelta }) => {
-      if (cid !== conversationId) return;
-      setStreamingText((t) => t + textDelta);
-    });
-    const offDone = onMessageDone(({ conversationId: cid }) => {
-      if (cid !== conversationId) return;
-      setStreamingText('');
-    });
-    const offError = onMessageError(({ conversationId: cid }) => {
-      if (cid !== conversationId) return;
-      setStreamingText('');
-    });
-    return () => {
-      offDelta();
-      offDone();
-      offError();
-    };
-  }, [conversationId]);
 
   const messages = conversationId ? messagesByChat[conversationId] ?? [] : [];
 
@@ -85,7 +56,7 @@ export default function UserChatPage() {
       const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
       if (distance < 120) node.scrollTop = node.scrollHeight;
     });
-  }, [conversationId, messages.length, streamingText]);
+  }, [conversationId, messages.length]);
 
   const onChange = (e) => {
     setText(e.target.value);
@@ -189,7 +160,6 @@ export default function UserChatPage() {
                     conversationId={conversationId}
                   />
                 ))}
-                {streamingText && <StreamingBubble text={streamingText} />}
               </div>
 
               <form

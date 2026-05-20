@@ -78,24 +78,6 @@ export function emitTyping(conversationId, start) {
   socket.emit(start ? 'typing:start' : 'typing:stop', { conversationId });
 }
 
-export function onMessageDelta(handler) {
-  if (!socket) return () => {};
-  socket.on('message:delta', handler);
-  return () => socket?.off('message:delta', handler);
-}
-
-export function onMessageDone(handler) {
-  if (!socket) return () => {};
-  socket.on('message:done', handler);
-  return () => socket?.off('message:done', handler);
-}
-
-export function onMessageError(handler) {
-  if (!socket) return () => {};
-  socket.on('message:error', handler);
-  return () => socket?.off('message:error', handler);
-}
-
 export function sendChatAction({ conversationId, action, preorderId, payload }) {
   if (!socket) return false;
   socket.emit('message:action', { conversationId, action, preorderId, payload });

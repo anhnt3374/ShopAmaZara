@@ -5,12 +5,6 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useChat } from '../context/ChatContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { MessageBubble } from './chat/MessageBubble.jsx';
-import { StreamingBubble } from './chat/StreamingBubble.jsx';
-import {
-  onMessageDelta,
-  onMessageDone,
-  onMessageError,
-} from '../services/chatSocket.js';
 
 const FAQ_ITEMS = [
   { id: 1, q: 'How long does shipping take?', a: 'Standard delivery: 5-7 business days. Express: 1-2 business days.' },
@@ -180,7 +174,6 @@ function SystemChat() {
   const [conversationId, setConversationId] = useState(null);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
-  const [streamingText, setStreamingText] = useState('');
   const scrollRef = useRef(null);
   const typingTimerRef = useRef(null);
 
@@ -214,28 +207,7 @@ function SystemChat() {
       const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
       if (distance < 80) node.scrollTop = node.scrollHeight;
     });
-  }, [conversationId, messages.length, streamingText]);
-
-  useEffect(() => {
-    if (!conversationId) return undefined;
-    const offDelta = onMessageDelta(({ conversationId: cid, textDelta }) => {
-      if (cid !== conversationId) return;
-      setStreamingText((t) => t + textDelta);
-    });
-    const offDone = onMessageDone(({ conversationId: cid }) => {
-      if (cid !== conversationId) return;
-      setStreamingText('');
-    });
-    const offError = onMessageError(({ conversationId: cid }) => {
-      if (cid !== conversationId) return;
-      setStreamingText('');
-    });
-    return () => {
-      offDelta();
-      offDone();
-      offError();
-    };
-  }, [conversationId]);
+  }, [conversationId, messages.length]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -274,8 +246,7 @@ function SystemChat() {
             compact
           />
         ))}
-        {streamingText && <StreamingBubble text={streamingText} />}
-        {conversationId && typingByChat[conversationId] && !streamingText && (
+        {conversationId && typingByChat[conversationId] && (
           <div className="text-[11px] text-on-surface-variant pl-2">Assistant is typing…</div>
         )}
       </div>

@@ -88,40 +88,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  emitDelta(
-    userId: string,
-    conversationId: string,
-    requestId: string,
-    textDelta: string,
-  ) {
-    this.server
-      .to(`user:${userId}`)
-      .emit('message:delta', { conversationId, requestId, textDelta });
-  }
-
-  emitDone(
-    userId: string,
-    conversationId: string,
-    requestId: string,
-    messageId: string,
-  ) {
-    this.server
-      .to(`user:${userId}`)
-      .emit('message:done', { conversationId, requestId, messageId });
-  }
-
-  emitError(
-    userId: string,
-    conversationId: string,
-    requestId: string,
-    code: string,
-    text: string,
-  ) {
-    this.server
-      .to(`user:${userId}`)
-      .emit('message:error', { conversationId, requestId, code, text });
-  }
-
   @SubscribeMessage('message:action')
   async onAction(
     @ConnectedSocket() socket: Socket,

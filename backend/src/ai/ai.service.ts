@@ -94,39 +94,16 @@ export class AiService {
     };
 
     try {
-      let buffered = '';
-      let finalState: GraphOutput | undefined;
-
-      if (this.graph.streamEvents) {
-        for await (const ev of this.graph.streamEvents(
-          { messages: history, contentBlocks: [], pendingPreorder: null },
-          { version: 'v2', ...cfg },
-        )) {
-          if (ev.event === 'on_chat_model_stream') {
-            const chunk = ev.data?.chunk?.content;
-            if (typeof chunk === 'string' && chunk.length > 0) {
-              buffered += chunk;
-              this.gateway.emitDelta(userId, conversation.id, requestId, chunk);
-            }
-          } else if (ev.event === 'on_chain_end' && ev.name === 'LangGraph') {
-            finalState = ev.data?.output;
-          }
-        }
-      } else {
-        finalState = await this.graph.invoke(
-          { messages: history, contentBlocks: [], pendingPreorder: null },
-          cfg,
-        );
-      }
+      const finalState = await this.graph.invoke(
+        { messages: history, contentBlocks: [], pendingPreorder: null },
+        cfg,
+      );
 
       const aiMessages = (finalState?.messages ?? []).filter(
         (m) => m instanceof AIMessage,
       ) as AIMessage[];
       const lastAi = aiMessages[aiMessages.length - 1];
-      const lastAiText = typeof lastAi?.content === 'string' ? lastAi.content : '';
-      // Prefer the streamed buffer when present (matches what the user already
-      // saw token-by-token); fall back to the final AI message content.
-      const text = buffered.length > 0 ? buffered : lastAiText;
+      const text = typeof lastAi?.content === 'string' ? lastAi.content : '';
       const blocks =
         finalState?.contentBlocks && finalState.contentBlocks.length > 0
           ? finalState.contentBlocks
@@ -137,7 +114,6 @@ export class AiService {
         blocks.length > 0 ? blocks : null,
       );
       this.gateway.fanOutMessages({ conversation, messages: [saved] });
-      this.gateway.emitDone(userId, conversation.id, requestId, String(saved.id));
 
       this.turnLogger.recordTurn({
         userId,
@@ -145,7 +121,7 @@ export class AiService {
         requestId,
         durationMs: Date.now() - start,
         tokensIn: 0,
-        tokensOut: buffered.length,
+        tokensOut: text.length,
         toolsCalled: blocks.map((b) => b.type),
         outcome: 'ok',
       });
@@ -154,14 +130,6 @@ export class AiService {
         "Sorry, I'm having trouble right now. Please try again in a moment.";
       const saved = await this.chats.appendBotMessage(conversation.id, fallback, null);
       this.gateway.fanOutMessages({ conversation, messages: [saved] });
-      this.gateway.emitError(
-        userId,
-        conversation.id,
-        requestId,
-        'ai_error',
-        fallback,
-      );
-      this.gateway.emitDone(userId, conversation.id, requestId, String(saved.id));
       this.turnLogger.recordTurn({
         userId,
         conversationId: conversation.id,
