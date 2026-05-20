@@ -77,7 +77,7 @@ function ChatPanel({ view, setView, onClose }) {
 }
 
 function PanelHeader({ view, onClose }) {
-  const { chats, activeStoreChatId, unreadTotal } = useChat();
+  const { chats, activeStoreChatId, unreadStores } = useChat();
   let title = 'AmaZara Assistant';
   let subtitle = 'Online';
   if (view === 'stores') {
@@ -87,7 +87,7 @@ function PanelHeader({ view, onClose }) {
       subtitle = 'Online';
     } else {
       title = 'Messages';
-      subtitle = unreadTotal > 0 ? `${unreadTotal} unread` : 'All caught up';
+      subtitle = unreadStores > 0 ? `${unreadStores} unread` : 'All caught up';
     }
   } else if (view === 'faq') {
     title = 'Help & FAQ';
@@ -115,10 +115,10 @@ function PanelHeader({ view, onClose }) {
 }
 
 function BottomTabs({ view, setView }) {
-  const { unreadTotal, setActiveStoreChatId } = useChat();
+  const { unreadSystem, unreadStores, setActiveStoreChatId } = useChat();
   const tabs = [
-    { id: 'system', icon: 'smart_toy', label: 'System' },
-    { id: 'stores', icon: 'forum', label: 'Stores', badge: unreadTotal },
+    { id: 'system', icon: 'smart_toy', label: 'System', badge: unreadSystem },
+    { id: 'stores', icon: 'forum', label: 'Stores', badge: unreadStores },
     { id: 'faq', icon: 'help', label: 'FAQ' },
   ];
   return (
