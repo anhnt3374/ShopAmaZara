@@ -13,8 +13,14 @@ const baseCtx = (overrides: Partial<Record<string, unknown>> = {}) => ({
   ...overrides,
 });
 
+const makeRegistry = () => ({
+  put: jest.fn(),
+  get: jest.fn().mockReturnValue(null),
+  delete: jest.fn(),
+});
+
 describe('order tools', () => {
-  it('create_preorder builds draft, sets pendingPreorder, pushes confirm_card', async () => {
+  it('create_preorder builds draft, sets pendingPreorder, stores in registry, pushes confirm_card', async () => {
     const draft = {
       preorderId: 'PRE-ABC123',
       items: [
@@ -42,15 +48,18 @@ describe('order tools', () => {
       expiresAt: Date.now() + 60_000,
     };
     const buildPreorder = jest.fn().mockResolvedValue(draft);
+    const registry = makeRegistry();
     const ctx = baseCtx();
     const tool = makeCreatePreorderTool({
       orders: { buildPreorder } as unknown as never,
+      registry: registry as unknown as never,
     });
     const out = await tool.invoke(
       { items: [{ productId: 'p1', qty: 1 }], addressId: 'a1', paymentMethod: 'cod' },
       { configurable: ctx as never },
     );
     expect(buildPreorder).toHaveBeenCalledWith('u1', [{ productId: 'p1', qty: 1 }], 'a1', 'cod');
+    expect(registry.put).toHaveBeenCalledWith(draft);
     expect(ctx.setPendingPreorder).toHaveBeenCalledWith(draft);
     expect(ctx.pushBlock).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'confirm_card', preorderId: 'PRE-ABC123' }),
@@ -58,7 +67,7 @@ describe('order tools', () => {
     expect(JSON.parse(out as string)).toMatchObject({ preorderId: 'PRE-ABC123' });
   });
 
-  it('confirm_order finalizes when draft id matches', async () => {
+  it('confirm_order finalizes via same-turn closure draft', async () => {
     const draft = {
       preorderId: 'PRE-X',
       items: [],
@@ -71,15 +80,18 @@ describe('order tools', () => {
     const createFromPreorder = jest
       .fn()
       .mockResolvedValue({ orderId: 'o1', total: '10', status: 'Paid' });
+    const registry = makeRegistry();
     const ctx = baseCtx({ getPendingPreorder: jest.fn().mockReturnValue(draft) });
     const tool = makeConfirmOrderTool({
       orders: { createFromPreorder } as unknown as never,
+      registry: registry as unknown as never,
     });
     const out = await tool.invoke(
       { preorderId: 'PRE-X' },
       { configurable: ctx as never },
     );
     expect(createFromPreorder).toHaveBeenCalledWith('u1', draft);
+    expect(registry.delete).toHaveBeenCalledWith('PRE-X');
     expect(ctx.setPendingPreorder).toHaveBeenCalledWith(null);
     expect(ctx.pushBlock).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'order_success', orderId: 'o1' }),
@@ -87,10 +99,41 @@ describe('order tools', () => {
     expect(JSON.parse(out as string)).toMatchObject({ orderId: 'o1' });
   });
 
-  it('confirm_order returns expired when draft is missing', async () => {
+  it('confirm_order falls back to registry across turns', async () => {
+    const draft = {
+      preorderId: 'PRE-X',
+      items: [],
+      addressId: 'a',
+      shipping: {} as never,
+      paymentMethod: 'cod' as const,
+      total: '10',
+      expiresAt: Date.now() + 60_000,
+    };
+    const createFromPreorder = jest
+      .fn()
+      .mockResolvedValue({ orderId: 'o1', total: '10', status: 'Paid' });
+    const registry = makeRegistry();
+    registry.get.mockReturnValue(draft);
+    const ctx = baseCtx(); // getPendingPreorder returns null (fresh turn)
+    const tool = makeConfirmOrderTool({
+      orders: { createFromPreorder } as unknown as never,
+      registry: registry as unknown as never,
+    });
+    await tool.invoke(
+      { preorderId: 'PRE-X' },
+      { configurable: ctx as never },
+    );
+    expect(registry.get).toHaveBeenCalledWith('PRE-X');
+    expect(createFromPreorder).toHaveBeenCalledWith('u1', draft);
+    expect(registry.delete).toHaveBeenCalledWith('PRE-X');
+  });
+
+  it('confirm_order returns expired when neither closure nor registry has the draft', async () => {
+    const registry = makeRegistry(); // .get returns null by default
     const ctx = baseCtx();
     const tool = makeConfirmOrderTool({
       orders: { createFromPreorder: jest.fn() } as unknown as never,
+      registry: registry as unknown as never,
     });
     const out = await tool.invoke(
       { preorderId: 'PRE-X' },
@@ -99,7 +142,8 @@ describe('order tools', () => {
     expect(JSON.parse(out as string)).toMatchObject({ ok: false, error: 'expired' });
   });
 
-  it('confirm_order returns expired when draft id mismatches', async () => {
+  it('confirm_order returns expired when preorderId mismatches', async () => {
+    const registry = makeRegistry();
     const ctx = baseCtx({
       getPendingPreorder: jest
         .fn()
@@ -107,6 +151,7 @@ describe('order tools', () => {
     });
     const tool = makeConfirmOrderTool({
       orders: { createFromPreorder: jest.fn() } as unknown as never,
+      registry: registry as unknown as never,
     });
     const out = await tool.invoke(
       { preorderId: 'PRE-X' },

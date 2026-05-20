@@ -1,6 +1,7 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import type { OrdersService } from '../../../orders/orders.service';
+import type { PreorderRegistry } from '../../preorder-registry';
 import type { ContentBlock } from '../../rich-message';
 import { ctxFromConfig } from './tool-context';
 
@@ -17,7 +18,10 @@ const PreorderSchema = z.object({
   paymentMethod: z.enum(['card', 'ewallet', 'bank', 'cod']).default('cod'),
 });
 
-export function makeCreatePreorderTool(deps: { orders: OrdersService }) {
+export function makeCreatePreorderTool(deps: {
+  orders: OrdersService;
+  registry: PreorderRegistry;
+}) {
   return new DynamicStructuredTool({
     name: 'create_preorder',
     description:
@@ -32,6 +36,9 @@ export function makeCreatePreorderTool(deps: { orders: OrdersService }) {
           input.addressId,
           input.paymentMethod,
         );
+        // Persist the draft outside the request closure so the user can hit
+        // Confirm on a later turn and still hit a valid draft.
+        deps.registry.put(draft);
         ctx.setPendingPreorder(draft);
         const block: ContentBlock = {
           type: 'confirm_card',
@@ -66,7 +73,10 @@ export function makeCreatePreorderTool(deps: { orders: OrdersService }) {
 
 const ConfirmSchema = z.object({ preorderId: z.string() });
 
-export function makeConfirmOrderTool(deps: { orders: OrdersService }) {
+export function makeConfirmOrderTool(deps: {
+  orders: OrdersService;
+  registry: PreorderRegistry;
+}) {
   return new DynamicStructuredTool({
     name: 'confirm_order',
     description:
@@ -74,12 +84,15 @@ export function makeConfirmOrderTool(deps: { orders: OrdersService }) {
     schema: ConfirmSchema,
     func: async (input, _r, config) => {
       const ctx = ctxFromConfig(config);
-      const draft = ctx.getPendingPreorder();
+      // Same-turn fast path: the closure still has the draft.
+      // Cross-turn (the common case): look it up in the registry.
+      const draft = ctx.getPendingPreorder() ?? deps.registry.get(input.preorderId);
       if (!draft || draft.preorderId !== input.preorderId) {
         return JSON.stringify({ ok: false, error: 'expired' });
       }
       try {
         const result = await deps.orders.createFromPreorder(ctx.userId, draft);
+        deps.registry.delete(draft.preorderId);
         ctx.setPendingPreorder(null);
         ctx.pushBlock({
           type: 'order_success',

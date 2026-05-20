@@ -267,9 +267,9 @@ export class OrdersService {
       order: { createdAt: 'DESC' },
       relations: { items: true },
     });
-    return {
-      items: orders.map((o) => this.toBuyerListView(o)),
-    };
+    const views = orders.map((o) => this.toBuyerListView(o));
+    await this.hydrateOrderItemImages(views);
+    return { items: views };
   }
 
   async findOneForBuyer(buyerId: string, id: string) {
@@ -279,7 +279,32 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException('Order not found');
     if (order.buyerId !== buyerId) throw new ForbiddenException('Not your order');
-    return this.toBuyerDetailView(order);
+    const view = this.toBuyerDetailView(order);
+    await this.hydrateOrderItemImages([view]);
+    return view;
+  }
+
+  /**
+   * OrderItem doesn't snapshot the image at creation time, so the buyer order
+   * views look up each referenced product once per request and attach the
+   * imageFirst URL. Skipped (image=null) when the product was deleted.
+   */
+  private async hydrateOrderItemImages(
+    views: Array<{ items: Array<{ productId: string; image?: string | null }> }>,
+  ): Promise<void> {
+    const ids = new Set<string>();
+    for (const v of views) for (const it of v.items) if (it.productId) ids.add(it.productId);
+    if (ids.size === 0) return;
+    const rows = await this.products.find({
+      where: { id: In([...ids]) },
+      select: { id: true, imageFirst: true },
+    });
+    const byId = new Map(rows.map((p) => [p.id, p.imageFirst ?? null]));
+    for (const v of views) {
+      for (const it of v.items) {
+        it.image = byId.get(it.productId) ?? null;
+      }
+    }
   }
 
   private toBuyerListView(o: Order) {

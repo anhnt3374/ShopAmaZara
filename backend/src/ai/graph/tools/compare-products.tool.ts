@@ -11,7 +11,8 @@ const Schema = z.object({
 export function makeCompareProductsTool(deps: { products: ProductsService }) {
   return new DynamicStructuredTool({
     name: 'compare_products',
-    description: 'Fetch full detail for 2-4 products to compare side by side.',
+    description:
+      'Call this whenever the user asks to compare or contrast products ("compare A and B", "which is better?", "what is the difference?"). Pass 2-4 productIds taken from the most recent product list. Returns brand / category / price / stock / rating / highlights for each so you can write a substantive comparison.',
     schema: Schema,
     func: async (input, _r, config) => {
       const ctx = ctxFromConfig(config);

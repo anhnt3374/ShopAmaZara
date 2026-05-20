@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ChatGroq } from '@langchain/groq';
 import { AiService, AI_GRAPH } from './ai.service';
 import { AiLogger } from './ai.logger';
+import { PreorderRegistry } from './preorder-registry';
 import { ChatsModule } from '../chats/chats.module';
 import { ProductsModule } from '../products/products.module';
 import { CartModule } from '../cart/cart.module';
@@ -38,6 +39,7 @@ import { makeSuggestSimilarTool } from './graph/tools/suggest-similar.tool';
   ],
   providers: [
     AiLogger,
+    PreorderRegistry,
     {
       provide: AI_GRAPH,
       inject: [
@@ -46,6 +48,7 @@ import { makeSuggestSimilarTool } from './graph/tools/suggest-similar.tool';
         CartService,
         WishlistService,
         OrdersService,
+        PreorderRegistry,
       ],
       useFactory: (
         config: ConfigService,
@@ -53,6 +56,7 @@ import { makeSuggestSimilarTool } from './graph/tools/suggest-similar.tool';
         cart: CartService,
         wishlist: WishlistService,
         orders: OrdersService,
+        registry: PreorderRegistry,
       ) => {
         const tools = [
           makeSearchProductsTool({ products }),
@@ -60,8 +64,8 @@ import { makeSuggestSimilarTool } from './graph/tools/suggest-similar.tool';
           makeAddToCartTool({ cart }),
           makeRemoveFromCartTool({ cart }),
           makeToggleWishlistTool({ wishlist }),
-          makeCreatePreorderTool({ orders }),
-          makeConfirmOrderTool({ orders }),
+          makeCreatePreorderTool({ orders, registry }),
+          makeConfirmOrderTool({ orders, registry }),
           makeCancelOrderTool({ orders }),
           makeLookupOrderTool({ orders }),
           makeSuggestSimilarTool({ products }),
