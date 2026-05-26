@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { ApiError } from '../services/api.js';
@@ -17,6 +17,7 @@ export default function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +28,8 @@ export default function AuthPage() {
         mode === 'signin'
           ? await login({ email, password })
           : await register({ email, password, fullName, role });
-      navigate(user.role === 'seller' ? '/store' : '/');
+      const from = location.state?.from;
+      navigate(from || (user.role === 'seller' ? '/store' : '/'), { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
