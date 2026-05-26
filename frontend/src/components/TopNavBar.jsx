@@ -5,20 +5,23 @@ import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const links = [
-  { to: '/', label: 'Shop', end: true },
-  { to: '/search', label: 'Deals' },
-  { to: '/store', label: 'Sell' },
-  { to: '/policy', label: 'Support' },
-];
-
 export default function TopNavBar() {
   const navigate = useNavigate();
   const { count } = useCart();
   const { ids: wishlistIds } = useWishlist();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [query, setQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isSeller = isAuthenticated && user?.role === 'seller';
+  const showBuyerTools = !isSeller; // guests + buyers see cart/wishlist/messages
+  const accountTo = isSeller ? '/store' : isAuthenticated ? '/account' : '/auth';
+  const links = [
+    { to: '/', label: 'Shop', end: true },
+    { to: '/search', label: 'Deals' },
+    { to: '/policy', label: 'Support' },
+    ...(isSeller ? [{ to: '/store', label: 'Dashboard' }] : []),
+  ];
 
   function submitSearch(e) {
     e.preventDefault();
@@ -76,42 +79,46 @@ export default function TopNavBar() {
             <Icon name="search" />
           </button>
 
-          <NavLink
-            to="/wishlist"
-            aria-label="Wishlist"
-            className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all relative"
-          >
-            <Icon name="favorite" />
-            {wishlistIds.length > 0 && (
-              <span className="absolute top-1 right-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold h-4 min-w-4 px-1 rounded-full flex items-center justify-center">
-                {wishlistIds.length}
-              </span>
-            )}
-          </NavLink>
+          {showBuyerTools && (
+            <>
+              <NavLink
+                to="/wishlist"
+                aria-label="Wishlist"
+                className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all relative"
+              >
+                <Icon name="favorite" />
+                {wishlistIds.length > 0 && (
+                  <span className="absolute top-1 right-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold h-4 min-w-4 px-1 rounded-full flex items-center justify-center">
+                    {wishlistIds.length}
+                  </span>
+                )}
+              </NavLink>
+
+              <NavLink
+                to="/cart"
+                aria-label="Cart"
+                className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all relative"
+              >
+                <Icon name="shopping_cart" />
+                {count > 0 && (
+                  <span className="absolute top-1 right-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold h-4 min-w-4 px-1 rounded-full flex items-center justify-center">
+                    {count}
+                  </span>
+                )}
+              </NavLink>
+
+              <NavLink
+                to="/messages"
+                aria-label="Messages"
+                className="hidden sm:inline-flex p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all"
+              >
+                <Icon name="chat" />
+              </NavLink>
+            </>
+          )}
 
           <NavLink
-            to="/cart"
-            aria-label="Cart"
-            className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all relative"
-          >
-            <Icon name="shopping_cart" />
-            {count > 0 && (
-              <span className="absolute top-1 right-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold h-4 min-w-4 px-1 rounded-full flex items-center justify-center">
-                {count}
-              </span>
-            )}
-          </NavLink>
-
-          <NavLink
-            to="/messages"
-            aria-label="Messages"
-            className="hidden sm:inline-flex p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all"
-          >
-            <Icon name="chat" />
-          </NavLink>
-
-          <NavLink
-            to={isAuthenticated ? '/account' : '/auth'}
+            to={accountTo}
             aria-label="Account"
             className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-all"
           >
