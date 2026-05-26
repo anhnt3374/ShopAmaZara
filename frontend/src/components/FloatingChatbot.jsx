@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useChat } from '../context/ChatContext.jsx';
@@ -16,7 +16,19 @@ const FAQ_ITEMS = [
 
 export default function FloatingChatbot() {
   const { open, toggleChat, closeChat, view, setView, unreadTotal } = useChat();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isBuyer = isAuthenticated && user?.role === 'buyer';
   const fabBadge = unreadTotal > 0;
+
+  function handleFabClick() {
+    if (!isBuyer) {
+      navigate('/auth', { state: { from: location.pathname + location.search } });
+      return;
+    }
+    toggleChat();
+  }
 
   return (
     <>
@@ -26,7 +38,7 @@ export default function FloatingChatbot() {
       {!open && (
         <button
           type="button"
-          onClick={toggleChat}
+          onClick={handleFabClick}
           aria-label="Open chat"
           className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-primary text-on-primary rounded-full shadow-overlay flex items-center justify-center hover:bg-primary-container transition-all duration-150 hover:scale-105 active:scale-95"
         >
