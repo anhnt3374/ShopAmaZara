@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
+import { useBuyerAction } from '../hooks/useBuyerAction.js';
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
+  const runBuyerAction = useBuyerAction();
   const isWishlisted = has(product.id);
   const discountBadge =
     product.discountLabel ?? (product.discount > 0 ? `-${product.discount}%` : null);
@@ -25,7 +27,7 @@ export default function ProductCard({ product }) {
       )}
       <button
         type="button"
-        onClick={() => toggle(product)}
+        onClick={() => runBuyerAction(() => toggle(product))}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         className={`absolute top-3 right-3 z-10 p-2 bg-surface/80 backdrop-blur-sm rounded-full transition-all duration-200 ${
           isWishlisted
@@ -79,7 +81,7 @@ export default function ProductCard({ product }) {
           </div>
           <button
             type="button"
-            onClick={() => addItem(product)}
+            onClick={() => runBuyerAction(() => addItem(product))}
             aria-label="Add to cart"
             disabled={!product.inStock}
             className="bg-surface-container hover:bg-surface-container-high text-primary p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
