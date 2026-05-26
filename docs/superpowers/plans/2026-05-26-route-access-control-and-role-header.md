@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 18, react-router-dom ^6.26 (`Outlet`, `Navigate`, nested/pathless routes), Vite. Spec: `docs/superpowers/specs/2026-05-26-route-access-control-and-role-header-design.md`.
 
-**Note on verification:** The frontend has no automated test harness. Each task is verified with `npm run lint` + `npm run build` (compile/lint gate) and, where behavior changes, a manual browser check against a running dev server (`docker compose up -d` or `cd frontend && npm run dev`). Use seeded accounts — buyer `buyer01@amazara.local`, seller `seller01@amazara.local`, password `password123`.
+**Note on verification:** The frontend has no automated test harness, and the repo's `lint` script references an eslint that is not installed (no eslint config present) — so the compile gate is **`npm run build`** only (the Vite build, which type-checks JSX resolution and imports). Where behavior changes, also do a manual browser check against a running dev server (`docker compose up -d` or `cd frontend && npm run dev`). Use seeded accounts — buyer `buyer01@amazara.local`, seller `seller01@amazara.local`, password `password123`.
 
 ---
 
@@ -99,7 +99,7 @@ export default function RedirectIfAuthed() {
 
 - [ ] **Step 4: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS (no eslint errors; build succeeds). The new files are not yet imported anywhere, so behavior is unchanged.
 
 - [ ] **Step 5: Commit**
@@ -207,7 +207,7 @@ export const router = createBrowserRouter([
 
 - [ ] **Step 2: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS.
 
 - [ ] **Step 3: Manual verification (dev server running)**
@@ -273,7 +273,7 @@ with:
 
 - [ ] **Step 4: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS.
 
 - [ ] **Step 5: Manual verification**
@@ -402,7 +402,7 @@ with:
 
 - [ ] **Step 5: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS.
 
 - [ ] **Step 6: Manual verification**
@@ -457,7 +457,7 @@ export function useBuyerAction() {
 
 - [ ] **Step 2: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS. (Not imported anywhere yet.)
 
 - [ ] **Step 3: Commit**
@@ -701,7 +701,7 @@ with:
 
 - [ ] **Step 7: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS. Watch for unused-variable lint errors — `addCartItem` (Cart) and
 `addWishlistItem` (Wishlist) must still be imported because `addItem` / `toggle` use them.
 `fetchCart` / `fetchWishlist` are still used by the hydrate paths.
@@ -787,7 +787,7 @@ with:
 
 - [ ] **Step 4: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS.
 
 - [ ] **Step 5: Manual verification**
@@ -880,7 +880,7 @@ with:
 
 - [ ] **Step 5: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS.
 
 - [ ] **Step 6: Manual verification**
@@ -964,7 +964,7 @@ with:
 
 - [ ] **Step 4: Lint + build**
 
-Run: `cd frontend && npm run lint && npm run build`
+Run: `cd frontend && npm run build`
 Expected: PASS.
 
 - [ ] **Step 5: Manual verification**
