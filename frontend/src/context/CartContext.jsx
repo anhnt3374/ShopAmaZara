@@ -16,25 +16,7 @@ import {
   updateCartItem,
 } from '../services/cart.js';
 
-const STORAGE_KEY = 'amazara.cart.v1';
 const CartContext = createContext(null);
-
-function load() {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function save(items) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    /* ignore quota */
-  }
-}
 
 // Server's CartItemView -> the local row shape the rest of the app uses
 function mapServerRow(row, previousSelectedMap) {
@@ -55,14 +37,12 @@ export function CartProvider({ children }) {
   const { isAuthenticated } = useAuth();
   const toast = useToast();
 
-  const [items, setItems] = useState(load);
+  const [items, setItems] = useState([]);
   const itemsRef = useRef(items);
-  const wasAuthRef = useRef(isAuthenticated);
 
   useEffect(() => {
     itemsRef.current = items;
-    if (!isAuthenticated) save(items);
-  }, [items, isAuthenticated]);
+  }, [items]);
 
   const refetchFromServer = useCallback(async () => {
     try {
@@ -77,41 +57,14 @@ export function CartProvider({ children }) {
     }
   }, [toast]);
 
-  // Hydrate / sync on auth state change
+  // Cart is buyer-only: hydrate from the server when logged in, clear otherwise.
   useEffect(() => {
-    const justLoggedIn = isAuthenticated && !wasAuthRef.current;
-    const justLoggedOut = !isAuthenticated && wasAuthRef.current;
-    wasAuthRef.current = isAuthenticated;
-
     if (!isAuthenticated) {
-      if (justLoggedOut) setItems(load());
+      setItems([]);
       return;
     }
-
-    let cancelled = false;
-    (async () => {
-      try {
-        if (justLoggedIn) {
-          // Best-effort: push guest cart to server
-          const guest = itemsRef.current;
-          if (guest.length) {
-            await Promise.all(
-              guest.map((g) => addCartItem(g.id, g.quantity).catch(() => null)),
-            );
-            save([]);
-          }
-        }
-        if (cancelled) return;
-        await refetchFromServer();
-      } catch {
-        /* refetchFromServer already toasted */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+    refetchFromServer();
+  }, [isAuthenticated, refetchFromServer]);
 
   const addItem = useCallback(
     (product, quantity = 1) => {
