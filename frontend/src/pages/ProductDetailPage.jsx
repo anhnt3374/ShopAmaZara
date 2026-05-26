@@ -6,6 +6,7 @@ import { useWishlist } from '../context/WishlistContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useChat } from '../context/ChatContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useBuyerAction } from '../hooks/useBuyerAction.js';
 import { getProduct } from '../services/products.js';
 import { reviewsService } from '../services/reviews.js';
 
@@ -26,6 +27,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
+  const runBuyerAction = useBuyerAction();
   const { isAuthenticated } = useAuth();
   const { ensureStoreChat } = useChat();
   const toast = useToast();
@@ -83,7 +85,7 @@ export default function ProductDetailPage() {
   async function submitReview(e) {
     e.preventDefault();
     if (!isAuthenticated) {
-      navigate('/auth', { state: { from: `/products/${id}` } });
+      navigate('/auth', { state: { from: `/product/${id}` } });
       return;
     }
     setSubmitting(true);
@@ -170,7 +172,7 @@ export default function ProductDetailPage() {
             <span className="text-label-md text-primary uppercase tracking-wider">{product.brand}</span>
             <button
               type="button"
-              onClick={() => toggle(product)}
+              onClick={() => runBuyerAction(() => toggle(product))}
               aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
               className={`p-2 rounded-full transition-colors ${
                 isWishlisted ? 'text-error bg-error-container/50' : 'text-on-surface-variant hover:text-error hover:bg-surface-container'
@@ -261,7 +263,7 @@ export default function ProductDetailPage() {
             </div>
             <button
               type="button"
-              onClick={() => addItem(product, qty)}
+              onClick={() => runBuyerAction(() => addItem(product, qty))}
               className="btn-secondary flex-1 h-12"
             >
               <Icon name="shopping_cart" />
@@ -269,7 +271,7 @@ export default function ProductDetailPage() {
             </button>
             <button
               type="button"
-              onClick={() => addItem(product, qty)}
+              onClick={() => runBuyerAction(() => addItem(product, qty))}
               className="btn-primary flex-1 h-12 shadow-lifted"
             >
               Buy Now
