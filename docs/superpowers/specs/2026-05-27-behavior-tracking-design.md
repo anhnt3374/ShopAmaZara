@@ -59,8 +59,8 @@ the same product in two orders appends two `+5` events.
 
 ## Weights
 
-`purchase +5 · add_to_cart +3 · remove_from_cart -2 · add_to_wishlist +3 · remove_wishlist -2 · view +1`
-(cart weights mirror wishlist). Review weight by rating:
+`purchase +5 · add_to_cart +4 · remove_from_cart -2 · add_to_wishlist +3 · remove_wishlist -2 · view +1`
+(cart-add is one notch above wishlist-add to reflect stronger purchase intent). Review weight by rating:
 `5 → +4`, `4 → +3`, `3 → +1`, `2 → -3`, `1 → -3`. A `reviewWeight(rating)` helper:
 `rating >= 5 ? 4 : rating === 4 ? 3 : rating === 3 ? 1 : -3`. Fixed weights live in a `WEIGHTS`
 constant.
