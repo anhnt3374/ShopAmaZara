@@ -41,7 +41,8 @@ def _fetch_image(url):
 
 
 def _normalize(t):
-    return t / t.norm(dim=-1, keepdim=True)
+    # clamp guards against a zero-norm vector producing NaN (poisons cosine later)
+    return t / t.norm(dim=-1, keepdim=True).clamp(min=1e-12)
 
 
 def embed_texts(texts):
