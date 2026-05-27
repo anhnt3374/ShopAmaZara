@@ -1,18 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Product } from '../products/product.entity';
 import { toProductSummary } from '../products/dto/product-views';
 import { WishlistItem } from './wishlist-item.entity';
+import { BehaviorService } from '../behavior/behavior.service';
 
 @Injectable()
 export class WishlistService {
+  private readonly behaviorLog = new Logger('WishlistService:behavior');
+
   constructor(
     @InjectRepository(WishlistItem)
     private readonly items: Repository<WishlistItem>,
     @InjectRepository(Product)
     private readonly products: Repository<Product>,
+    @Optional() private readonly behavior?: BehaviorService,
   ) {}
+
+  private fireBehavior(fn: () => Promise<void>): void {
+    if (!this.behavior) return;
+    Promise.resolve()
+      .then(fn)
+      .catch((err) =>
+        this.behaviorLog.warn(`behavior hook failed: ${err instanceof Error ? err.message : String(err)}`),
+      );
+  }
 
   async list(userId: string) {
     const rows = await this.items.find({
@@ -36,10 +49,12 @@ export class WishlistService {
     if (existing) return { item: existing, created: false };
     const entity = this.items.create({ userId, productId });
     const saved = await this.items.save(entity);
+    this.fireBehavior(() => this.behavior!.recordWishlistAdd(userId, productId));
     return { item: saved, created: true };
   }
 
   async remove(userId: string, productId: string): Promise<void> {
     await this.items.delete({ userId, productId });
+    this.fireBehavior(() => this.behavior!.recordWishlistRemove(userId, productId));
   }
 }

@@ -3,7 +3,9 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
@@ -15,6 +17,7 @@ import { UserAddress } from '../addresses/address.entity';
 import { CheckoutDto } from './dto/checkout.dto';
 import { OrderItem } from './order-item.entity';
 import { Order } from './order.entity';
+import { BehaviorService } from '../behavior/behavior.service';
 
 export type PreorderItemInput = { productId: string; qty: number };
 
@@ -48,12 +51,24 @@ const makePreorderId = () => `PRE-${customAlphabet('ABCDEFGHJKMNPQRSTUVWXYZ23456
 
 @Injectable()
 export class OrdersService {
+  private readonly behaviorLog = new Logger('OrdersService:behavior');
+
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(Order) private readonly orders: Repository<Order>,
     @InjectRepository(Product) private readonly products: Repository<Product>,
     @InjectRepository(UserAddress) private readonly addresses: Repository<UserAddress>,
+    @Optional() private readonly behavior?: BehaviorService,
   ) {}
+
+  private fireBehavior(fn: () => Promise<void>): void {
+    if (!this.behavior) return;
+    Promise.resolve()
+      .then(fn)
+      .catch((err) =>
+        this.behaviorLog.warn(`behavior hook failed: ${err instanceof Error ? err.message : String(err)}`),
+      );
+  }
 
   async buildPreorder(
     userId: string,
@@ -111,7 +126,8 @@ export class OrdersService {
   }
 
   async checkout(buyerId: string, dto: CheckoutDto): Promise<{ orderId: string; total: number; status: 'Paid' }> {
-    return this.dataSource.transaction(async (manager) => {
+    let purchasedIds: string[] = [];
+    const result = await this.dataSource.transaction(async (manager) => {
       // 1. cart rows
       const cartRows = await manager.find(CartItem, {
         where: { userId: buyerId, productId: In(dto.productIds) },
@@ -120,6 +136,7 @@ export class OrdersService {
 
       // 2. products
       const productIds = cartRows.map((r) => r.productId);
+      purchasedIds = productIds;
       const products = await manager.find(Product, { where: { id: In(productIds) } });
       const byId = new Map(products.map((p) => [p.id, p]));
 
@@ -201,8 +218,10 @@ export class OrdersService {
       // 8. clear cart rows
       await manager.delete(CartItem, { userId: buyerId, productId: In(productIds) });
 
-      return { orderId: String(savedOrder.id), total, status: 'Paid' };
+      return { orderId: String(savedOrder.id), total, status: 'Paid' as const };
     });
+    this.fireBehavior(() => this.behavior!.recordPurchase(buyerId, purchasedIds));
+    return result;
   }
 
   async createFromPreorder(
@@ -212,7 +231,8 @@ export class OrdersService {
     if (Date.now() > draft.expiresAt) {
       throw new BadRequestException('Preorder expired');
     }
-    return this.dataSource.transaction(async (manager) => {
+    const purchasedIds = draft.items.map((it) => it.productId);
+    const result = await this.dataSource.transaction(async (manager) => {
       for (const it of draft.items) {
         const res = await manager.query(
           'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?',
@@ -255,6 +275,8 @@ export class OrdersService {
       await manager.save(itemEntities);
       return { orderId: String(savedOrder.id), total: draft.total, status: 'Paid' as const };
     });
+    this.fireBehavior(() => this.behavior!.recordPurchase(userId, purchasedIds));
+    return result;
   }
 
   async listForBuyer(buyerId: string, status?: string) {
