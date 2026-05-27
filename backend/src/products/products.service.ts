@@ -75,6 +75,8 @@ export class ProductsService {
       try {
         let userPreference;
         if (userId && this.preference) {
+          // PreferenceService is best-effort today, but don't rely on that here —
+          // a fetch failure must still leave search unpersonalized, not abort it.
           try {
             userPreference = await this.preference.getPreferenceVectors(userId);
           } catch (err) {
