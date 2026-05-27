@@ -56,6 +56,17 @@ describe('SearchService.search', () => {
     expect(many.components.boost).toBeGreaterThan(few.components.boost);
   });
 
+  it('a malformed (non-numeric) payload yields a finite score, never NaN', async () => {
+    const retrieved = [
+      { id: 'bad', payload: { discount: 'n/a', rating: 'x', reviewCount: 'oops' }, vectors: { desc: [1, 0] } },
+    ];
+    const { text, image, qdrant } = deps(retrieved);
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const hits = await svc.search({ query: 'x' });
+    expect(Number.isFinite(hits[0].score)).toBe(true);
+    expect(hits[0].components.boost).toBe(0);
+  });
+
   it('returns [] when no candidates', async () => {
     const { text, image, qdrant } = deps([]);
     const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());

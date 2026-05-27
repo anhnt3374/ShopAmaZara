@@ -24,9 +24,11 @@ function dot(a: number[], b: number[]): number {
 }
 
 function boostScore(payload: Record<string, unknown>): number {
-  const discount = Number(payload.discount ?? 0) / 100;
-  const rating = Number(payload.rating ?? 0) / 5;
-  const reviewCount = Number(payload.reviewCount ?? 0);
+  // `|| 0` coerces a NaN (malformed/non-numeric payload value) to 0 so a single
+  // bad row can't poison the whole result-set sort with NaN.
+  const discount = Math.max(0, Math.min(100, Number(payload.discount ?? 0) || 0)) / 100;
+  const rating = Math.max(0, Math.min(5, Number(payload.rating ?? 0) || 0)) / 5;
+  const reviewCount = Math.max(0, Number(payload.reviewCount ?? 0) || 0);
   const conf = Math.min(1, Math.log1p(reviewCount) / Math.log(50));
   const v = 0.5 * discount + 0.5 * rating * conf;
   return Math.max(0, Math.min(1, v));
