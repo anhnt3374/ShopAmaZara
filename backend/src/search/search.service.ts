@@ -96,6 +96,10 @@ export class SearchService {
     if (ids.length === 0) return [];
 
     const points = await this.qdrant.retrieveWithVectors(ids);
+    // Only blend when there is an actual preference vector — an empty {} (a
+    // logged-in buyer with no history) must not uniformly shrink every score by α.
+    const pref = params.userPreference;
+    const hasPref = !!pref && !!(pref.desc || pref.attr || pref.image);
     const hits: RankedHit[] = points.map((p) => {
       const sDesc = p.vectors.desc ? Math.max(0, dot(qBge, p.vectors.desc)) : 0;
       const sAttr = p.vectors.attr ? Math.max(0, dot(qBge, p.vectors.attr)) : 0;
@@ -106,9 +110,8 @@ export class SearchService {
         this.weights.attr * sAttr +
         this.weights.image * sImage +
         this.weights.boost * sBoost;
-      const score = params.userPreference
-        ? (1 - this.alpha) * queryScore +
-          this.alpha * personalizationScore(params.userPreference, p.vectors, this.weights)
+      const score = hasPref
+        ? (1 - this.alpha) * queryScore + this.alpha * personalizationScore(pref!, p.vectors, this.weights)
         : queryScore;
       return { id: p.id, score, components: { desc: sDesc, attr: sAttr, image: sImage, boost: sBoost } };
     });

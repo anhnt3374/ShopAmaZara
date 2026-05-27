@@ -109,4 +109,17 @@ describe('SearchService.search', () => {
     const hits = await svc.search({ query: 'x' });
     expect(hits[0].score).toBeCloseTo(0.55, 5);
   });
+
+  it('an empty userPreference {} does not shrink the score (no-history buyer)', async () => {
+    const retrieved = [{ id: 'p', payload: {}, vectors: { desc: [1, 0] } }];
+    const text = { embed: jest.fn().mockResolvedValue([[1, 0]]) };
+    const image = { embedText: jest.fn().mockResolvedValue([[0, 1]]) };
+    const qdrant = {
+      searchVector: jest.fn().mockResolvedValue(['p']),
+      retrieveWithVectors: jest.fn().mockResolvedValue(retrieved),
+    };
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const hits = await svc.search({ query: 'x', userPreference: {} });
+    expect(hits[0].score).toBeCloseTo(0.55, 5);
+  });
 });
