@@ -26,6 +26,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/review.entity';
 import { AiModule } from './ai/ai.module';
 import { EmbeddingsModule } from './embeddings/embeddings.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { EmbeddingsModule } from './embeddings/embeddings.module';
     ReviewsModule,
     AiModule,
     EmbeddingsModule,
+    SearchModule,
   ],
   controllers: [AppController],
 })
