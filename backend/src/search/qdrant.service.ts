@@ -48,6 +48,7 @@ const PAYLOAD_INDEXES: Array<[string, PayloadIndexSchema]> = [
   ['brand', 'keyword'],
   ['storeId', 'keyword'],
   ['targetGender', 'keyword'],
+  ['targetAgeGroup', 'keyword'],
   ['price', 'float'],
   ['isPublished', 'bool'],
 ];

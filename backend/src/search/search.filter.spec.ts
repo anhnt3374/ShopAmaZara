@@ -24,6 +24,7 @@ describe('buildFilter', () => {
 
   it('adds a price range with gte/lte when provided', () => {
     expect(buildFilter({ minPrice: 10, maxPrice: 50 }).must).toContainEqual({ key: 'price', range: { gte: 10, lte: 50 } });
+    expect(buildFilter({ minPrice: 0 }).must).toContainEqual({ key: 'price', range: { gte: 0 } }); // 0 is a valid floor
     expect(buildFilter({ minPrice: 10 }).must).toContainEqual({ key: 'price', range: { gte: 10 } });
     expect(buildFilter({ maxPrice: 50 }).must).toContainEqual({ key: 'price', range: { lte: 50 } });
   });
