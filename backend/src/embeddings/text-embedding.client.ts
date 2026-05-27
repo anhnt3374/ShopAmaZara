@@ -18,22 +18,25 @@ export class TextEmbeddingClient {
     return this.config.get<string>('TEXT_EMBED_URL', 'http://text-embed:8000');
   }
   private get batchSize(): number {
-    return Number(this.config.get<string>('EMBED_BATCH_SIZE', '32'));
+    const n = Number(this.config.get<string>('EMBED_BATCH_SIZE', '32'));
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 32;
   }
   private get timeoutMs(): number {
-    return Number(this.config.get<string>('EMBED_REQUEST_TIMEOUT_MS', '30000'));
+    const n = Number(this.config.get<string>('EMBED_REQUEST_TIMEOUT_MS', '30000'));
+    return Number.isFinite(n) && n > 0 ? n : 30000;
   }
 
   async embed(texts: string[], opts: { isQuery?: boolean } = {}): Promise<number[][]> {
     if (!this.enabled) throw new Error('Embeddings disabled (EMBEDDINGS_ENABLED=false)');
     if (texts.length === 0) return [];
+    const { baseUrl, batchSize, timeoutMs } = this;
     const out: number[][] = [];
-    for (let i = 0; i < texts.length; i += this.batchSize) {
-      const batch = texts.slice(i, i + this.batchSize);
+    for (let i = 0; i < texts.length; i += batchSize) {
+      const batch = texts.slice(i, i + batchSize);
       const res = await postJson<EmbedResponse>(
-        `${this.baseUrl}/embed`,
+        `${baseUrl}/embed`,
         { texts: batch, is_query: opts.isQuery ?? false },
-        this.timeoutMs,
+        timeoutMs,
       );
       out.push(...res.vectors);
     }

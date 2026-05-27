@@ -1,7 +1,11 @@
 import { ImageEmbeddingClient } from './image-embedding.client';
 
 function makeConfig(overrides: Record<string, string> = {}) {
-  const values: Record<string, string> = { EMBED_BATCH_SIZE: '2', ...overrides };
+  const values: Record<string, string> = {
+    EMBED_BATCH_SIZE: '2',
+    EMBEDDINGS_ENABLED: 'true',
+    ...overrides,
+  };
   return { get: (key: string, def?: string) => values[key] ?? def } as any;
 }
 
@@ -42,5 +46,13 @@ describe('ImageEmbeddingClient', () => {
   it('throws when disabled', async () => {
     const client = new ImageEmbeddingClient(makeConfig({ EMBEDDINGS_ENABLED: 'false' }));
     await expect(client.embedImages(['u'])).rejects.toThrow(/disabled/);
+  });
+
+  it('throws on non-ok response', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: false, status: 502, text: async () => 'bad gateway' }) as any;
+    const client = new ImageEmbeddingClient(makeConfig());
+    await expect(client.embedImages(['u'])).rejects.toThrow(/502/);
   });
 });

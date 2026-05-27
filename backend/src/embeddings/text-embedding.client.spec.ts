@@ -1,7 +1,11 @@
 import { TextEmbeddingClient } from './text-embedding.client';
 
 function makeConfig(overrides: Record<string, string> = {}) {
-  const values: Record<string, string> = { EMBED_BATCH_SIZE: '2', ...overrides };
+  const values: Record<string, string> = {
+    EMBED_BATCH_SIZE: '2',
+    EMBEDDINGS_ENABLED: 'true',
+    ...overrides,
+  };
   return {
     get: (key: string, def?: string) => values[key] ?? def,
   } as any;
@@ -51,7 +55,9 @@ describe('TextEmbeddingClient', () => {
   });
 
   it('throws on non-ok response', async () => {
-    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 }) as any;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: false, status: 500, text: async () => 'boom' }) as any;
     const client = new TextEmbeddingClient(makeConfig());
     await expect(client.embed(['a'])).rejects.toThrow(/500/);
   });

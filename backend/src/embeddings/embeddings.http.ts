@@ -9,9 +9,15 @@ export async function postJson<T>(url: string, body: unknown, timeoutMs: number)
       signal: controller.signal,
     });
     if (!res.ok) {
-      throw new Error(`embed request failed: ${res.status} ${url}`);
+      const detail = await res.text().catch(() => '');
+      throw new Error(`embed request failed: ${res.status} ${url} ${detail}`.trim());
     }
     return (await res.json()) as T;
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(`embed request timed out after ${timeoutMs}ms: ${url}`);
+    }
+    throw err;
   } finally {
     clearTimeout(timer);
   }
