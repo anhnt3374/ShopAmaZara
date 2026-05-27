@@ -75,9 +75,12 @@ encoders:
   response (so the caller knows which were skipped) — it does not fail the whole batch.
 - `/embed/text` runs the FG-CLIP 2 **text** encoder (same space as images) — used in
   sub-project 3 so a text query can be matched against product *image* embeddings.
-- Model is loaded per its HuggingFace model card (e.g. `transformers` AutoModel/AutoProcessor,
-  `trust_remote_code` if the card requires it). The embedding **dimension is auto-detected**
-  from the model output at startup and surfaced via `/info` — not hardcoded.
+- Model is loaded per FG-CLIP 2's real API (`trust_remote_code`): `AutoModelForCausalLM` +
+  `AutoTokenizer` + `AutoImageProcessor`. Text uses `get_text_features(..., walk_type=...)` with
+  token-length routing (≤64 tokens → `"short"`/max_length 64, else `"long"`/max_length 196);
+  images use `processor(images, max_num_patches=…)` → `get_image_features`. `attn_implementation`
+  defaults to `eager` (safest on new GPU archs under cu13). The embedding **dimension is
+  auto-detected** from a warmup encode and surfaced via `/info` (fg-clip2-base = 768).
 
 ### Shared service conventions
 - Model loads once at startup; `/health` reports `model_loaded` so the NestJS client and
@@ -110,18 +113,26 @@ Env (documented in `backend/.env.example` and the service Dockerfiles):
 |-----|---------|---------|
 | `TEXT_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` | text service |
 | `IMAGE_EMBED_MODEL` | `qihoo360/fg-clip2-base` | image service |
-| `EMBED_DEVICE` | `cuda` | both services (set `cpu` to run without a GPU) |
+| `EMBED_DEVICE` | `cuda` | both services (`auto`/`cuda`/`cpu`; set `cpu` to run without a GPU) |
+| `IMAGE_ATTN_IMPL` | `eager` | image service (FG-CLIP attention impl) |
 | `TEXT_EMBED_URL` | `http://text-embed:8000` | backend client |
 | `IMAGE_EMBED_URL` | `http://image-embed:8000` | backend client |
 | `EMBEDDINGS_ENABLED` | `true` | backend client |
 | `EMBED_BATCH_SIZE` | `32` | backend client |
 | `EMBED_REQUEST_TIMEOUT_MS` | `30000` | backend client |
 
+Dependencies are pinned exactly to model-compatible versions (image: `transformers==4.57.6`
++ torchvision/einops/sentencepiece; text: `sentence-transformers==5.5.1` + `transformers==5.9.0`)
+— the two models require different `transformers` majors, which is why they must be separate
+services.
+
 `docker-compose.yml`:
-- Two new services `text-embed` and `image-embed` built from `ml/*/Dockerfile` (CUDA-enabled
-  PyTorch base image), each reserving the GPU via
-  `deploy.resources.reservations.devices: [{ capabilities: [gpu] }]`. On WSL2 this uses the
-  host NVIDIA GPU; setting `EMBED_DEVICE=cpu` (and dropping the reservation) runs CPU-only.
+- Two new services `text-embed` and `image-embed` built from `ml/*/Dockerfile` (slim Python base;
+  `torch`/`torchvision` installed FIRST from the PyTorch **cu130** index — those wheels bundle the
+  CUDA 13 runtime), each reserving the GPU via
+  `deploy.resources.reservations.devices: [{ driver: nvidia, count: 1, capabilities: [gpu] }]`.
+  On WSL2 this uses the host NVIDIA GPU; setting `EMBED_DEVICE=cpu` (and dropping the reservation)
+  runs CPU-only (use the cu/cpu index instead).
 - A shared named volume `hf_cache` mounted at the HuggingFace cache dir so weights download once.
 - Backend does **not** hard-`depends_on` these (model load is slow); it stays up and the client
   surfaces a clear error if a service is unreachable.
@@ -145,8 +156,10 @@ Env (documented in `backend/.env.example` and the service Dockerfiles):
 - Behavior events and weights (sub-project 4).
 - User preference vectors + profile + re-ranking (sub-project 5).
 
-## Open implementation note
-The exact FG-CLIP 2 load/encode API (library, `trust_remote_code`, preprocessing) will follow
-the `qihoo360/fg-clip2-base` model card and be confirmed during planning; the service contract
-above (normalized vectors, auto-detected dim, the two endpoints) is fixed regardless of the
-loading details.
+## Resolved implementation note
+The FG-CLIP 2 load/encode API was confirmed against a verified reference implementation:
+`AutoModelForCausalLM` + `AutoTokenizer` + `AutoImageProcessor` with `trust_remote_code`,
+`get_text_features(walk_type="short"|"long")` with token-length routing, and
+`get_image_features` with `max_num_patches`. Deps are pinned exactly and torch is pulled from
+the cu130 index. The service contract (normalized vectors, auto-detected dim, the two endpoints)
+is unchanged.
