@@ -22,3 +22,4 @@ under `superpowers/plans/`.
 | 2026-05-14 | Reviews (CRUD + product detail aggregate) | [features/reviews.md](features/reviews.md) |
 | 2026-05-19 | Chatbot — shopping agent (LangGraph + Groq) | [features/chatbot.md](features/chatbot.md) |
 | 2026-05-26 | Route access control + role-aware header | [features/route-access-control.md](features/route-access-control.md) |
+| 2026-05-28 | Semantic search + personalization (embeddings, Qdrant, behavior, re-rank) | [features/semantic-search-personalization.md](features/semantic-search-personalization.md) |
