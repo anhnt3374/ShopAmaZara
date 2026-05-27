@@ -36,9 +36,16 @@ describe('QdrantService', () => {
 
   it('ensureCollection swallows "already exists" from createCollection', async () => {
     const client = makeClient();
-    client.createCollection.mockRejectedValueOnce(new Error('already exists'));
+    client.createCollection.mockRejectedValueOnce(new Error('Collection already exists'));
     const svc = new QdrantService(client as any, makeConfig());
     await expect(svc.ensureCollection()).resolves.toBeUndefined();
+  });
+
+  it('ensureCollection re-throws a non-exists createCollection error (e.g. bad URL)', async () => {
+    const client = makeClient();
+    client.createCollection.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+    const svc = new QdrantService(client as any, makeConfig());
+    await expect(svc.ensureCollection()).rejects.toThrow(/ECONNREFUSED/);
   });
 
   it('upsert sends only the present named vectors (image omitted when absent)', async () => {

@@ -24,14 +24,16 @@ export interface ProductPoint {
 }
 
 interface QdrantLike {
-  createCollection(name: string, cfg: unknown): Promise<unknown>;
-  createPayloadIndex(name: string, cfg: unknown): Promise<unknown>;
-  upsert(name: string, body: unknown): Promise<unknown>;
-  setPayload(name: string, body: unknown): Promise<unknown>;
-  delete(name: string, body: unknown): Promise<unknown>;
+  createCollection(name: string, cfg: unknown): Promise<void>;
+  createPayloadIndex(name: string, cfg: unknown): Promise<void>;
+  upsert(name: string, body: unknown): Promise<void>;
+  setPayload(name: string, body: unknown): Promise<void>;
+  delete(name: string, body: unknown): Promise<void>;
 }
 
-const PAYLOAD_INDEXES: Array<[string, string]> = [
+type PayloadIndexSchema = 'keyword' | 'float' | 'bool';
+
+const PAYLOAD_INDEXES: Array<[string, PayloadIndexSchema]> = [
   ['category', 'keyword'],
   ['brand', 'keyword'],
   ['storeId', 'keyword'],
@@ -39,6 +41,13 @@ const PAYLOAD_INDEXES: Array<[string, string]> = [
   ['price', 'float'],
   ['isPublished', 'bool'],
 ];
+
+// Qdrant returns a 409/"already exists" when creating a collection that's there.
+function isAlreadyExists(err: unknown): boolean {
+  const status = (err as { status?: number })?.status;
+  const msg = ((err as Error)?.message ?? '').toLowerCase();
+  return status === 409 || msg.includes('already exist');
+}
 
 function pruneVectors(v: ProductVectors): Record<string, number[]> {
   const out: Record<string, number[]> = {};
@@ -81,7 +90,11 @@ export class QdrantService implements OnApplicationBootstrap {
         },
       });
     } catch (err) {
-      this.log.debug(`createCollection skipped: ${(err as Error).message}`);
+      // Already-created is expected (idempotent). Anything else (e.g. a bad
+      // QDRANT_URL / unreachable server) must surface — re-throw so the
+      // bootstrap warn fires and the backfill script fails loudly.
+      if (!isAlreadyExists(err)) throw err;
+      this.log.debug('createCollection skipped: collection already exists');
     }
     for (const [field, schema] of PAYLOAD_INDEXES) {
       try {
@@ -101,6 +114,8 @@ export class QdrantService implements OnApplicationBootstrap {
 
   async upsertMany(points: ProductPoint[]): Promise<void> {
     if (points.length === 0) return;
+    // wait:false — the index is eventually-consistent alongside MySQL (the
+    // source of truth). Do not flip to true expecting read-your-write here.
     await this.client.upsert(this.collection, {
       wait: false,
       points: points.map((p) => ({
