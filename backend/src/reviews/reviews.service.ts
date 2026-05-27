@@ -31,9 +31,14 @@ export class ReviewsService {
 
   private fireRefresh(productId: string): void {
     if (!this.indexer) return;
-    this.indexer
-      .refreshStats(productId)
-      .catch((err) => this.indexLog.warn(`refreshStats failed: ${(err as Error).message}`));
+    const indexer = this.indexer;
+    // Promise.resolve().then(...) so a synchronous throw is also caught — fully
+    // fire-and-forget, never escapes into the request.
+    Promise.resolve()
+      .then(() => indexer.refreshStats(productId))
+      .catch((err) =>
+        this.indexLog.warn(`refreshStats failed: ${err instanceof Error ? err.message : String(err)}`),
+      );
   }
 
   async canUserReview(userId: string, productId: string): Promise<boolean> {

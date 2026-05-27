@@ -50,7 +50,13 @@ export class ProductsService {
 
   private fireIndex(fn: () => Promise<void>): void {
     if (!this.indexer) return;
-    fn().catch((err) => this.indexerLog.warn(`index hook failed: ${(err as Error).message}`));
+    // Promise.resolve().then(fn) so even a synchronous throw inside fn becomes a
+    // caught rejection — fully fire-and-forget, never escapes into the request.
+    Promise.resolve()
+      .then(fn)
+      .catch((err) =>
+        this.indexerLog.warn(`index hook failed: ${err instanceof Error ? err.message : String(err)}`),
+      );
   }
 
   async list(dto: ListProductsDto): Promise<ListResult> {

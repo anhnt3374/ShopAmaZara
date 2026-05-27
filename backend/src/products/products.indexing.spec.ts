@@ -31,4 +31,16 @@ describe('ProductsService indexing hooks', () => {
     await svc.deleteForStore('s1', 'p1');
     expect(indexer.removeProduct).toHaveBeenCalledWith('p1');
   });
+
+  it('a rejected index promise does not bubble to the caller', async () => {
+    const indexer = {
+      indexProduct: jest.fn().mockRejectedValue(new Error('qdrant down')),
+      removeProduct: jest.fn(),
+      indexProducts: jest.fn(),
+    };
+    const svc = new ProductsService(repoStub(), repoStub(), indexer as any);
+    await expect(
+      svc.createForStore('s1', { name: 'X', brand: 'B', category: 'C', price: 10, stock: 5 } as any),
+    ).resolves.toBeDefined();
+  });
 });
