@@ -86,7 +86,12 @@ export class ProductsService {
           const limit = Math.min(dto.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
           const start = (page - 1) * limit;
           const pageIds = hits.slice(start, start + limit).map((h) => h.id);
-          const rows = await this.products.findBy({ id: In(pageIds) });
+          // `total` is the ranked-hit count (capped at SEARCH_RESULT_CAP). A page
+          // beyond it is legitimately empty.
+          if (pageIds.length === 0) return { items: [], total: hits.length, page, limit };
+          // isPublished filter mirrors listSql and drops any row that was
+          // unpublished after indexing but before the index caught up.
+          const rows = await this.products.findBy({ id: In(pageIds), isPublished: true });
           const byId = new Map(rows.map((r) => [r.id, r]));
           const items = pageIds
             .map((id) => byId.get(id))
