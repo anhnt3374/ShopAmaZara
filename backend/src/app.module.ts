@@ -27,6 +27,8 @@ import { Review } from './reviews/review.entity';
 import { AiModule } from './ai/ai.module';
 import { EmbeddingsModule } from './embeddings/embeddings.module';
 import { SearchModule } from './search/search.module';
+import { UserProductEvent } from './behavior/behavior-event.entity';
+import { BehaviorModule } from './behavior/behavior.module';
 
 @Module({
   imports: [
@@ -40,7 +42,7 @@ import { SearchModule } from './search/search.module';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress, Conversation, Message, Review],
+        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress, Conversation, Message, Review, UserProductEvent],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -59,6 +61,7 @@ import { SearchModule } from './search/search.module';
     AiModule,
     EmbeddingsModule,
     SearchModule,
+    BehaviorModule,
   ],
   controllers: [AppController],
 })
