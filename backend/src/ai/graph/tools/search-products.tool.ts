@@ -28,7 +28,7 @@ export function makeSearchProductsTool(deps: { products: ProductsService }) {
         category: input.category ? [input.category] : undefined,
         page: 1,
         limit: input.limit,
-      } as any);
+      } as any, ctx.userId);
 
       const productItems: ProductItem[] = items.map((p: any) => ({
         id: String(p.id),

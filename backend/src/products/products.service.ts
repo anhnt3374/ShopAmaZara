@@ -14,6 +14,7 @@ import { Product } from './product.entity';
 import { Review } from '../reviews/review.entity';
 import { ProductIndexerService } from '../search/product-indexer.service';
 import { SearchService } from '../search/search.service';
+import { PreferenceService } from '../personalization/preference.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -51,6 +52,7 @@ export class ProductsService {
     @Optional() private readonly indexer?: ProductIndexerService,
     @Optional() private readonly search?: SearchService,
     @Optional() private readonly config?: ConfigService,
+    @Optional() private readonly preference?: PreferenceService,
   ) {}
 
   private get searchEnabled(): boolean {
@@ -68,9 +70,17 @@ export class ProductsService {
       );
   }
 
-  async list(dto: ListProductsDto): Promise<ListResult> {
+  async list(dto: ListProductsDto, userId?: string): Promise<ListResult> {
     if (dto.q && this.searchEnabled && this.search) {
       try {
+        let userPreference;
+        if (userId && this.preference) {
+          try {
+            userPreference = await this.preference.getPreferenceVectors(userId);
+          } catch (err) {
+            this.searchLog.warn(`preference fetch failed: ${(err as Error).message}`);
+          }
+        }
         const hits = await this.search.search({
           query: dto.q,
           category: dto.category,
@@ -80,6 +90,7 @@ export class ProductsService {
           maxPrice: dto.maxPrice,
           gender: dto.gender,
           ageGroup: dto.ageGroup,
+          userPreference,
         });
         if (hits.length > 0) {
           const page = dto.page ?? 1;

@@ -14,6 +14,7 @@ describe('search_products tool', () => {
     );
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({ q: 'bluetooth', maxPrice: 1_000_000 }),
+      'u1',
     );
     expect(JSON.parse(out).items).toHaveLength(1);
     expect(pushed[0]).toMatchObject({ type: 'products', mode: 'list' });
@@ -34,6 +35,7 @@ describe('search_products tool', () => {
     );
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({ category: ['Footwear'] }),
+      'u1',
     );
   });
 

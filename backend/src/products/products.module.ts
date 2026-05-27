@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StoresModule } from '../stores/stores.module';
 import { SearchModule } from '../search/search.module';
+import { PersonalizationModule } from '../personalization/personalization.module';
 import { Product } from './product.entity';
 import { Review } from '../reviews/review.entity';
 import { ProductsService } from './products.service';
@@ -13,7 +14,7 @@ import { SellerStoreGuard } from '../common/guards/seller-store.guard';
 import { ProductsBulkService } from './products.bulk.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Review]), StoresModule, SearchModule],
+  imports: [TypeOrmModule.forFeature([Product, Review]), StoresModule, SearchModule, PersonalizationModule],
   controllers: [
     ProductsController,
     StoreProductsController,

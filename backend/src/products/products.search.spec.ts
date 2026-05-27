@@ -58,4 +58,25 @@ describe('ProductsService.list semantic routing', () => {
     await svc.list({ q: 'shoes', page: 1, limit: 24 } as any);
     expect(products.createQueryBuilder).toHaveBeenCalled();
   });
+
+  it('userId present -> fetches preference vectors and forwards as userPreference', async () => {
+    const pref = { desc: [1, 0] };
+    const preference = { getPreferenceVectors: jest.fn().mockResolvedValue(pref) };
+    const search = { search: jest.fn().mockResolvedValue([{ id: 'p1', score: 0.9, components: {} }]) };
+    const products = { findBy: jest.fn().mockResolvedValue([prod('p1')]), createQueryBuilder: jest.fn() };
+    const svc = new ProductsService(products as any, reviewsRepo, undefined, search as any, cfg, preference as any);
+    await svc.list({ q: 'shoes', page: 1, limit: 24 } as any, '7');
+    expect(preference.getPreferenceVectors).toHaveBeenCalledWith('7');
+    expect(search.search.mock.calls[0][0].userPreference).toEqual(pref);
+  });
+
+  it('preference fetch error -> unpersonalized search still returns', async () => {
+    const preference = { getPreferenceVectors: jest.fn().mockRejectedValue(new Error('pref down')) };
+    const search = { search: jest.fn().mockResolvedValue([{ id: 'p1', score: 0.9, components: {} }]) };
+    const products = { findBy: jest.fn().mockResolvedValue([prod('p1')]), createQueryBuilder: jest.fn() };
+    const svc = new ProductsService(products as any, reviewsRepo, undefined, search as any, cfg, preference as any);
+    const res = await svc.list({ q: 'shoes', page: 1, limit: 24 } as any, '7');
+    expect(res.items.map((i: any) => i.id)).toEqual(['p1']);
+    expect(search.search.mock.calls[0][0].userPreference).toBeUndefined();
+  });
 });
