@@ -29,6 +29,7 @@ import { EmbeddingsModule } from './embeddings/embeddings.module';
 import { SearchModule } from './search/search.module';
 import { UserProductEvent } from './behavior/behavior-event.entity';
 import { BehaviorModule } from './behavior/behavior.module';
+import { PersonalizationModule } from './personalization/personalization.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { BehaviorModule } from './behavior/behavior.module';
     EmbeddingsModule,
     SearchModule,
     BehaviorModule,
+    PersonalizationModule,
   ],
   controllers: [AppController],
 })
