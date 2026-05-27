@@ -126,6 +126,9 @@ export class OrdersService {
   }
 
   async checkout(buyerId: string, dto: CheckoutDto): Promise<{ orderId: string; total: number; status: 'Paid' }> {
+    // Captured inside the transaction, read after it resolves (the awaited
+    // transaction always settles before the post-await read; a thrown
+    // transaction rejects the await, so the purchase hook below is skipped).
     let purchasedIds: string[] = [];
     const result = await this.dataSource.transaction(async (manager) => {
       // 1. cart rows
