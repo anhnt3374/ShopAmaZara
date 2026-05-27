@@ -25,6 +25,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/review.entity';
 import { AiModule } from './ai/ai.module';
+import { EmbeddingsModule } from './embeddings/embeddings.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { AiModule } from './ai/ai.module';
     UploadsModule,
     ReviewsModule,
     AiModule,
+    EmbeddingsModule,
   ],
   controllers: [AppController],
 })
