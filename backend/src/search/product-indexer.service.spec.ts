@@ -26,7 +26,7 @@ const baseProduct: any = {
 };
 
 function deps() {
-  const text = { embed: jest.fn().mockResolvedValue([[0.1]]) };
+  const text = { embed: jest.fn().mockImplementation(async (texts: string[]) => texts.map(() => [0.1])) };
   const image = { embedImages: jest.fn().mockResolvedValue({ vectors: [[0.9]], failed: [] }) };
   const qdrant = { upsert: jest.fn().mockResolvedValue(undefined), setPayload: jest.fn(), deletePoint: jest.fn() };
   const reviews = {
@@ -82,7 +82,8 @@ describe('ProductIndexerService.indexProduct', () => {
     const { text, image, qdrant, reviews } = deps();
     const svc = new ProductIndexerService(text as any, image as any, qdrant as any, reviews as any, makeConfig());
     await svc.indexProduct(baseProduct);
-    expect(text.embed).toHaveBeenCalledTimes(2);
+    expect(text.embed).toHaveBeenCalledTimes(1); // desc + attr batched into one call
+    expect(text.embed.mock.calls[0][0]).toHaveLength(2);
     expect(image.embedImages).toHaveBeenCalledWith(['http://img/1.jpg']);
     const [id, vectors, payload] = qdrant.upsert.mock.calls[0];
     expect(id).toBe('p1');

@@ -125,13 +125,19 @@ export class ProductIndexerService {
   }
 
   private async buildPoint(p: Product, stats: ProductStats): Promise<ProductPoint> {
-    const [descVec] = await this.text.embed([this.buildDescText(p)]);
+    // Embed desc + attr in one batched call (one round-trip). attr is skipped
+    // entirely when empty so it doesn't occupy a slot.
+    const descText = this.buildDescText(p);
     const attrText = this.buildAttrText(p);
-    const attrVec = attrText ? (await this.text.embed([attrText]))[0] : undefined;
+    const texts = attrText ? [descText, attrText] : [descText];
+    const vecs = await this.text.embed(texts);
+    const descVec = vecs[0];
+    const attrVec = attrText ? vecs[1] : undefined;
     let imageVec: number[] | undefined;
     if (p.imageFirst) {
       const { vectors, failed } = await this.image.embedImages([p.imageFirst]);
       if (!failed.includes(0)) imageVec = vectors[0];
+      else this.log.debug(`image embed failed for product ${p.id}; indexing without image vector`);
     }
     return {
       id: p.id,
