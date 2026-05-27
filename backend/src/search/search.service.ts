@@ -2,13 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TextEmbeddingClient } from '../embeddings/text-embedding.client';
 import { ImageEmbeddingClient } from '../embeddings/image-embedding.client';
-import { QdrantService } from './qdrant.service';
+import { ProductVectors, QdrantService } from './qdrant.service';
 import { ATTR_VECTOR, DESC_VECTOR, IMAGE_VECTOR } from './qdrant.constants';
 import { DEFAULT_CANDIDATE_K, DEFAULT_RESULT_CAP, DEFAULT_WEIGHTS } from './search.constants';
 import { buildFilter, SearchFilters } from './search.filter';
 
 export interface SearchParams extends SearchFilters {
   query: string;
+  userPreference?: ProductVectors;
 }
 export interface RankedHit {
   id: string;
@@ -34,12 +35,26 @@ function boostScore(payload: Record<string, unknown>): number {
   return Math.max(0, Math.min(1, v));
 }
 
+function personalizationScore(
+  pref: ProductVectors,
+  pv: ProductVectors,
+  weights: { desc: number; attr: number; image: number },
+): number {
+  let num = 0;
+  let den = 0;
+  if (pref.desc && pv.desc) { num += weights.desc * Math.max(0, dot(pref.desc, pv.desc)); den += weights.desc; }
+  if (pref.attr && pv.attr) { num += weights.attr * Math.max(0, dot(pref.attr, pv.attr)); den += weights.attr; }
+  if (pref.image && pv.image) { num += weights.image * Math.max(0, dot(pref.image, pv.image)); den += weights.image; }
+  return den > 0 ? num / den : 0;
+}
+
 @Injectable()
 export class SearchService {
   private readonly log = new Logger('SearchService');
   private readonly weights: typeof DEFAULT_WEIGHTS;
   private readonly candidateK: number;
   private readonly resultCap: number;
+  private readonly alpha: number;
 
   constructor(
     private readonly text: TextEmbeddingClient,
@@ -59,6 +74,7 @@ export class SearchService {
     };
     this.candidateK = num('SEARCH_CANDIDATE_K', DEFAULT_CANDIDATE_K);
     this.resultCap = num('SEARCH_RESULT_CAP', DEFAULT_RESULT_CAP);
+    this.alpha = num('PERSONALIZATION_ALPHA', 0.25);
   }
 
   async search(params: SearchParams): Promise<RankedHit[]> {
@@ -85,11 +101,15 @@ export class SearchService {
       const sAttr = p.vectors.attr ? Math.max(0, dot(qBge, p.vectors.attr)) : 0;
       const sImage = p.vectors.image ? Math.max(0, dot(qClip, p.vectors.image)) : 0;
       const sBoost = boostScore(p.payload);
-      const score =
+      const queryScore =
         this.weights.desc * sDesc +
         this.weights.attr * sAttr +
         this.weights.image * sImage +
         this.weights.boost * sBoost;
+      const score = params.userPreference
+        ? (1 - this.alpha) * queryScore +
+          this.alpha * personalizationScore(params.userPreference, p.vectors, this.weights)
+        : queryScore;
       return { id: p.id, score, components: { desc: sDesc, attr: sAttr, image: sImage, boost: sBoost } };
     });
     hits.sort((a, b) => b.score - a.score);

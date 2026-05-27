@@ -81,4 +81,32 @@ describe('SearchService.search', () => {
     const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
     await expect(svc.search({ query: 'x' })).rejects.toThrow(/embedding/);
   });
+
+  it('blends userPreference into the score: final = 0.75*query + 0.25*pers', async () => {
+    const retrieved = [{ id: 'p', payload: {}, vectors: { desc: [1, 0] } }];
+    const text = { embed: jest.fn().mockResolvedValue([[1, 0]]) };
+    const image = { embedText: jest.fn().mockResolvedValue([[0, 1]]) };
+    const qdrant = {
+      searchVector: jest.fn().mockResolvedValue(['p']),
+      retrieveWithVectors: jest.fn().mockResolvedValue(retrieved),
+    };
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const hits = await svc.search({ query: 'x', userPreference: { desc: [1, 0] } });
+    // queryScore: sDesc=dot([1,0],[1,0])=1 -> 0.55; pers: only desc both sides, cos=1 -> 1.
+    // final = 0.75*0.55 + 0.25*1 = 0.6625
+    expect(hits[0].score).toBeCloseTo(0.6625, 4);
+  });
+
+  it('no userPreference leaves the score query-only', async () => {
+    const retrieved = [{ id: 'p', payload: {}, vectors: { desc: [1, 0] } }];
+    const text = { embed: jest.fn().mockResolvedValue([[1, 0]]) };
+    const image = { embedText: jest.fn().mockResolvedValue([[0, 1]]) };
+    const qdrant = {
+      searchVector: jest.fn().mockResolvedValue(['p']),
+      retrieveWithVectors: jest.fn().mockResolvedValue(retrieved),
+    };
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const hits = await svc.search({ query: 'x' });
+    expect(hits[0].score).toBeCloseTo(0.55, 5);
+  });
 });
