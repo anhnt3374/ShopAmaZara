@@ -17,6 +17,8 @@ function makeClient() {
     upsert: jest.fn().mockResolvedValue(undefined),
     setPayload: jest.fn().mockResolvedValue(undefined),
     delete: jest.fn().mockResolvedValue(undefined),
+    query: jest.fn().mockResolvedValue({ points: [] }),
+    retrieve: jest.fn().mockResolvedValue([]),
   };
 }
 
@@ -82,5 +84,28 @@ describe('QdrantService', () => {
     const svc = new QdrantService(client as any, makeConfig());
     await svc.upsertMany([]);
     expect(client.upsert).not.toHaveBeenCalled();
+  });
+
+  it('searchVector returns the point ids as strings', async () => {
+    const client = makeClient();
+    client.query.mockResolvedValue({ points: [{ id: 'a' }, { id: 2 }] });
+    const svc = new QdrantService(client as any, makeConfig());
+    const ids = await svc.searchVector('desc', [1, 2], { must: [] }, 50);
+    expect(ids).toEqual(['a', '2']);
+    const [name, body] = client.query.mock.calls[0];
+    expect(name).toBe('products');
+    expect(body).toMatchObject({ using: 'desc', limit: 50, query: [1, 2] });
+  });
+
+  it('retrieveWithVectors maps payload + named vectors, [] for no ids', async () => {
+    const client = makeClient();
+    expect(await new QdrantService(client as any, makeConfig()).retrieveWithVectors([])).toEqual([]);
+    client.retrieve.mockResolvedValue([
+      { id: 'p1', payload: { category: 'shoes' }, vector: { desc: [1], attr: [2], image: [3] } },
+      { id: 'p2', payload: null, vector: { desc: [4] } },
+    ]);
+    const out = await new QdrantService(client as any, makeConfig()).retrieveWithVectors(['p1', 'p2']);
+    expect(out[0]).toEqual({ id: 'p1', payload: { category: 'shoes' }, vectors: { desc: [1], attr: [2], image: [3] } });
+    expect(out[1]).toEqual({ id: 'p2', payload: {}, vectors: { desc: [4] } });
   });
 });

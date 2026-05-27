@@ -22,6 +22,11 @@ export interface ProductPoint {
   vectors: ProductVectors;
   payload: Record<string, unknown>;
 }
+export interface RetrievedPoint {
+  id: string;
+  payload: Record<string, unknown>;
+  vectors: ProductVectors;
+}
 
 interface QdrantLike {
   createCollection(name: string, cfg: unknown): Promise<void>;
@@ -29,6 +34,11 @@ interface QdrantLike {
   upsert(name: string, body: unknown): Promise<void>;
   setPayload(name: string, body: unknown): Promise<void>;
   delete(name: string, body: unknown): Promise<void>;
+  query(name: string, body: unknown): Promise<{ points: Array<{ id: string | number }> }>;
+  retrieve(
+    name: string,
+    body: unknown,
+  ): Promise<Array<{ id: string | number; payload?: Record<string, unknown> | null; vector?: unknown }>>;
 }
 
 type PayloadIndexSchema = 'keyword' | 'float' | 'bool';
@@ -54,6 +64,16 @@ function pruneVectors(v: ProductVectors): Record<string, number[]> {
   if (v.desc) out[DESC_VECTOR] = v.desc;
   if (v.attr) out[ATTR_VECTOR] = v.attr;
   if (v.image) out[IMAGE_VECTOR] = v.image;
+  return out;
+}
+
+function extractVectors(vector: unknown): ProductVectors {
+  if (!vector || typeof vector !== 'object') return {};
+  const v = vector as Record<string, unknown>;
+  const out: ProductVectors = {};
+  if (Array.isArray(v[DESC_VECTOR])) out.desc = v[DESC_VECTOR] as number[];
+  if (Array.isArray(v[ATTR_VECTOR])) out.attr = v[ATTR_VECTOR] as number[];
+  if (Array.isArray(v[IMAGE_VECTOR])) out.image = v[IMAGE_VECTOR] as number[];
   return out;
 }
 
@@ -132,5 +152,36 @@ export class QdrantService implements OnApplicationBootstrap {
 
   async deletePoint(id: string): Promise<void> {
     await this.client.delete(this.collection, { points: [id] });
+  }
+
+  async searchVector(
+    vectorName: string,
+    vector: number[],
+    filter: unknown,
+    limit: number,
+  ): Promise<string[]> {
+    const res = await this.client.query(this.collection, {
+      query: vector,
+      using: vectorName,
+      limit,
+      filter,
+      with_payload: false,
+      with_vector: false,
+    });
+    return (res.points ?? []).map((p) => String(p.id));
+  }
+
+  async retrieveWithVectors(ids: string[]): Promise<RetrievedPoint[]> {
+    if (ids.length === 0) return [];
+    const recs = await this.client.retrieve(this.collection, {
+      ids,
+      with_payload: true,
+      with_vector: [DESC_VECTOR, ATTR_VECTOR, IMAGE_VECTOR],
+    });
+    return recs.map((r) => ({
+      id: String(r.id),
+      payload: (r.payload ?? {}) as Record<string, unknown>,
+      vectors: extractVectors(r.vector),
+    }));
   }
 }
