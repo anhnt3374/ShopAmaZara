@@ -6,12 +6,14 @@ import {
   NotFoundException,
   Optional,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { In, Not, Repository } from 'typeorm';
 import { Product } from './product.entity';
 import { Review } from '../reviews/review.entity';
 import { ProductIndexerService } from '../search/product-indexer.service';
+import { SearchService } from '../search/search.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -41,12 +43,19 @@ export interface ListResult {
 @Injectable()
 export class ProductsService {
   private readonly indexerLog = new Logger('ProductsService:index');
+  private readonly searchLog = new Logger('ProductsService:search');
 
   constructor(
     @InjectRepository(Product) private readonly products: Repository<Product>,
     @InjectRepository(Review) private readonly reviewsRepo: Repository<Review>,
     @Optional() private readonly indexer?: ProductIndexerService,
+    @Optional() private readonly search?: SearchService,
+    @Optional() private readonly config?: ConfigService,
   ) {}
+
+  private get searchEnabled(): boolean {
+    return this.config?.get<string>('EMBEDDINGS_ENABLED', 'true') !== 'false';
+  }
 
   private fireIndex(fn: () => Promise<void>): void {
     if (!this.indexer) return;
@@ -60,6 +69,41 @@ export class ProductsService {
   }
 
   async list(dto: ListProductsDto): Promise<ListResult> {
+    if (dto.q && this.searchEnabled && this.search) {
+      try {
+        const hits = await this.search.search({
+          query: dto.q,
+          category: dto.category,
+          brand: dto.brand,
+          storeId: dto.storeId,
+          minPrice: dto.minPrice,
+          maxPrice: dto.maxPrice,
+          gender: dto.gender,
+          ageGroup: dto.ageGroup,
+        });
+        if (hits.length > 0) {
+          const page = dto.page ?? 1;
+          const limit = Math.min(dto.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
+          const start = (page - 1) * limit;
+          const pageIds = hits.slice(start, start + limit).map((h) => h.id);
+          const rows = await this.products.findBy({ id: In(pageIds) });
+          const byId = new Map(rows.map((r) => [r.id, r]));
+          const items = pageIds
+            .map((id) => byId.get(id))
+            .filter((r): r is Product => Boolean(r))
+            .map(toProductSummary);
+          return { items, total: hits.length, page, limit };
+        }
+      } catch (err) {
+        this.searchLog.warn(
+          `semantic search failed, falling back to LIKE: ${(err as Error).message}`,
+        );
+      }
+    }
+    return this.listSql(dto);
+  }
+
+  private async listSql(dto: ListProductsDto): Promise<ListResult> {
     const page = dto.page ?? 1;
     const limit = Math.min(dto.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
 
