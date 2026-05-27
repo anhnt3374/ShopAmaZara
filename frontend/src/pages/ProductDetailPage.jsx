@@ -9,6 +9,7 @@ import { useToast } from '../context/ToastContext.jsx';
 import { useBuyerAction } from '../hooks/useBuyerAction.js';
 import { getProduct } from '../services/products.js';
 import { reviewsService } from '../services/reviews.js';
+import { recordView } from '../services/events.js';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -28,7 +29,7 @@ export default function ProductDetailPage() {
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
   const runBuyerAction = useBuyerAction();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { ensureStoreChat } = useChat();
   const toast = useToast();
 
@@ -51,6 +52,12 @@ export default function ProductDetailPage() {
     setActiveImg(0);
     setQty(1);
   }, [id]);
+
+  useEffect(() => {
+    if (id && isAuthenticated && user?.role === 'buyer') {
+      recordView(id);
+    }
+  }, [id, isAuthenticated, user?.role]);
 
   useEffect(() => {
     if (!id) return;
