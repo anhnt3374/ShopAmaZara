@@ -2,13 +2,16 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { In, QueryFailedError, Repository } from 'typeorm';
 import { OrderItem } from '../orders/order-item.entity';
 import { User } from '../users/user.entity';
+import { ProductIndexerService } from '../search/product-indexer.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ListReviewsDto } from './dto/list-reviews.dto';
@@ -17,11 +20,21 @@ import { Review } from './review.entity';
 
 @Injectable()
 export class ReviewsService {
+  private readonly indexLog = new Logger('ReviewsService:index');
+
   constructor(
     @InjectRepository(Review) private readonly reviews: Repository<Review>,
     @InjectRepository(OrderItem) private readonly orderItems: Repository<OrderItem>,
     @InjectRepository(User) private readonly users: Repository<User>,
+    @Optional() private readonly indexer?: ProductIndexerService,
   ) {}
+
+  private fireRefresh(productId: string): void {
+    if (!this.indexer) return;
+    this.indexer
+      .refreshStats(productId)
+      .catch((err) => this.indexLog.warn(`refreshStats failed: ${(err as Error).message}`));
+  }
 
   async canUserReview(userId: string, productId: string): Promise<boolean> {
     const count = await this.orderItems
@@ -52,6 +65,7 @@ export class ReviewsService {
 
     try {
       const saved = await this.reviews.save(entity);
+      this.fireRefresh(productId);
       return toReviewItem(saved, { id: user.id, fullName: user.fullName });
     } catch (err) {
       const code = (err as any)?.code ?? (err instanceof QueryFailedError ? (err.driverError as any)?.code : undefined);
@@ -72,6 +86,7 @@ export class ReviewsService {
     if (dto.comment !== undefined) review.comment = dto.comment?.trim() || null;
 
     const saved = await this.reviews.save(review);
+    this.fireRefresh(review.productId);
     const user = await this.users.findOne({ where: { id: userId } });
     return toReviewItem(saved, { id: user!.id, fullName: user!.fullName });
   }
@@ -83,6 +98,7 @@ export class ReviewsService {
       throw new ForbiddenException('You can only delete your own review');
     }
     await this.reviews.remove(review);
+    this.fireRefresh(review.productId);
   }
 
   async listForProduct(productId: string, dto: ListReviewsDto): Promise<ReviewListResult> {

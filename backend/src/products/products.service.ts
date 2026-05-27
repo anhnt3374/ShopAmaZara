@@ -2,13 +2,16 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { In, Not, Repository } from 'typeorm';
 import { Product } from './product.entity';
 import { Review } from '../reviews/review.entity';
+import { ProductIndexerService } from '../search/product-indexer.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -37,10 +40,18 @@ export interface ListResult {
 
 @Injectable()
 export class ProductsService {
+  private readonly indexerLog = new Logger('ProductsService:index');
+
   constructor(
     @InjectRepository(Product) private readonly products: Repository<Product>,
     @InjectRepository(Review) private readonly reviewsRepo: Repository<Review>,
+    @Optional() private readonly indexer?: ProductIndexerService,
   ) {}
+
+  private fireIndex(fn: () => Promise<void>): void {
+    if (!this.indexer) return;
+    fn().catch((err) => this.indexerLog.warn(`index hook failed: ${(err as Error).message}`));
+  }
 
   async list(dto: ListProductsDto): Promise<ListResult> {
     const page = dto.page ?? 1;
@@ -260,7 +271,9 @@ export class ProductsService {
       targetAgeGroup: dto.targetAgeGroup ?? null,
       tags: dto.tags ?? null,
     });
-    return this.products.save(entity);
+    const saved = await this.products.save(entity);
+    this.fireIndex(() => this.indexer!.indexProduct(saved));
+    return saved;
   }
 
   async updateForStore(
@@ -323,7 +336,9 @@ export class ProductsService {
     }
 
     Object.assign(product, fields);
-    return this.products.save(product);
+    const saved = await this.products.save(product);
+    this.fireIndex(() => this.indexer!.indexProduct(saved));
+    return saved;
   }
 
   async deleteForStore(storeId: string, id: string): Promise<void> {
@@ -332,6 +347,7 @@ export class ProductsService {
     if (product.storeId !== storeId)
       throw new ForbiddenException('Not your product');
     await this.products.remove(product);
+    this.fireIndex(() => this.indexer!.removeProduct(id));
   }
 
   async createManyForStore(
@@ -399,6 +415,7 @@ export class ProductsService {
       if (entities.length) {
         await this.products.save(entities);
         created += entities.length;
+        this.fireIndex(() => this.indexer!.indexProducts(entities));
       }
     }
     return { created, skippedDuringInsert };
