@@ -82,10 +82,23 @@ export class PreferenceService {
     const now = Date.now();
     const cached = this.cache.get(userId);
     if (cached && cached.expiresAt > now) return cached;
-    const computed = await this.compute(userId);
-    const entry: Entry = { ...computed, expiresAt: now + this.ttlMs };
-    this.cache.set(userId, entry);
-    return entry;
+    try {
+      const computed = await this.compute(userId);
+      const entry: Entry = { ...computed, expiresAt: now + this.ttlMs };
+      this.cache.set(userId, entry);
+      return entry;
+    } catch (err) {
+      // Personalization is best-effort: a DB/Qdrant failure degrades to no
+      // personalization (empty vectors + empty profile) rather than erroring the
+      // caller (search falls back to query-only; GET /me/profile returns empties).
+      // Not cached, so the next request retries.
+      this.log.warn(`preference compute failed for ${userId}: ${(err as Error).message}`);
+      return {
+        vectors: {},
+        profile: { topColors: [], topSizes: [], orderPrice: { min: 0, max: 0, avg: 0, count: 0 } },
+        expiresAt: 0,
+      };
+    }
   }
 
   private async compute(userId: string): Promise<{ vectors: ProductVectors; profile: UserProfile }> {

@@ -54,9 +54,28 @@ describe('PreferenceService.getPreferenceVectors', () => {
     await svc.getPreferenceVectors('7');
     expect(events.query).toHaveBeenCalledTimes(1);
   });
+
+  it('degrades to {} (never throws) when compute fails', async () => {
+    const { events, orders, qdrant, config } = makeDeps({});
+    events.query.mockRejectedValue(new Error('db down'));
+    const svc = new PreferenceService(events as any, orders as any, qdrant as any, config);
+    await expect(svc.getPreferenceVectors('7')).resolves.toEqual({});
+  });
 });
 
 describe('PreferenceService.getProfile', () => {
+  it('degrades to an empty profile (never throws) when compute fails', async () => {
+    const events = { query: jest.fn().mockRejectedValue(new Error('db down')) } as any;
+    const orders = { query: jest.fn().mockRejectedValue(new Error('db down')) } as any;
+    const qdrant = { retrieveWithVectors: jest.fn() } as any;
+    const svc = new PreferenceService(events, orders, qdrant, makeConfig({ EMBEDDINGS_ENABLED: 'true' }));
+    await expect(svc.getProfile('7')).resolves.toEqual({
+      topColors: [],
+      topSizes: [],
+      orderPrice: { min: 0, max: 0, avg: 0, count: 0 },
+    });
+  });
+
   it('tallies colors/sizes from payloads and aggregates order price', async () => {
     const affinity = [{ productId: 'a', score: '2' }, { productId: 'b', score: '1' }];
     const points = [
