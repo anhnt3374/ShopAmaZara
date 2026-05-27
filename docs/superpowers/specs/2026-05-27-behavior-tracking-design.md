@@ -31,12 +31,12 @@ backend/src/behavior/
   behavior.controller.ts     POST /me/events/view  (JwtAuthGuard, @CurrentUser)
   behavior.module.ts         TypeOrm[UserProductEvent]; provides + exports BehaviorService
 backend/src/app.module.ts    register UserProductEvent in the TypeORM entities list + BehaviorModule
-+ orders/wishlist/reviews modules import BehaviorModule; their services fire events (@Optional)
++ orders/cart/wishlist/reviews modules import BehaviorModule; their services fire events (@Optional)
 frontend/src/services/events.js          recordView(productId)
 frontend/src/pages/ProductDetailPage.jsx fire recordView on mount when authed buyer
 ```
 
-Wiring (no cycles): `OrdersModule` / `WishlistModule` / `ReviewsModule` import `BehaviorModule`;
+Wiring (no cycles): `OrdersModule` / `CartModule` / `WishlistModule` / `ReviewsModule` import `BehaviorModule`;
 `BehaviorModule` imports only `TypeOrmModule.forFeature([UserProductEvent])` (+ the auth guard
 plumbing its controller needs). It does not import those modules back.
 
@@ -47,7 +47,7 @@ plumbing its controller needs). It does not import those modules back.
 | `id` | char(36) PK | uuid |
 | `user_id` | bigint unsigned | matches users.id / reviews.user_id |
 | `product_id` | char(36) | |
-| `type` | enum(`purchase`,`add_to_wishlist`,`remove_wishlist`,`review`,`view`) | |
+| `type` | enum(`purchase`,`add_to_cart`,`remove_from_cart`,`add_to_wishlist`,`remove_wishlist`,`review`,`view`) | |
 | `weight` | int (signed) | resolved at write time |
 | `created_at` | timestamp | |
 
@@ -59,7 +59,8 @@ the same product in two orders appends two `+5` events.
 
 ## Weights
 
-`purchase +5 · add_to_wishlist +3 · remove_wishlist -2 · view +1`. Review weight by rating:
+`purchase +5 · add_to_cart +3 · remove_from_cart -2 · add_to_wishlist +3 · remove_wishlist -2 · view +1`
+(cart weights mirror wishlist). Review weight by rating:
 `5 → +4`, `4 → +3`, `3 → +1`, `2 → -3`, `1 → -3`. A `reviewWeight(rating)` helper:
 `rating >= 5 ? 4 : rating === 4 ? 3 : rating === 3 ? 1 : -3`. Fixed weights live in a `WEIGHTS`
 constant.
@@ -71,6 +72,7 @@ itself just performs the DB write.
 
 - `recordPurchase(userId, productIds: string[])` — one `purchase` row per product id (dedup the
   input array first). Empty array → no-op.
+- `recordCartAdd(userId, productId)` / `recordCartRemove(userId, productId)` — append.
 - `recordWishlistAdd(userId, productId)` / `recordWishlistRemove(userId, productId)` — append.
 - `recordReview(userId, productId, rating)` — find the existing `review` row for the pair; update
   its `weight` to `reviewWeight(rating)` if present, else insert.
@@ -84,6 +86,10 @@ helper (`Promise.resolve().then(fn).catch(log)`), so a tracking failure never af
 
 - `OrdersService.checkout` and `createFromPreorder`: after the order + items are saved, call
   `recordPurchase(buyerId, productIds)` with the order's product ids.
+- `CartService.add` → only when a **new** row is created (the `existing` is null branch), fire
+  `recordCartAdd` (a qty increment is not a new add); `CartService.remove` and the
+  `CartService.update` `quantity === 0` deletion branch → `recordCartRemove`. `CartService.clear`
+  (and checkout's cart cleanup) do **not** fire a remove event — they are not a disinterest signal.
 - `WishlistService.add` → on `created === true`, `recordWishlistAdd`; `remove` → `recordWishlistRemove`.
 - `ReviewsService.create` → `recordReview(userId, productId, rating)`; `update` →
   `recordReview(userId, review.productId, review.rating)`; `remove` → `removeReview(userId, productId)`.
