@@ -21,7 +21,7 @@ def is_loaded():
     return _model is not None
 
 
-def embed(texts, is_query=False):
+def embed(texts: list[str], is_query: bool = False) -> list[list[float]]:
     model = get_model()
     inputs = [QUERY_INSTRUCTION + t for t in texts] if is_query else list(texts)
     vecs = model.encode(inputs, normalize_embeddings=True)
