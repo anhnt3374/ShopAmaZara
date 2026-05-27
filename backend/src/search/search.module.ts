@@ -6,6 +6,7 @@ import { Review } from '../reviews/review.entity';
 import { EmbeddingsModule } from '../embeddings/embeddings.module';
 import { ProductIndexerService } from './product-indexer.service';
 import { QDRANT_CLIENT, QdrantService } from './qdrant.service';
+import { SearchService } from './search.service';
 
 @Module({
   imports: [EmbeddingsModule, TypeOrmModule.forFeature([Review])],
@@ -18,7 +19,8 @@ import { QDRANT_CLIENT, QdrantService } from './qdrant.service';
     },
     QdrantService,
     ProductIndexerService,
+    SearchService,
   ],
-  exports: [QdrantService, ProductIndexerService],
+  exports: [QdrantService, ProductIndexerService, SearchService],
 })
 export class SearchModule {}
