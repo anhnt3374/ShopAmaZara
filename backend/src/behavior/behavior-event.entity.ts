@@ -28,7 +28,7 @@ export class UserProductEvent {
   })
   type!: BehaviorEventType;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'tinyint' })
   weight!: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })

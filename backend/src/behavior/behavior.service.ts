@@ -13,6 +13,7 @@ export const WEIGHTS = {
   view: 1,
 } as const;
 
+// rating is the validated 1–5 review score (DTO enforces the range).
 export function reviewWeight(rating: number): number {
   return rating >= 5 ? 4 : rating === 4 ? 3 : rating === 3 ? 1 : -3;
 }
@@ -56,6 +57,9 @@ export class BehaviorService {
   }
 
   async recordReview(userId: string, productId: string, rating: number): Promise<void> {
+    // find-then-write is racy under truly-concurrent calls, but reviews are
+    // serialized per user (unique review per product) and this is fire-and-forget
+    // tracking, so a rare duplicate is acceptable (no DB-level lock needed).
     const weight = reviewWeight(rating);
     const existing = await this.events.findOne({ where: { userId, productId, type: 'review' } });
     if (existing) {
@@ -71,6 +75,8 @@ export class BehaviorService {
   }
 
   async recordView(userId: string, productId: string): Promise<void> {
+    // Idempotent per (user, product); find-then-insert is racy under concurrent
+    // calls but a rare duplicate +1 view is harmless for fire-and-forget tracking.
     const existing = await this.events.findOne({ where: { userId, productId, type: 'view' } });
     if (existing) return;
     await this.append(userId, productId, 'view', WEIGHTS.view);
