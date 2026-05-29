@@ -53,12 +53,13 @@ export default function ProductCard({ product }) {
           />
           {colors.length > 0 && (
             <div
-              className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-surface/85 backdrop-blur-sm px-2 py-1 shadow-sm"
+              role="img"
+              className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-surface/80 backdrop-blur-sm px-2 py-1 shadow-sm"
               aria-label={`${colors.length} ${colors.length === 1 ? 'color' : 'colors'} available`}
             >
               {shownColors.map((c, idx) => (
                 <span
-                  key={`${c}-${idx}`}
+                  key={idx}
                   aria-hidden="true"
                   className="w-3.5 h-3.5 rounded-full border border-black/15 ring-1 ring-inset ring-white/40"
                   style={{ backgroundColor: c }}
