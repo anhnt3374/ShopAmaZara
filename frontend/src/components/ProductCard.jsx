@@ -12,6 +12,11 @@ export default function ProductCard({ product }) {
   const discountBadge =
     product.discountLabel ?? (product.discount > 0 ? `-${product.discount}%` : null);
 
+  const MAX_SWATCHES = 3;
+  const colors = Array.isArray(product.colors) ? product.colors : [];
+  const shownColors = colors.slice(0, MAX_SWATCHES);
+  const extraColors = colors.length - shownColors.length;
+
   return (
     <article className="group relative bg-surface border border-outline-variant rounded-xl overflow-hidden hover:border-primary hover:shadow-lifted transition-all duration-300">
       {discountBadge && (
@@ -46,6 +51,26 @@ export default function ProductCard({ product }) {
             loading="lazy"
             className="object-cover w-full h-full group-hover:scale-[1.02] transition-transform duration-300"
           />
+          {colors.length > 0 && (
+            <div
+              className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-surface/85 backdrop-blur-sm px-2 py-1 shadow-sm"
+              aria-label={`${colors.length} ${colors.length === 1 ? 'color' : 'colors'} available`}
+            >
+              {shownColors.map((c, idx) => (
+                <span
+                  key={`${c}-${idx}`}
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 rounded-full border border-black/15 ring-1 ring-inset ring-white/40"
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+              {extraColors > 0 && (
+                <span aria-hidden="true" className="text-[11px] font-semibold text-on-surface-variant">
+                  +{extraColors}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </Link>
 
