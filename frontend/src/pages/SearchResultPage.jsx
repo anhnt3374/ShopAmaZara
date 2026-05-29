@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import ProductCard from '../components/ProductCard.jsx';
+import CategoryFilter from '../components/CategoryFilter.jsx';
 import { getProductFacets, listProducts } from '../services/products.js';
 
 const PAGE_SIZE = 24;
@@ -146,25 +147,11 @@ export default function SearchResultPage() {
         <h3 className="text-label-md text-on-surface-variant mb-3 uppercase tracking-wider">
           Categories
         </h3>
-        {categoryList.length === 0 ? (
-          <p className="text-body-sm text-on-surface-variant">Loading…</p>
-        ) : (
-          <ul className="space-y-2 text-body-sm text-on-surface max-h-72 overflow-auto scrollbar-thin pr-1">
-            {categoryList.map((c) => (
-              <li key={c}>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={selectedCats.includes(c)}
-                    onChange={() => toggleCategory(c)}
-                    className="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4"
-                  />
-                  <span className="group-hover:text-primary transition-colors truncate">{c}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        )}
+        <CategoryFilter
+          categories={categoryList}
+          selected={selectedCats}
+          onToggle={toggleCategory}
+        />
       </div>
 
       <div>
