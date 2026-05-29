@@ -26,7 +26,7 @@ export default function AuthPage() {
     try {
       const user =
         mode === 'signin'
-          ? await login({ email, password })
+          ? await login({ email, password, role })
           : await register({ email, password, fullName, role });
       const from = location.state?.from;
       navigate(from || (user.role === 'seller' ? '/store' : '/'), { replace: true });
