@@ -330,11 +330,13 @@ async function main() {
     const ordersRepo = ds.getRepository(Order);
     const orderItemsRepo = ds.getRepository(OrderItem);
 
+    // Delivered orders are the eligibility key for review seeding —
+    // bumping the count so a healthier 15-25% of products end up reviewed.
     const statusDist: Array<{ status: 'Paid' | 'Shipped' | 'Delivered' | 'Cancelled'; count: number }> = [
-      { status: 'Delivered', count: 150 },
-      { status: 'Paid', count: 60 },
-      { status: 'Shipped', count: 45 },
-      { status: 'Cancelled', count: 45 },
+      { status: 'Delivered', count: 500 },
+      { status: 'Paid', count: 80 },
+      { status: 'Shipped', count: 60 },
+      { status: 'Cancelled', count: 60 },
     ];
 
     const paymentMethods: Array<'card' | 'ewallet' | 'bank' | 'cod'> = ['card', 'ewallet', 'bank', 'cod'];

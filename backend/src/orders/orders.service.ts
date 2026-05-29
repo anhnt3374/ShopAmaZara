@@ -3,27 +3,134 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { randomUUID } from 'node:crypto';
+import { customAlphabet } from 'nanoid';
 import { CartItem } from '../cart/cart-item.entity';
 import { Product } from '../products/product.entity';
 import { UserAddress } from '../addresses/address.entity';
 import { CheckoutDto } from './dto/checkout.dto';
 import { OrderItem } from './order-item.entity';
 import { Order } from './order.entity';
+import { BehaviorService } from '../behavior/behavior.service';
+
+export type PreorderItemInput = { productId: string; qty: number };
+
+export type PreorderDraft = {
+  preorderId: string;
+  items: {
+    productId: string;
+    storeId: string;
+    qty: number;
+    unitPrice: string;
+    name: string;
+  }[];
+  addressId: string;
+  shipping: {
+    recipientName: string;
+    phone: string;
+    line1: string;
+    line2: string | null;
+    city: string;
+    region: string;
+    postalCode: string;
+    country: string;
+  };
+  paymentMethod: 'card' | 'ewallet' | 'bank' | 'cod';
+  total: string;
+  expiresAt: number;
+};
+
+const PREORDER_TTL_MS = 10 * 60 * 1000;
+const makePreorderId = () => `PRE-${customAlphabet('ABCDEFGHJKMNPQRSTUVWXYZ23456789', 6)()}`;
 
 @Injectable()
 export class OrdersService {
+  private readonly behaviorLog = new Logger('OrdersService:behavior');
+
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(Order) private readonly orders: Repository<Order>,
+    @InjectRepository(Product) private readonly products: Repository<Product>,
+    @InjectRepository(UserAddress) private readonly addresses: Repository<UserAddress>,
+    @Optional() private readonly behavior?: BehaviorService,
   ) {}
 
+  private fireBehavior(fn: () => Promise<void>): void {
+    if (!this.behavior) return;
+    Promise.resolve()
+      .then(fn)
+      .catch((err) =>
+        this.behaviorLog.warn(`behavior hook failed: ${err instanceof Error ? err.message : String(err)}`),
+      );
+  }
+
+  async buildPreorder(
+    userId: string,
+    items: PreorderItemInput[],
+    addressId?: string,
+    paymentMethod: 'card' | 'ewallet' | 'bank' | 'cod' = 'cod',
+  ): Promise<PreorderDraft> {
+    if (items.length === 0) throw new BadRequestException('items must not be empty');
+
+    let resolvedAddr: UserAddress;
+    if (!addressId) {
+      const defaultAddr = await this.addresses.findOne({
+        where: { userId, isDefault: true },
+      });
+      if (!defaultAddr) {
+        throw new BadRequestException('No default address; please provide addressId');
+      }
+      resolvedAddr = defaultAddr;
+    } else {
+      const addr = await this.addresses.findOne({ where: { id: addressId } });
+      if (!addr) throw new NotFoundException('Address not found');
+      if (addr.userId !== userId) throw new ForbiddenException('Not your address');
+      resolvedAddr = addr;
+    }
+
+    const lines: PreorderDraft['items'] = [];
+    let total = 0;
+    for (const it of items) {
+      const p = await this.products.findOne({ where: { id: it.productId } });
+      if (!p) throw new NotFoundException(`Product ${it.productId} not found`);
+      if (p.stock < it.qty) throw new BadRequestException(`Insufficient stock for ${p.name}`);
+      const unit = Number(p.price);
+      total += unit * it.qty;
+      lines.push({ productId: p.id, storeId: p.storeId, qty: it.qty, unitPrice: p.price, name: p.name });
+    }
+
+    return {
+      preorderId: makePreorderId(),
+      items: lines,
+      addressId: resolvedAddr.id,
+      shipping: {
+        recipientName: resolvedAddr.recipientName,
+        phone: resolvedAddr.phone,
+        line1: resolvedAddr.line1,
+        line2: resolvedAddr.line2,
+        city: resolvedAddr.city,
+        region: resolvedAddr.region,
+        postalCode: resolvedAddr.postalCode,
+        country: resolvedAddr.country,
+      },
+      paymentMethod,
+      total: total.toFixed(2),
+      expiresAt: Date.now() + PREORDER_TTL_MS,
+    };
+  }
+
   async checkout(buyerId: string, dto: CheckoutDto): Promise<{ orderId: string; total: number; status: 'Paid' }> {
-    return this.dataSource.transaction(async (manager) => {
+    // Captured inside the transaction, read after it resolves (the awaited
+    // transaction always settles before the post-await read; a thrown
+    // transaction rejects the await, so the purchase hook below is skipped).
+    let purchasedIds: string[] = [];
+    const result = await this.dataSource.transaction(async (manager) => {
       // 1. cart rows
       const cartRows = await manager.find(CartItem, {
         where: { userId: buyerId, productId: In(dto.productIds) },
@@ -32,6 +139,7 @@ export class OrdersService {
 
       // 2. products
       const productIds = cartRows.map((r) => r.productId);
+      purchasedIds = productIds;
       const products = await manager.find(Product, { where: { id: In(productIds) } });
       const byId = new Map(products.map((p) => [p.id, p]));
 
@@ -113,8 +221,65 @@ export class OrdersService {
       // 8. clear cart rows
       await manager.delete(CartItem, { userId: buyerId, productId: In(productIds) });
 
-      return { orderId: String(savedOrder.id), total, status: 'Paid' };
+      return { orderId: String(savedOrder.id), total, status: 'Paid' as const };
     });
+    this.fireBehavior(() => this.behavior!.recordPurchase(buyerId, purchasedIds));
+    return result;
+  }
+
+  async createFromPreorder(
+    userId: string,
+    draft: PreorderDraft,
+  ): Promise<{ orderId: string; total: string; status: 'Paid' }> {
+    if (Date.now() > draft.expiresAt) {
+      throw new BadRequestException('Preorder expired');
+    }
+    const purchasedIds = draft.items.map((it) => it.productId);
+    const result = await this.dataSource.transaction(async (manager) => {
+      for (const it of draft.items) {
+        const res = await manager.query(
+          'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?',
+          [it.qty, it.productId, it.qty],
+        );
+        const affected = (res as { affectedRows?: number }).affectedRows ?? 0;
+        if (affected !== 1) {
+          throw new ConflictException(`Insufficient stock for ${it.name}`);
+        }
+      }
+      const orderEntity = manager.create(Order, {
+        buyerId: userId,
+        subtotal: draft.total,
+        shipping: '0.00',
+        tax: '0.00',
+        total: draft.total,
+        status: 'Paid',
+        paymentMethod: draft.paymentMethod,
+        paidAt: new Date(),
+        shippingRecipient: draft.shipping.recipientName,
+        shippingPhone: draft.shipping.phone,
+        shippingLine1: draft.shipping.line1,
+        shippingLine2: draft.shipping.line2,
+        shippingCity: draft.shipping.city,
+        shippingRegion: draft.shipping.region,
+        shippingPostal: draft.shipping.postalCode,
+        shippingCountry: draft.shipping.country,
+      });
+      const savedOrder = await manager.save(orderEntity);
+      const itemEntities = draft.items.map((it) =>
+        manager.create(OrderItem, {
+          orderId: savedOrder.id,
+          productId: it.productId,
+          storeId: it.storeId,
+          nameSnapshot: it.name,
+          priceSnapshot: it.unitPrice,
+          quantity: it.qty,
+        }),
+      );
+      await manager.save(itemEntities);
+      return { orderId: String(savedOrder.id), total: draft.total, status: 'Paid' as const };
+    });
+    this.fireBehavior(() => this.behavior!.recordPurchase(userId, purchasedIds));
+    return result;
   }
 
   async listForBuyer(buyerId: string, status?: string) {
@@ -127,9 +292,9 @@ export class OrdersService {
       order: { createdAt: 'DESC' },
       relations: { items: true },
     });
-    return {
-      items: orders.map((o) => this.toBuyerListView(o)),
-    };
+    const views = orders.map((o) => this.toBuyerListView(o));
+    await this.hydrateOrderItemImages(views);
+    return { items: views };
   }
 
   async findOneForBuyer(buyerId: string, id: string) {
@@ -139,7 +304,32 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException('Order not found');
     if (order.buyerId !== buyerId) throw new ForbiddenException('Not your order');
-    return this.toBuyerDetailView(order);
+    const view = this.toBuyerDetailView(order);
+    await this.hydrateOrderItemImages([view]);
+    return view;
+  }
+
+  /**
+   * OrderItem doesn't snapshot the image at creation time, so the buyer order
+   * views look up each referenced product once per request and attach the
+   * imageFirst URL. Skipped (image=null) when the product was deleted.
+   */
+  private async hydrateOrderItemImages(
+    views: Array<{ items: Array<{ productId: string; image?: string | null }> }>,
+  ): Promise<void> {
+    const ids = new Set<string>();
+    for (const v of views) for (const it of v.items) if (it.productId) ids.add(it.productId);
+    if (ids.size === 0) return;
+    const rows = await this.products.find({
+      where: { id: In([...ids]) },
+      select: { id: true, imageFirst: true },
+    });
+    const byId = new Map(rows.map((p) => [p.id, p.imageFirst ?? null]));
+    for (const v of views) {
+      for (const it of v.items) {
+        it.image = byId.get(it.productId) ?? null;
+      }
+    }
   }
 
   private toBuyerListView(o: Order) {
@@ -268,25 +458,28 @@ export class OrdersService {
     });
   }
 
-  async cancelForBuyer(buyerId: string, id: string): Promise<{ id: string; status: 'Cancelled' }> {
-    return this.dataSource.transaction(async (manager) => {
-      const order = await manager.findOne(Order, {
-        where: { id },
-        relations: { items: true },
-      });
+  async cancelForBuyer(
+    userId: string,
+    orderId: string,
+    _reason?: string,
+  ): Promise<{ ok: true }> {
+    return this.dataSource.transaction(async (m) => {
+      const order = await m.findOne(Order, { where: { id: orderId }, relations: ['items'] });
       if (!order) throw new NotFoundException('Order not found');
-      if (order.buyerId !== buyerId) throw new ForbiddenException('Not your order');
-      if (order.status !== 'Paid') throw new ConflictException(`Cannot cancel an order with status ${order.status}`);
+      if (order.buyerId !== userId) throw new ForbiddenException('Not your order');
+      if (order.status === 'Delivered') {
+        throw new BadRequestException('Cannot cancel a delivered order');
+      }
+      if (order.status === 'Cancelled') return { ok: true as const };
+
       for (const it of order.items ?? []) {
-        await manager.query(
+        await m.query(
           'UPDATE products SET stock = stock + ? WHERE id = ?',
           [it.quantity, it.productId],
         );
       }
-      order.status = 'Cancelled';
-      order.cancelledAt = new Date();
-      await manager.save(order);
-      return { id: String(order.id), status: 'Cancelled' };
+      await m.update(Order, { id: order.id }, { status: 'Cancelled', cancelledAt: new Date() });
+      return { ok: true as const };
     });
   }
 }

@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom';
 import UserLayout from './layouts/UserLayout.jsx';
 import StoreLayout from './layouts/StoreLayout.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
+import RequireRole from './components/routing/RequireRole.jsx';
+import RedirectIfAuthed from './components/routing/RedirectIfAuthed.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ProductDetailPage from './pages/ProductDetailPage.jsx';
 import SearchResultPage from './pages/SearchResultPage.jsx';
@@ -25,36 +27,54 @@ export const router = createBrowserRouter([
   {
     element: <UserLayout />,
     children: [
+      // Public
       { path: '/', element: <HomePage /> },
       { path: '/search', element: <SearchResultPage /> },
       { path: '/product/:id', element: <ProductDetailPage /> },
-      { path: '/cart', element: <CartPage /> },
-      { path: '/wishlist', element: <WishlistPage /> },
-      { path: '/messages', element: <UserChatPage /> },
-      { path: '/messages/:conversationId', element: <UserChatPage /> },
       { path: '/policy', element: <PolicyPage /> },
       { path: '/policy/:section', element: <PolicyPage /> },
-      { path: '/checkout', element: <CheckoutPage /> },
-      { path: '/orders', element: <OrderManagementPage /> },
-      { path: '/orders/:id', element: <OrderDetailPage /> },
-      { path: '/account', element: <ProfilePage /> },
-      { path: '/account/addresses', element: <AddressesPage /> },
+      // Buyer-only
+      {
+        element: <RequireRole role="buyer" />,
+        children: [
+          { path: '/cart', element: <CartPage /> },
+          { path: '/wishlist', element: <WishlistPage /> },
+          { path: '/messages', element: <UserChatPage /> },
+          { path: '/messages/:conversationId', element: <UserChatPage /> },
+          { path: '/checkout', element: <CheckoutPage /> },
+          { path: '/orders', element: <OrderManagementPage /> },
+          { path: '/orders/:id', element: <OrderDetailPage /> },
+          { path: '/account', element: <ProfilePage /> },
+          { path: '/account/addresses', element: <AddressesPage /> },
+        ],
+      },
     ],
   },
   {
-    element: <StoreLayout />,
+    // Seller-only
+    element: <RequireRole role="seller" />,
     children: [
-      { path: '/store', element: <StoreOrderManagementPage /> },
-      { path: '/store/orders', element: <StoreOrderManagementPage /> },
-      { path: '/store/inventory', element: <StoreInventoryPage /> },
-      { path: '/store/products/new', element: <StoreProductFormPage /> },
-      { path: '/store/products/:id', element: <StoreProductFormPage /> },
-      { path: '/store/messages', element: <StoreChatPage /> },
+      {
+        element: <StoreLayout />,
+        children: [
+          { path: '/store', element: <StoreOrderManagementPage /> },
+          { path: '/store/orders', element: <StoreOrderManagementPage /> },
+          { path: '/store/inventory', element: <StoreInventoryPage /> },
+          { path: '/store/products/new', element: <StoreProductFormPage /> },
+          { path: '/store/products/:id', element: <StoreProductFormPage /> },
+          { path: '/store/messages', element: <StoreChatPage /> },
+        ],
+      },
     ],
   },
   {
     element: <AuthLayout />,
-    children: [{ path: '/auth', element: <AuthPage /> }],
+    children: [
+      {
+        element: <RedirectIfAuthed />,
+        children: [{ path: '/auth', element: <AuthPage /> }],
+      },
+    ],
   },
   { path: '*', element: <NotFoundPage /> },
 ]);

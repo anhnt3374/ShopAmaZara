@@ -137,13 +137,34 @@ export default function OrderDetailPage() {
             <ul className="divide-y divide-outline-variant">
               {order.items.map((it) => (
                 <li key={it.id} className="px-6 py-5 flex gap-4">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden border border-outline-variant bg-surface-container flex items-center justify-center text-body-sm text-on-surface-variant text-center px-1">
-                    {it.name}
-                  </div>
-                  <div className="flex-grow flex flex-col justify-between">
-                    <p className="text-body-md text-primary font-semibold">{it.name}</p>
-                    <div className="flex justify-between items-end">
-                      <span className="text-body-sm text-on-surface-variant">Qty: {it.quantity}</span>
+                  <Link
+                    to={`/product/${it.productId}`}
+                    className="w-20 h-20 flex-none rounded-lg overflow-hidden border border-outline-variant bg-surface-container"
+                    title={it.name}
+                  >
+                    {it.image ? (
+                      <img
+                        src={it.image}
+                        alt={it.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-body-xs text-on-surface-variant text-center px-1">
+                        {it.name}
+                      </div>
+                    )}
+                  </Link>
+                  <div className="flex-grow flex flex-col justify-between min-w-0">
+                    <Link
+                      to={`/product/${it.productId}`}
+                      className="text-body-md text-primary font-semibold hover:underline truncate"
+                    >
+                      {it.name}
+                    </Link>
+                    <div className="text-body-sm text-on-surface-variant">
+                      ${Number(it.price).toFixed(2)} · Qty {it.quantity}
+                    </div>
+                    <div className="flex justify-end">
                       <span className="text-headline-md text-on-surface">
                         ${(Number(it.price) * it.quantity).toFixed(2)}
                       </span>

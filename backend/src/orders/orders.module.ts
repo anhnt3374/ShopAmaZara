@@ -10,11 +10,13 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { StoreOrdersController } from './store-orders.controller';
 import { UserAddress } from '../addresses/address.entity';
+import { BehaviorModule } from '../behavior/behavior.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, CartItem, Product, UserAddress]),
     StoresModule,
+    BehaviorModule,
   ],
   controllers: [OrdersController, StoreOrdersController],
   providers: [OrdersService, SellerStoreGuard],

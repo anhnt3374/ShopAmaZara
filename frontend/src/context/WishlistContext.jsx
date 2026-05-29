@@ -15,25 +15,7 @@ import {
   removeWishlistItem,
 } from '../services/wishlist.js';
 
-const STORAGE_KEY = 'amazara.wishlist.v1';
 const WishlistContext = createContext(null);
-
-function loadIds() {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveIds(ids) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    /* ignore */
-  }
-}
 
 function pickIdAndName(idOrProduct) {
   if (idOrProduct && typeof idOrProduct === 'object') {
@@ -46,50 +28,29 @@ export function WishlistProvider({ children }) {
   const { isAuthenticated } = useAuth();
   const toast = useToast();
 
-  // `ids` always tracks the set of wishlisted product ids (used by `has(id)`)
-  const [ids, setIds] = useState(loadIds);
+  // `ids` tracks the set of wishlisted product ids (used by `has(id)`)
+  const [ids, setIds] = useState([]);
   // `products` is the hydrated server view, only populated when logged in
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const idsRef = useRef(ids);
-  const wasAuthRef = useRef(isAuthenticated);
 
   useEffect(() => {
     idsRef.current = ids;
-    // Only persist to localStorage when logged out — server is source of truth otherwise
-    if (!isAuthenticated) saveIds(ids);
-  }, [ids, isAuthenticated]);
+  }, [ids]);
 
-  // Hydrate / sync on auth state change
+  // Wishlist is buyer-only: hydrate from the server when logged in, clear otherwise.
   useEffect(() => {
-    const justLoggedIn = isAuthenticated && !wasAuthRef.current;
-    const justLoggedOut = !isAuthenticated && wasAuthRef.current;
-    wasAuthRef.current = isAuthenticated;
-
     if (!isAuthenticated) {
+      setIds([]);
       setProducts([]);
-      if (justLoggedOut) {
-        // Reset guest state to whatever's in localStorage (which we no longer sync on logged in)
-        setIds(loadIds());
-      }
       return;
     }
-
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        if (justLoggedIn) {
-          // Best-effort: push any guest-state ids to the server before hydrating
-          const guestIds = idsRef.current;
-          if (guestIds.length) {
-            await Promise.all(
-              guestIds.map((pid) => addWishlistItem(pid).catch(() => null)),
-            );
-            saveIds([]);
-          }
-        }
         const res = await fetchWishlist();
         if (cancelled) return;
         const items = res.items ?? [];
@@ -104,8 +65,7 @@ export function WishlistProvider({ children }) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, [isAuthenticated, toast]);
 
   const has = useCallback((id) => ids.includes(id), [ids]);
 

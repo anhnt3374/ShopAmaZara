@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
@@ -13,6 +15,7 @@ import {
 import { CartItem } from './cart-item.entity';
 import { AddCartItemDto } from './dto/add-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { BehaviorService } from '../behavior/behavior.service';
 
 export interface CartItemView {
   id: string;
@@ -24,10 +27,22 @@ export interface CartItemView {
 
 @Injectable()
 export class CartService {
+  private readonly behaviorLog = new Logger('CartService:behavior');
+
   constructor(
     @InjectRepository(CartItem) private readonly items: Repository<CartItem>,
     @InjectRepository(Product) private readonly products: Repository<Product>,
+    @Optional() private readonly behavior?: BehaviorService,
   ) {}
+
+  private fireBehavior(fn: () => Promise<void>): void {
+    if (!this.behavior) return;
+    Promise.resolve()
+      .then(fn)
+      .catch((err) =>
+        this.behaviorLog.warn(`behavior hook failed: ${err instanceof Error ? err.message : String(err)}`),
+      );
+  }
 
   private hydrateRow(row: CartItem, product: Product): CartItemView {
     const summary = toProductSummary(product);
@@ -86,6 +101,7 @@ export class CartService {
       quantity: dto.quantity,
     });
     const saved = await this.items.save(created);
+    this.fireBehavior(() => this.behavior!.recordCartAdd(userId, dto.productId));
     return { item: this.hydrateRow(saved, product) };
   }
 
@@ -98,6 +114,7 @@ export class CartService {
     if (!row) throw new NotFoundException('Cart row not found');
     if (dto.quantity === 0) {
       await this.items.delete({ userId, productId });
+      this.fireBehavior(() => this.behavior!.recordCartRemove(userId, productId));
       return null;
     }
     const product = await this.products.findOne({ where: { id: productId } });
@@ -111,6 +128,7 @@ export class CartService {
 
   async remove(userId: string, productId: string): Promise<void> {
     await this.items.delete({ userId, productId });
+    this.fireBehavior(() => this.behavior!.recordCartRemove(userId, productId));
   }
 
   async clear(userId: string): Promise<void> {

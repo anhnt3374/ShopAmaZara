@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import { createContext, useContext, useMemo, useState, useCallback } from 'react';
 import { authStorage } from '../services/api.js';
 import * as authService from '../services/auth.js';
 import { getMe } from '../services/profile.js';
@@ -32,33 +32,42 @@ function persist({ token, user }) {
 export function AuthProvider({ children }) {
   const [{ token, user }, setState] = useState(loadInitial);
 
-  useEffect(() => {
-    persist({ token, user });
-  }, [token, user]);
-
   const login = useCallback(async (credentials) => {
     const res = await authService.login(credentials);
+    // Persist BEFORE setState so api.js (which reads localStorage) sees the
+    // token immediately when downstream context useEffects fire on the same
+    // commit. A trailing useEffect-based persist loses that race and the
+    // first round of /me/* requests goes out without the Authorization header.
+    persist({ token: res.accessToken, user: res.user });
     setState({ token: res.accessToken, user: res.user });
     return res.user;
   }, []);
 
   const register = useCallback(async (input) => {
     const res = await authService.register(input);
+    persist({ token: res.accessToken, user: res.user });
     setState({ token: res.accessToken, user: res.user });
     return res.user;
   }, []);
 
   const logout = useCallback(() => {
+    persist({ token: null, user: null });
     setState({ token: null, user: null });
   }, []);
 
-  const setUser = useCallback((u) => setState((s) => ({ ...s, user: u })), []);
+  const setUser = useCallback((u) => {
+    setState((s) => {
+      const next = { ...s, user: u };
+      persist(next);
+      return next;
+    });
+  }, []);
   const refreshUser = useCallback(async () => {
     try {
       const u = await getMe();
       setUser(u);
       return u;
-    } catch {
+    } catch (_e) {
       return null;
     }
   }, [setUser]);

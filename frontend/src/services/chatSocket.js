@@ -77,3 +77,9 @@ export function emitTyping(conversationId, start) {
   if (!socket) return;
   socket.emit(start ? 'typing:start' : 'typing:stop', { conversationId });
 }
+
+export function sendChatAction({ conversationId, action, preorderId, payload }) {
+  if (!socket) return false;
+  socket.emit('message:action', { conversationId, action, preorderId, payload });
+  return true;
+}

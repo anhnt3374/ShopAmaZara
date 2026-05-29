@@ -140,3 +140,82 @@ describe('ProductsService', () => {
     });
   });
 });
+
+describe('ProductsService.suggest', () => {
+  let svc: ProductsService;
+  let products: { find: jest.Mock; findBy: jest.Mock };
+
+  beforeEach(async () => {
+    products = { find: jest.fn(), findBy: jest.fn() };
+    const mod = await Test.createTestingModule({
+      providers: [
+        ProductsService,
+        { provide: getRepositoryToken(Product), useValue: products },
+        {
+          provide: getRepositoryToken(Review),
+          useValue: {
+            createQueryBuilder: jest.fn().mockReturnValue({
+              select: jest.fn().mockReturnThis(),
+              addSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              getRawOne: jest.fn().mockResolvedValue({ cnt: '0', avg: null }),
+            }),
+          },
+        },
+      ],
+    }).compile();
+    svc = mod.get(ProductsService);
+  });
+
+  it('similar mode: finds products in the same category, excluding seeds', async () => {
+    products.findBy.mockResolvedValue([{ id: '1', category: 'headphones', storeId: 's1' }]);
+    products.find.mockResolvedValue([{ id: '5', category: 'headphones' }]);
+    const out = await svc.suggest(['1'], 'similar');
+    const call = products.find.mock.calls[0][0];
+    expect(call.where.category).toBe('headphones');
+    expect(out).toHaveLength(1);
+  });
+
+  it('returns empty array when seeds are empty', async () => {
+    expect(await svc.suggest([], 'similar')).toEqual([]);
+  });
+});
+
+describe('ProductsService.findManyByIds', () => {
+  let svc: ProductsService;
+  let findBy: jest.Mock;
+
+  beforeEach(async () => {
+    findBy = jest.fn();
+    const mod = await Test.createTestingModule({
+      providers: [
+        ProductsService,
+        { provide: getRepositoryToken(Product), useValue: { findBy } },
+        {
+          provide: getRepositoryToken(Review),
+          useValue: {
+            createQueryBuilder: jest.fn().mockReturnValue({
+              select: jest.fn().mockReturnThis(),
+              addSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              getRawOne: jest.fn().mockResolvedValue({ cnt: '0', avg: null }),
+            }),
+          },
+        },
+      ],
+    }).compile();
+    svc = mod.get(ProductsService);
+  });
+
+  it('returns an empty array for empty ids', async () => {
+    expect(await svc.findManyByIds([])).toEqual([]);
+    expect(findBy).not.toHaveBeenCalled();
+  });
+
+  it('queries the repo with In(ids) when present', async () => {
+    findBy.mockResolvedValue([{ id: '1' }, { id: '2' }]);
+    const out = await svc.findManyByIds(['1', '2']);
+    expect(findBy).toHaveBeenCalledWith({ id: expect.anything() });
+    expect(out).toHaveLength(2);
+  });
+});

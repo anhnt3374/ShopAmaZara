@@ -2,13 +2,19 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Product } from './product.entity';
 import { Review } from '../reviews/review.entity';
+import { ProductIndexerService } from '../search/product-indexer.service';
+import { SearchService } from '../search/search.service';
+import { PreferenceService } from '../personalization/preference.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -37,12 +43,85 @@ export interface ListResult {
 
 @Injectable()
 export class ProductsService {
+  private readonly indexerLog = new Logger('ProductsService:index');
+  private readonly searchLog = new Logger('ProductsService:search');
+
   constructor(
     @InjectRepository(Product) private readonly products: Repository<Product>,
     @InjectRepository(Review) private readonly reviewsRepo: Repository<Review>,
+    @Optional() private readonly indexer?: ProductIndexerService,
+    @Optional() private readonly search?: SearchService,
+    @Optional() private readonly config?: ConfigService,
+    @Optional() private readonly preference?: PreferenceService,
   ) {}
 
-  async list(dto: ListProductsDto): Promise<ListResult> {
+  private get searchEnabled(): boolean {
+    return this.config?.get<string>('EMBEDDINGS_ENABLED', 'true') !== 'false';
+  }
+
+  private fireIndex(fn: () => Promise<void>): void {
+    if (!this.indexer) return;
+    // Promise.resolve().then(fn) so even a synchronous throw inside fn becomes a
+    // caught rejection — fully fire-and-forget, never escapes into the request.
+    Promise.resolve()
+      .then(fn)
+      .catch((err) =>
+        this.indexerLog.warn(`index hook failed: ${err instanceof Error ? err.message : String(err)}`),
+      );
+  }
+
+  async list(dto: ListProductsDto, userId?: string): Promise<ListResult> {
+    if (dto.q && this.searchEnabled && this.search) {
+      try {
+        let userPreference;
+        if (userId && this.preference) {
+          // PreferenceService is best-effort today, but don't rely on that here —
+          // a fetch failure must still leave search unpersonalized, not abort it.
+          try {
+            userPreference = await this.preference.getPreferenceVectors(userId);
+          } catch (err) {
+            this.searchLog.warn(`preference fetch failed: ${(err as Error).message}`);
+          }
+        }
+        const hits = await this.search.search({
+          query: dto.q,
+          category: dto.category,
+          brand: dto.brand,
+          storeId: dto.storeId,
+          minPrice: dto.minPrice,
+          maxPrice: dto.maxPrice,
+          gender: dto.gender,
+          ageGroup: dto.ageGroup,
+          userPreference,
+        });
+        if (hits.length > 0) {
+          const page = dto.page ?? 1;
+          const limit = Math.min(dto.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
+          const start = (page - 1) * limit;
+          const pageIds = hits.slice(start, start + limit).map((h) => h.id);
+          // `total` is the ranked-hit count (capped at SEARCH_RESULT_CAP). A page
+          // beyond it is legitimately empty.
+          if (pageIds.length === 0) return { items: [], total: hits.length, page, limit };
+          // isPublished filter mirrors listSql and drops any row that was
+          // unpublished after indexing but before the index caught up.
+          const rows = await this.products.findBy({ id: In(pageIds), isPublished: true });
+          const byId = new Map(rows.map((r) => [r.id, r]));
+          const items = pageIds
+            .map((id) => byId.get(id))
+            .filter((r): r is Product => Boolean(r))
+            .map(toProductSummary);
+          return { items, total: hits.length, page, limit };
+        }
+      } catch (err) {
+        this.searchLog.warn(
+          `semantic search failed, falling back to LIKE: ${(err as Error).message}`,
+        );
+      }
+    }
+    return this.listSql(dto);
+  }
+
+  private async listSql(dto: ListProductsDto): Promise<ListResult> {
     const page = dto.page ?? 1;
     const limit = Math.min(dto.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
 
@@ -101,6 +180,38 @@ export class ProductsService {
     return toProductDetail(row, {
       rating: stats?.avg ? Math.round(Number(stats.avg) * 10) / 10 : 0,
       reviewCount: Number(stats?.cnt ?? 0),
+    });
+  }
+
+  async findManyByIds(ids: string[]): Promise<Product[]> {
+    if (ids.length === 0) return [];
+    return this.products.findBy({ id: In(ids) });
+  }
+
+  async suggest(
+    seedIds: string[],
+    mode: 'similar' | 'complementary',
+    limit = 6,
+  ): Promise<Product[]> {
+    if (seedIds.length === 0) return [];
+    const seeds = await this.findManyByIds(seedIds);
+    if (seeds.length === 0) return [];
+    const seedCategory = seeds[0].category;
+    const seedIdSet = seeds.map((s) => s.id);
+    if (mode === 'similar') {
+      return this.products.find({
+        where: { category: seedCategory, id: Not(In(seedIdSet)), isPublished: true },
+        take: limit,
+      });
+    }
+    return this.products.find({
+      where: {
+        category: Not(seedCategory),
+        storeId: seeds[0].storeId,
+        isPublished: true,
+        id: Not(In(seedIdSet)),
+      },
+      take: limit,
     });
   }
 
@@ -228,7 +339,9 @@ export class ProductsService {
       targetAgeGroup: dto.targetAgeGroup ?? null,
       tags: dto.tags ?? null,
     });
-    return this.products.save(entity);
+    const saved = await this.products.save(entity);
+    this.fireIndex(() => this.indexer!.indexProduct(saved));
+    return saved;
   }
 
   async updateForStore(
@@ -291,7 +404,9 @@ export class ProductsService {
     }
 
     Object.assign(product, fields);
-    return this.products.save(product);
+    const saved = await this.products.save(product);
+    this.fireIndex(() => this.indexer!.indexProduct(saved));
+    return saved;
   }
 
   async deleteForStore(storeId: string, id: string): Promise<void> {
@@ -300,6 +415,7 @@ export class ProductsService {
     if (product.storeId !== storeId)
       throw new ForbiddenException('Not your product');
     await this.products.remove(product);
+    this.fireIndex(() => this.indexer!.removeProduct(id));
   }
 
   async createManyForStore(
@@ -367,6 +483,7 @@ export class ProductsService {
       if (entities.length) {
         await this.products.save(entities);
         created += entities.length;
+        this.fireIndex(() => this.indexer!.indexProducts(entities));
       }
     }
     return { created, skippedDuringInsert };

@@ -28,6 +28,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      qdrant:
+        condition: service_started
     environment:
       PORT: 3000
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
@@ -38,6 +40,13 @@ services:
       DATABASE_NAME: ${MYSQL_DATABASE:-amazara}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-prod}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      TEXT_EMBED_URL: ${TEXT_EMBED_URL:-http://text-embed:8000}
+      IMAGE_EMBED_URL: ${IMAGE_EMBED_URL:-http://image-embed:8000}
+      EMBEDDINGS_ENABLED: ${EMBEDDINGS_ENABLED:-true}
+      EMBED_BATCH_SIZE: ${EMBED_BATCH_SIZE:-32}
+      EMBED_REQUEST_TIMEOUT_MS: ${EMBED_REQUEST_TIMEOUT_MS:-30000}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-products}
     ports:
       - "3000:3000"
     volumes:
@@ -63,7 +72,62 @@ services:
       - ./frontend:/app
       - amazara_frontend_node_modules:/app/node_modules
 
+  text-embed:
+    build:
+      context: ./ml/text-embed
+    container_name: amazara-text-embed
+    restart: unless-stopped
+    environment:
+      TEXT_EMBED_MODEL: ${TEXT_EMBED_MODEL:-BAAI/bge-small-en-v1.5}
+      EMBED_DEVICE: ${EMBED_DEVICE:-cuda}
+      HF_HOME: /hf_cache
+    volumes:
+      - hf_cache:/hf_cache
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  image-embed:
+    build:
+      context: ./ml/image-embed
+    container_name: amazara-image-embed
+    restart: unless-stopped
+    environment:
+      IMAGE_EMBED_MODEL: ${IMAGE_EMBED_MODEL:-qihoo360/fg-clip2-base}
+      EMBED_DEVICE: ${EMBED_DEVICE:-cuda}
+      IMAGE_ATTN_IMPL: ${IMAGE_ATTN_IMPL:-eager}
+      HF_HOME: /hf_cache
+    volumes:
+      - hf_cache:/hf_cache
+    ports:
+      - "8002:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: amazara-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
 volumes:
   amazara_mysql_data:
   amazara_backend_node_modules:
   amazara_frontend_node_modules:
+  hf_cache:
+  qdrant_storage:

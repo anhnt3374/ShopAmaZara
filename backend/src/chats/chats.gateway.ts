@@ -1,4 +1,4 @@
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { Logger, UnauthorizedException, forwardRef, Inject } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -14,6 +14,7 @@ import { Server, Socket } from 'socket.io';
 import { StoresService } from '../stores/stores.service';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
+import { ChatsService } from './chats.service';
 
 interface JwtPayload {
   sub: string;
@@ -34,6 +35,8 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly stores: StoresService,
+    @Inject(forwardRef(() => ChatsService))
+    private readonly chats: ChatsService,
   ) {}
 
   async handleConnection(socket: Socket) {
@@ -76,11 +79,37 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           conversationId: String(msg.conversationId),
           senderKind: msg.senderKind,
           senderId: msg.senderId,
-          body: msg.body,
+          body: msg.body ?? '',
+          contentBlocks: msg.contentBlocks ?? null,
           createdAt: msg.createdAt,
         },
       };
       for (const r of rooms) this.server.to(r).emit('message:new', out);
+    }
+  }
+
+  @SubscribeMessage('message:action')
+  async onAction(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody()
+    body: {
+      conversationId: string;
+      action: string;
+      preorderId?: string;
+    },
+  ) {
+    const userId = socket.data.userId as string | undefined;
+    if (!userId) return;
+    const sentinel = `[action:${body.action}${body.preorderId ? `:${body.preorderId}` : ''}]`;
+    try {
+      const { conversation, messages } = await this.chats.sendBuyerMessage(
+        userId,
+        body.conversationId,
+        sentinel,
+      );
+      this.fanOutMessages({ conversation, messages });
+    } catch (err) {
+      this.log.warn(`action ${body.action} failed: ${(err as Error).message}`);
     }
   }
 

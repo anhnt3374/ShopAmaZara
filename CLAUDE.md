@@ -39,7 +39,7 @@ cd backend && npm run test:e2e                # e2e (needs MySQL up via `docker 
 
 ## Conventions
 
-- **UI language is English only.** Do not introduce other locales in markup, copy, or alt text.
+- **UI language is English only.** This applies to ALL user-facing strings — page headings, buttons, form labels, validation messages, toast/snackbar text, alt text, policy/support copy, error pages, and the chatbot system prompt. Do not introduce Vietnamese (or any other locale) in markup, JSX text, default values, mock data, or seed copy. When porting or fixing pages, scan for residual Vietnamese strings and translate them; do not leave them mixed.
 - Backend imports: NestJS modules per domain (`auth/`, `users/`, ...). Each module exports a service when other modules need it.
 - Frontend services: one file per resource in `src/services/*`. They use the `api` wrapper from `services/api.js` so the base URL, auth header, and error handling stay in one place.
 - Auth: JWT stored in `localStorage` under `amazara.auth.token`. User profile under `amazara.auth.user`. The `api` wrapper auto-injects the `Authorization: Bearer` header and clears storage on 401. Use the `useAuth()` hook from `context/AuthContext.jsx` for `login`, `register`, `logout`, `user`, `isAuthenticated`.

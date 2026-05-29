@@ -30,8 +30,11 @@ export class Message {
   @Column({ name: 'sender_id', type: 'varchar', length: 64, default: '' })
   senderId!: string;
 
-  @Column({ type: 'text' })
-  body!: string;
+  @Column({ type: 'text', nullable: true })
+  body!: string | null;
+
+  @Column({ name: 'content_blocks', type: 'json', nullable: true })
+  contentBlocks!: unknown[] | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;

@@ -1,0 +1,6 @@
+# Light deps for the route tests (model functions are mocked — no torch/transformers).
+fastapi==0.136.1
+starlette==0.52.1
+pydantic==2.13.4
+httpx==0.28.1
+pytest==9.0.3

@@ -24,6 +24,12 @@ import { ChatsModule } from './chats/chats.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/review.entity';
+import { AiModule } from './ai/ai.module';
+import { EmbeddingsModule } from './embeddings/embeddings.module';
+import { SearchModule } from './search/search.module';
+import { UserProductEvent } from './behavior/behavior-event.entity';
+import { BehaviorModule } from './behavior/behavior.module';
+import { PersonalizationModule } from './personalization/personalization.module';
 
 @Module({
   imports: [
@@ -37,7 +43,7 @@ import { Review } from './reviews/review.entity';
         username: config.get<string>('DATABASE_USER'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
-        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress, Conversation, Message, Review],
+        entities: [User, Store, Product, WishlistItem, CartItem, Order, OrderItem, UserAddress, Conversation, Message, Review, UserProductEvent],
         synchronize: process.env.NODE_ENV !== 'production',
         charset: 'utf8mb4',
       }),
@@ -53,6 +59,11 @@ import { Review } from './reviews/review.entity';
     ChatsModule,
     UploadsModule,
     ReviewsModule,
+    AiModule,
+    EmbeddingsModule,
+    SearchModule,
+    BehaviorModule,
+    PersonalizationModule,
   ],
   controllers: [AppController],
 })

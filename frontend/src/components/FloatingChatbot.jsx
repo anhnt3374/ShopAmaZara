@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useChat } from '../context/ChatContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
+import { MessageBubble } from './chat/MessageBubble.jsx';
 
 const FAQ_ITEMS = [
   { id: 1, q: 'How long does shipping take?', a: 'Standard delivery: 5-7 business days. Express: 1-2 business days.' },
@@ -15,24 +16,40 @@ const FAQ_ITEMS = [
 
 export default function FloatingChatbot() {
   const { open, toggleChat, closeChat, view, setView, unreadTotal } = useChat();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isBuyer = isAuthenticated && user?.role === 'buyer';
   const fabBadge = unreadTotal > 0;
+
+  function handleFabClick() {
+    if (!isBuyer) {
+      navigate('/auth', { state: { from: location.pathname + location.search } });
+      return;
+    }
+    toggleChat();
+  }
 
   return (
     <>
       {open && <ChatPanel view={view} setView={setView} onClose={closeChat} />}
-      <button
-        type="button"
-        onClick={toggleChat}
-        aria-label="Open chat"
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-primary text-on-primary rounded-full shadow-overlay flex items-center justify-center hover:bg-primary-container transition-all duration-150 hover:scale-105 active:scale-95"
-      >
-        <Icon name={open ? 'close' : 'chat'} size={28} />
-        {!open && fabBadge && (
-          <span className="absolute -top-1 -right-1 bg-error text-on-error text-[10px] font-bold h-5 min-w-5 px-1 rounded-full flex items-center justify-center">
-            {unreadTotal}
-          </span>
-        )}
-      </button>
+      {/* FAB is only visible while the panel is closed. The panel header has
+          its own X button to close. */}
+      {!open && (
+        <button
+          type="button"
+          onClick={handleFabClick}
+          aria-label="Open chat"
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-primary text-on-primary rounded-full shadow-overlay flex items-center justify-center hover:bg-primary-container transition-all duration-150 hover:scale-105 active:scale-95"
+        >
+          <Icon name="chat" size={28} />
+          {fabBadge && (
+            <span className="absolute -top-1 -right-1 bg-error text-on-error text-[10px] font-bold h-5 min-w-5 px-1 rounded-full flex items-center justify-center">
+              {unreadTotal}
+            </span>
+          )}
+        </button>
+      )}
     </>
   );
 }
@@ -44,10 +61,13 @@ function ChatPanel({ view, setView, onClose }) {
     <div
       role="dialog"
       aria-label="Chat assistant"
-      className="fixed bottom-24 right-4 sm:right-6 z-40 w-[calc(100vw-2rem)] sm:w-[380px] h-[calc(100vh-9rem)] sm:h-[600px] max-h-[80vh] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-overlay flex flex-col overflow-hidden"
+      // top-20 keeps the panel below the site header on small screens; on the
+      // ≥sm popover variant we anchor bottom-6 (same offset the FAB used) so
+      // the panel reclaims the FAB's slot instead of leaving a dead gap.
+      className="fixed top-20 bottom-6 right-4 sm:right-6 sm:top-auto sm:bottom-6 z-40 w-[calc(100vw-2rem)] sm:w-[380px] sm:h-[640px] sm:max-h-[calc(100vh-7rem)] max-h-[640px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-overlay flex flex-col overflow-hidden"
     >
       <PanelHeader view={view} onClose={onClose} />
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin bg-surface-container-low">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin bg-surface-container-low">
         {view === 'system' && (isAuthenticated ? <SystemChat /> : <SignInState />)}
         {view === 'stores' && (isAuthenticated ? <StoresTab /> : <SignInState />)}
         {view === 'faq' && <FaqTab />}
@@ -63,7 +83,7 @@ function ChatPanel({ view, setView, onClose }) {
 }
 
 function PanelHeader({ view, onClose }) {
-  const { chats, activeStoreChatId, unreadTotal } = useChat();
+  const { chats, activeStoreChatId, unreadStores } = useChat();
   let title = 'AmaZara Assistant';
   let subtitle = 'Online';
   if (view === 'stores') {
@@ -73,7 +93,7 @@ function PanelHeader({ view, onClose }) {
       subtitle = 'Online';
     } else {
       title = 'Messages';
-      subtitle = unreadTotal > 0 ? `${unreadTotal} unread` : 'All caught up';
+      subtitle = unreadStores > 0 ? `${unreadStores} unread` : 'All caught up';
     }
   } else if (view === 'faq') {
     title = 'Help & FAQ';
@@ -101,10 +121,10 @@ function PanelHeader({ view, onClose }) {
 }
 
 function BottomTabs({ view, setView }) {
-  const { unreadTotal, setActiveStoreChatId } = useChat();
+  const { unreadSystem, unreadStores, setActiveStoreChatId } = useChat();
   const tabs = [
-    { id: 'system', icon: 'smart_toy', label: 'System' },
-    { id: 'stores', icon: 'forum', label: 'Stores', badge: unreadTotal },
+    { id: 'system', icon: 'smart_toy', label: 'System', badge: unreadSystem },
+    { id: 'stores', icon: 'forum', label: 'Stores', badge: unreadStores },
     { id: 'faq', icon: 'help', label: 'FAQ' },
   ];
   return (
@@ -181,12 +201,25 @@ function SystemChat() {
 
   const messages = conversationId ? messagesByChat[conversationId] ?? [] : [];
 
+  const initialScrollDoneRef = useRef(false);
+  useEffect(() => {
+    initialScrollDoneRef.current = false;
+  }, [conversationId]);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-    if (distance < 80) el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
+    requestAnimationFrame(() => {
+      const node = scrollRef.current;
+      if (!node) return;
+      if (!initialScrollDoneRef.current && messages.length > 0) {
+        node.scrollTop = node.scrollHeight;
+        initialScrollDoneRef.current = true;
+        return;
+      }
+      const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
+      if (distance < 80) node.scrollTop = node.scrollHeight;
+    });
+  }, [conversationId, messages.length]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -218,7 +251,12 @@ function SystemChat() {
           </div>
         )}
         {messages.map((m) => (
-          <Bubble key={m.id} m={m} ownKind="buyer" />
+          <MessageBubble
+            key={m.id}
+            message={m}
+            conversationId={conversationId}
+            compact
+          />
         ))}
         {conversationId && typingByChat[conversationId] && (
           <div className="text-[11px] text-on-surface-variant pl-2">Assistant is typing…</div>
@@ -259,12 +297,26 @@ function StoresTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeStoreChatId]);
 
+  const storeScrollDoneRef = useRef(null);
+  useEffect(() => {
+    storeScrollDoneRef.current = null; // reset when switching store chats
+  }, [activeStoreChatId]);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-    if (distance < 80) el.scrollTop = el.scrollHeight;
-  }, [activeStoreChatId, messagesByChat[activeStoreChatId]?.length]);
+    requestAnimationFrame(() => {
+      const node = scrollRef.current;
+      if (!node) return;
+      const len = messagesByChat[activeStoreChatId]?.length ?? 0;
+      if (storeScrollDoneRef.current !== activeStoreChatId && len > 0) {
+        node.scrollTop = node.scrollHeight;
+        storeScrollDoneRef.current = activeStoreChatId;
+        return;
+      }
+      const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
+      if (distance < 80) node.scrollTop = node.scrollHeight;
+    });
+  }, [activeStoreChatId, messagesByChat]);
 
   if (activeStoreChatId) {
     const messages = messagesByChat[activeStoreChatId] ?? [];

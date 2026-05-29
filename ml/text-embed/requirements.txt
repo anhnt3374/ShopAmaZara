@@ -1,0 +1,11 @@
+# torch is installed FIRST from the PyTorch cu130 index in the Dockerfile (its
+# wheel bundles the CUDA 13 runtime), so it is NOT listed here.
+fastapi==0.136.1
+starlette==0.52.1
+uvicorn[standard]==0.47.0
+pydantic==2.13.4
+sentence-transformers==5.5.1
+transformers==5.9.0
+tokenizers==0.22.2
+huggingface_hub==1.15.0
+safetensors==0.7.0

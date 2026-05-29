@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useChat } from '../context/ChatContext.jsx';
+import { MessageBubble } from '../components/chat/MessageBubble.jsx';
 
 export default function UserChatPage() {
   const { conversationId } = useParams();
@@ -33,10 +34,28 @@ export default function UserChatPage() {
 
   const messages = conversationId ? messagesByChat[conversationId] ?? [] : [];
 
+  const initialScrollDoneRef = useRef(false);
+  useEffect(() => {
+    initialScrollDoneRef.current = false;
+  }, [conversationId]);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    // Wait one frame so the message list has actually laid out before we read
+    // scrollHeight — otherwise React may not have committed the new bubbles yet.
+    requestAnimationFrame(() => {
+      if (!scrollRef.current) return;
+      if (!initialScrollDoneRef.current && messages.length > 0) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        initialScrollDoneRef.current = true;
+        return;
+      }
+      // After the initial jump, only auto-scroll when the user is near the
+      // bottom so they don't lose their place while reading history.
+      const node = scrollRef.current;
+      const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
+      if (distance < 120) node.scrollTop = node.scrollHeight;
+    });
   }, [conversationId, messages.length]);
 
   const onChange = (e) => {
@@ -135,20 +154,11 @@ export default function UserChatPage() {
 
               <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3 bg-surface-container-low">
                 {messages.map((m) => (
-                  <div
+                  <MessageBubble
                     key={m.id}
-                    className={`flex ${m.senderKind === 'buyer' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] sm:max-w-[60%] px-4 py-2 rounded-2xl text-body-sm ${
-                        m.senderKind === 'buyer'
-                          ? 'bg-primary text-on-primary rounded-br-md'
-                          : 'bg-surface text-on-surface border border-outline-variant rounded-bl-md'
-                      }`}
-                    >
-                      {m.body}
-                    </div>
-                  </div>
+                    message={m}
+                    conversationId={conversationId}
+                  />
                 ))}
               </div>
 

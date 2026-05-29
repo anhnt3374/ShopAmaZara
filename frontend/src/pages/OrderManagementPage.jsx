@@ -123,22 +123,46 @@ export default function OrderManagementPage() {
                       </div>
                       <OrderStatusBadge status={o.status} />
                     </div>
-                    <div className="flex gap-3">
+                    <ul className="flex flex-col gap-2">
                       {(o.items ?? []).slice(0, 3).map((it) => (
-                        <div
-                          key={it.id}
-                          className="w-16 h-16 rounded-lg overflow-hidden border border-outline-variant bg-surface-container flex items-center justify-center text-body-sm text-on-surface-variant px-1 text-center"
-                          title={it.name}
-                        >
-                          {it.name}
-                        </div>
+                        <li key={it.id} className="flex items-center gap-3 min-w-0">
+                          <Link
+                            to={`/product/${it.productId}`}
+                            className="w-12 h-12 flex-none rounded-md overflow-hidden border border-outline-variant bg-surface-container"
+                            title={it.name}
+                          >
+                            {it.image ? (
+                              <img
+                                src={it.image}
+                                alt={it.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[10px] text-on-surface-variant text-center px-0.5">
+                                {it.name}
+                              </div>
+                            )}
+                          </Link>
+                          <div className="flex-1 min-w-0 text-body-sm">
+                            <Link
+                              to={`/product/${it.productId}`}
+                              className="text-on-surface font-medium hover:underline truncate block"
+                            >
+                              {it.name}
+                            </Link>
+                            <div className="text-on-surface-variant text-body-xs">
+                              ${Number(it.price).toFixed(2)} · Qty {it.quantity}
+                            </div>
+                          </div>
+                        </li>
                       ))}
                       {(o.items?.length ?? 0) > 3 && (
-                        <div className="w-16 h-16 rounded-lg overflow-hidden border border-outline-variant bg-surface flex items-center justify-center text-label-md text-on-surface-variant">
-                          +{o.items.length - 3}
-                        </div>
+                        <li className="text-body-xs text-on-surface-variant pl-1">
+                          +{o.items.length - 3} more item
+                          {o.items.length - 3 > 1 ? 's' : ''}
+                        </li>
                       )}
-                    </div>
+                    </ul>
                   </div>
                   <div className="md:w-60 flex flex-col justify-between border-t md:border-t-0 md:border-l border-outline-variant pt-6 md:pt-0 md:pl-6">
                     <div className="mb-4">

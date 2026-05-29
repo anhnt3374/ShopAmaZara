@@ -193,10 +193,21 @@ export function ChatProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected]);
 
-  const unreadTotal = useMemo(
-    () => chats.reduce((s, c) => s + (c.unread ?? 0), 0),
+  const unreadSystem = useMemo(
+    () =>
+      chats
+        .filter((c) => c.kind === 'system')
+        .reduce((s, c) => s + (c.unread ?? 0), 0),
     [chats],
   );
+  const unreadStores = useMemo(
+    () =>
+      chats
+        .filter((c) => c.kind === 'store')
+        .reduce((s, c) => s + (c.unread ?? 0), 0),
+    [chats],
+  );
+  const unreadTotal = unreadSystem + unreadStores;
 
   const value = useMemo(
     () => ({
@@ -206,7 +217,7 @@ export function ChatProvider({ children }) {
       messagesByChat, loadMessages,
       sendMessage, markRead,
       ensureSystemChat, ensureStoreChat,
-      unreadTotal, typingByChat,
+      unreadTotal, unreadSystem, unreadStores, typingByChat,
       emitTyping,
       connected,
     }),
@@ -217,7 +228,7 @@ export function ChatProvider({ children }) {
       messagesByChat, loadMessages,
       sendMessage, markRead,
       ensureSystemChat, ensureStoreChat,
-      unreadTotal, typingByChat,
+      unreadTotal, unreadSystem, unreadStores, typingByChat,
       connected,
     ],
   );
