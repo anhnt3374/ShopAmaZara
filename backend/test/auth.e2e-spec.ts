@@ -124,6 +124,29 @@ describe('Auth (e2e)', () => {
         .send({ email: 'not-an-email', password: 'short' });
       expect(res.status).toBe(400);
     });
+
+    it('returns 200 when the supplied role matches the account', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: validBody.email, password: validBody.password, role: 'buyer' });
+      expect(res.status).toBe(200);
+      expect(res.body.user.role).toBe('buyer');
+    });
+
+    it('returns 401 when the supplied role does not match the account', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: validBody.email, password: validBody.password, role: 'seller' });
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe('This account is not registered as a seller account.');
+    });
+
+    it('returns 400 when role is present but invalid', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: validBody.email, password: validBody.password, role: 'admin' });
+      expect(res.status).toBe(400);
+    });
   });
 
   describe('GET /auth/me', () => {

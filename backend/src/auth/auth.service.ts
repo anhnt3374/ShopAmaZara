@@ -47,6 +47,11 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
+    if (dto.role && dto.role !== user.role) {
+      throw new UnauthorizedException(
+        `This account is not registered as a ${dto.role} account.`,
+      );
+    }
     return this.toAuthResponse(user);
   }
 
