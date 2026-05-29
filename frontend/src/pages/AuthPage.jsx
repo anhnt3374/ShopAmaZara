@@ -142,17 +142,6 @@ export default function AuthPage() {
             {!submitting && <Icon name="arrow_forward" size={18} />}
           </button>
 
-          <div className="flex items-center gap-3 text-body-sm text-on-surface-variant my-2">
-            <span className="flex-1 border-t border-outline-variant" />
-            or
-            <span className="flex-1 border-t border-outline-variant" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <SocialButton icon="g_translate" label="Google" />
-            <SocialButton icon="apple" label="Apple" />
-          </div>
-
           <p className="text-body-sm text-on-surface-variant text-center mt-auto">
             {mode === 'signin' ? (
               <>
@@ -223,17 +212,5 @@ function Field({ label, icon, ...rest }) {
         <Icon name={icon} className="absolute left-3 top-2.5 text-outline" size={20} />
       </div>
     </label>
-  );
-}
-
-function SocialButton({ icon, label }) {
-  return (
-    <button
-      type="button"
-      className="border border-outline-variant rounded-lg py-2.5 px-3 inline-flex items-center justify-center gap-2 text-label-md text-on-surface hover:bg-surface-container-low transition-colors"
-    >
-      <Icon name={icon} size={20} />
-      {label}
-    </button>
   );
 }
