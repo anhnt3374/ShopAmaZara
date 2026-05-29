@@ -37,17 +37,19 @@ Responses:
 
 ### `POST /auth/login`
 
-Request body:
+Request body (`role` is optional):
 
 ```json
-{ "email": "jane@example.com", "password": "hunter2hunter2" }
+{ "email": "jane@example.com", "password": "hunter2hunter2", "role": "buyer" }
 ```
 
 Responses:
 - `200 OK` → same shape as register success
-- `400 Bad Request` → validation error
+- `400 Bad Request` → validation error (includes `role` not in `buyer`/`seller`)
 - `401 Unauthorized` → `{ "message": "Invalid credentials", ... }` for both wrong
   password and unknown email (intentional, to avoid user enumeration)
+- `401 Unauthorized` → `{ "message": "This account is not registered as a <role> account.", ... }`
+  when `role` is supplied and does not match the account's role
 
 ### `GET /auth/me`
 
@@ -104,6 +106,5 @@ npm run test:e2e                  # e2e tests against amazara_test (MySQL contai
 - No refresh tokens. Access token TTL is 7 days.
 - No email verification or password reset.
 - Role is stored but no route-level role guards yet.
-- Google / Apple buttons in the UI are visual stubs.
 - `synchronize: true` for dev; migrations are a future task.
 - No rate limiting on `/auth/*`.
