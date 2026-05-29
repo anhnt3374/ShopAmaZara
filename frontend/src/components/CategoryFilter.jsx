@@ -49,7 +49,7 @@ export default function CategoryFilter({ categories, selected, onToggle }) {
             {selected.map((c) => (
               <span
                 key={c}
-                className="inline-flex items-center gap-1 bg-primary-container text-on-primary rounded-full pl-3 pr-1.5 py-1 text-body-sm"
+                className="inline-flex items-center gap-1 bg-primary-container text-on-primary-container rounded-full pl-3 pr-1.5 py-1 text-body-sm"
               >
                 <span className="truncate max-w-[10rem]">{c}</span>
                 <button
@@ -76,6 +76,7 @@ export default function CategoryFilter({ categories, selected, onToggle }) {
               <label className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
+                  // always false: selected items are removed from this list and shown as chips above
                   checked={false}
                   onChange={() => onToggle(c)}
                   className="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4"
