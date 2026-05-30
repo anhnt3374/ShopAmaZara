@@ -14,8 +14,9 @@ hashed with bcrypt (cost 12). Successful register/login returns a JWT
 header.
 
 Logout (`useAuth().logout`, clears token + user) is surfaced in the UI as a
-**Sign out** button: on the buyer Profile page header (`ProfilePage`) and in the
-seller sidebar (`StoreSideNav`); both redirect to `/` afterwards.
+**Sign out** button in the side nav for both roles — buyer (`AccountSideNav`)
+and seller (`StoreSideNav`). Both confirm first (`confirm('Sign out of your
+account?')`), then clear the session and redirect to `/`.
 
 ## API
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AccountSideNav from '../components/AccountSideNav.jsx';
 import Icon from '../components/Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -12,14 +12,8 @@ const DEFAULT_AVATAR =
   'https://ui-avatars.com/api/?background=1e40af&color=fff&size=256&name=Account';
 
 export default function ProfilePage() {
-  const { user, refreshUser, setUser, logout } = useAuth();
+  const { user, refreshUser, setUser } = useAuth();
   const toast = useToast();
-  const navigate = useNavigate();
-
-  function handleLogout() {
-    logout();
-    navigate('/');
-  }
   const [orderCount, setOrderCount] = useState(null);
   const [addressCount, setAddressCount] = useState(null);
   const [form, setForm] = useState(() => ({
@@ -93,14 +87,6 @@ export default function ProfilePage() {
               </span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline text-error hover:bg-error/10 transition-colors self-center md:self-start shrink-0"
-          >
-            <Icon name="logout" size={20} />
-            <span className="text-label-md">Sign out</span>
-          </button>
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">

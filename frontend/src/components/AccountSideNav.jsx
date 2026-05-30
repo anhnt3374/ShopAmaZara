@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import Icon from './Icon.jsx';
 
@@ -9,7 +9,15 @@ const links = [
 ];
 
 export default function AccountSideNav() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    if (!confirm('Sign out of your account?')) return;
+    logout();
+    navigate('/');
+  }
+
   return (
     <aside className="hidden md:flex flex-col gap-2 w-64 shrink-0 pr-4">
       <div className="mb-6 px-4">
@@ -43,6 +51,14 @@ export default function AccountSideNav() {
             <span className="text-label-md">View Dashboard</span>
           </NavLink>
         )}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="mt-4 px-4 py-3 flex items-center gap-3 rounded-lg text-error hover:bg-error/10 transition-colors text-left"
+        >
+          <Icon name="logout" size={20} />
+          <span className="text-label-md">Sign out</span>
+        </button>
       </nav>
     </aside>
   );

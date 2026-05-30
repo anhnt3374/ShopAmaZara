@@ -14,6 +14,7 @@ export default function StoreSideNav({ onItemClick }) {
   const { logout } = useAuth();
 
   function handleLogout() {
+    if (!confirm('Sign out of your account?')) return;
     onItemClick?.();
     logout();
     navigate('/');
