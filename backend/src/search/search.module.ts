@@ -6,6 +6,7 @@ import { Review } from '../reviews/review.entity';
 import { EmbeddingsModule } from '../embeddings/embeddings.module';
 import { ProductIndexerService } from './product-indexer.service';
 import { QDRANT_CLIENT, QdrantService } from './qdrant.service';
+import { QueryCacheService } from './query-cache.service';
 import { SEARCH_CACHE, SearchCacheStore } from './search-cache';
 import { SearchService } from './search.service';
 
@@ -44,6 +45,7 @@ import { SearchService } from './search.service';
       },
     },
     QdrantService,
+    QueryCacheService,
     ProductIndexerService,
     SearchService,
   ],

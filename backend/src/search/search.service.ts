@@ -7,6 +7,7 @@ import { ATTR_VECTOR, DESC_VECTOR, IMAGE_VECTOR } from './qdrant.constants';
 import { DEFAULT_CANDIDATE_K, DEFAULT_RESULT_CAP, DEFAULT_WEIGHTS } from './search.constants';
 import { buildFilter, SearchFilters } from './search.filter';
 import { SEARCH_CACHE, SearchCacheStore } from './search-cache';
+import { QueryCacheService } from './query-cache.service';
 
 export interface SearchParams extends SearchFilters {
   query: string;
@@ -71,6 +72,7 @@ export class SearchService {
     private readonly qdrant: QdrantService,
     config: ConfigService,
     @Optional() @Inject(SEARCH_CACHE) private readonly cache?: SearchCacheStore | null,
+    @Optional() private readonly queryCache?: QueryCacheService,
   ) {
     const num = (key: string, def: number): number => {
       const n = Number(config.get<string>(key, String(def)));
@@ -107,7 +109,22 @@ export class SearchService {
     ]);
   }
 
+  // Filter-only key for the semantic cache (personalization excluded — semantic
+  // caching is applied to non-personalized queries only).
+  private scopeKey(params: SearchParams): string {
+    return JSON.stringify([
+      params.category ?? null,
+      params.brand ?? null,
+      params.storeId ?? null,
+      params.minPrice ?? null,
+      params.maxPrice ?? null,
+      params.gender ?? null,
+      params.ageGroup ?? null,
+    ]);
+  }
+
   async search(params: SearchParams): Promise<RankedHit[]> {
+    // Tier 1: Redis exact cache — skips the embedding entirely on a verbatim repeat.
     const key = this.cache && this.cacheTtlMs > 0 ? this.cacheKey(params) : null;
     if (key) {
       const cached = await this.cache!.get(key);
@@ -121,6 +138,21 @@ export class SearchService {
     const qBge = bgeVecs[0];
     const qClip = clipVecs[0];
     if (!qBge || !qClip) throw new Error('query embedding produced no vector');
+
+    const pref = params.userPreference;
+    const hasPref = !!pref && !!(pref.desc || pref.attr || pref.image);
+
+    // Tier 2: semantic cache (non-personalized queries only). A near-identical
+    // past query in the same filter scope returns its hits without the Qdrant
+    // product search; populate the exact cache so the next verbatim repeat is instant.
+    const scope = !hasPref && this.queryCache?.enabled ? this.scopeKey(params) : null;
+    if (scope) {
+      const sem = await this.queryCache!.lookup(qBge, scope);
+      if (sem) {
+        if (key) await this.cache!.set(key, sem, this.cacheTtlMs);
+        return sem;
+      }
+    }
 
     const filter = buildFilter(params);
     const [descIds, attrIds, imageIds] = await Promise.all([
@@ -136,9 +168,8 @@ export class SearchService {
 
     const points = await this.qdrant.retrieveWithVectors(ids);
     // Only blend when there is an actual preference vector — an empty {} (a
-    // logged-in buyer with no history) must not uniformly shrink every score by α.
-    const pref = params.userPreference;
-    const hasPref = !!pref && !!(pref.desc || pref.attr || pref.image);
+    // logged-in buyer with no history) must not uniformly shrink every score by α
+    // (pref/hasPref computed above for the cache decision).
     const hits: RankedHit[] = points.map((p) => {
       const sDesc = p.vectors.desc ? Math.max(0, dot(qBge, p.vectors.desc)) : 0;
       const sAttr = p.vectors.attr ? Math.max(0, dot(qBge, p.vectors.attr)) : 0;
@@ -158,6 +189,7 @@ export class SearchService {
     const capped = hits.slice(0, this.resultCap);
     this.log.debug(`q=${JSON.stringify(params.query)} cands=${ids.length} kept=${capped.length}`);
     if (key) await this.cache!.set(key, capped, this.cacheTtlMs);
+    if (scope && capped.length > 0) await this.queryCache!.store(qBge, scope, params.query, capped);
     return capped;
   }
 }

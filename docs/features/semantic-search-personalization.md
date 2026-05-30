@@ -44,7 +44,24 @@ model/device settings are in `backend/.env.example`.
 - `POST /me/events/view { productId }` — record a product view (buyers).
 - `GET /me/profile` — color/size/order-price hints for the current buyer.
 
-## Query cache (Redis)
+## Query cache (two tiers)
+Two caches sit in front of the embed + Qdrant pipeline, both storing only ranked
+hits (ids + scores) so product rows stay fresh from MySQL per page:
+
+1. **Tier 1 — Redis exact** (below): a verbatim repeat (after case/space
+   normalization) is served before embedding; pagination reuses it.
+2. **Tier 2 — Qdrant semantic** (`QueryCacheService`, collection `query_cache`):
+   on a Redis miss the query is embedded (needed for search anyway) and matched
+   against past query embeddings. If the nearest cached query — **same filter
+   scope, not expired** — is within `QUERY_CACHE_THRESHOLD` cosine (default 0.97),
+   its hits are reused (and written back to Redis), skipping the product search +
+   fusion. Applied to **non-personalized** queries only (no cross-user leak).
+   Entries carry `expiresAt`; reads filter expired ones out and a sweeper every
+   `QUERY_CACHE_SWEEP_MS` (60s) deletes them. TTL `QUERY_CACHE_TTL_MS` (5min);
+   `QUERY_CACHE_THRESHOLD<=0` or no Qdrant disables it. Best-effort throughout.
+   Files: `query-cache.service.ts`, wired in `SearchModule`.
+
+### Tier 1 — Redis exact
 `SearchService` caches ranked hits in **Redis** (`redis` compose service,
 `REDIS_URL`), keyed by the normalized query + filters + personalization
 (anonymous / no-history requests share one entry; personalized results are keyed

@@ -197,3 +197,36 @@ describe('SearchService query cache', () => {
     expect(text.embed).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('SearchService semantic cache (tier 2)', () => {
+  const retrieved = [{ id: 'p1', payload: {}, vectors: { desc: [1, 0] } }];
+  const SEM_HITS = [{ id: 'cached', score: 0.9, components: { desc: 0.9, attr: 0, image: 0, boost: 0 } }];
+
+  it('serves a semantic hit without the product search (but still embeds)', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const queryCache = { enabled: true, lookup: jest.fn().mockResolvedValue(SEM_HITS), store: jest.fn() };
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig(), undefined, queryCache as any);
+    const out = await svc.search({ query: 'red shoes' });
+    expect(out).toEqual(SEM_HITS);
+    expect(queryCache.lookup).toHaveBeenCalledTimes(1);
+    expect(text.embed).toHaveBeenCalledTimes(1); // embedded to look up
+    expect(qdrant.searchVector).not.toHaveBeenCalled(); // product search skipped
+  });
+
+  it('skips semantic cache for personalized queries', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const queryCache = { enabled: true, lookup: jest.fn().mockResolvedValue(SEM_HITS), store: jest.fn() };
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig(), undefined, queryCache as any);
+    await svc.search({ query: 'x', userPreference: { desc: [1, 0] } });
+    expect(queryCache.lookup).not.toHaveBeenCalled();
+    expect(qdrant.searchVector).toHaveBeenCalledTimes(3); // real search ran
+  });
+
+  it('stores the computed result on a semantic miss (non-personalized)', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const queryCache = { enabled: true, lookup: jest.fn().mockResolvedValue(null), store: jest.fn() };
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig(), undefined, queryCache as any);
+    await svc.search({ query: 'x' });
+    expect(queryCache.store).toHaveBeenCalledTimes(1);
+  });
+});
