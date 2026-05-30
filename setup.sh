@@ -4,23 +4,29 @@
 # What it does (in order):
 #   1. Verify docker + docker compose are present.
 #   2. Create backend/.env and frontend/.env from their .env.example files.
-#   3. (Optional --reset) Tear down existing containers and volumes for a fresh DB.
-#   4. docker compose up -d  →  MySQL + backend (auto-installs deps, TypeORM synchronize)
-#                                + frontend (auto-installs deps, Vite HMR).
+#   3. (Optional --reset) Tear down existing containers AND volumes for a fresh start.
+#   4. docker compose up -d  →  MySQL + Qdrant + backend (auto-installs deps, TypeORM
+#                                synchronize) + frontend (Vite HMR) + embedding services.
 #   5. Wait for backend /health to respond.
 #   6. (Optional, default on) Seed: products + reviews into MySQL via the backend container.
-#   7. Print URLs.
+#   7. (Optional, default on) Wait for the embedding services, then index products into
+#      Qdrant (semantic search). Needs a GPU; skipped gracefully if they never become ready.
+#   8. Print URLs.
+#
+# Note: the chatbot needs GROQ_API_KEY in backend/.env (not set automatically).
 #
 # Usage:
-#   ./setup.sh                 # default: full setup + seed
-#   ./setup.sh --no-seed       # skip the seed step
-#   ./setup.sh --reset         # drop volumes first (fresh DB)
+#   ./setup.sh                 # default: full setup + seed + index
+#   ./setup.sh --no-seed       # skip the MySQL seed step
+#   ./setup.sh --no-index      # skip the Qdrant product indexing step
+#   ./setup.sh --reset         # tear down old containers + volumes first (fresh start)
 #   ./setup.sh --no-frontend   # backend + db only (skip frontend container)
 #   ./setup.sh --help          # show this help
 
 set -euo pipefail
 
 NO_SEED=false
+NO_INDEX=false
 RESET=false
 NO_FRONTEND=false
 
@@ -31,6 +37,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --no-seed) NO_SEED=true; shift ;;
+    --no-index) NO_INDEX=true; shift ;;
     --reset) RESET=true; shift ;;
     --no-frontend) NO_FRONTEND=true; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -90,18 +97,20 @@ fi
 # 3. Optional reset -----------------------------------------------------------
 
 if [[ "$RESET" == "true" ]]; then
-  step "Resetting docker volumes (--reset)"
-  $DC down -v
-  c_green "Volumes removed."
+  step "Tearing down old containers + volumes (--reset)"
+  # -v drops named volumes (MySQL data, Qdrant storage, hf_cache, node_modules);
+  # --remove-orphans clears containers no longer in the compose file.
+  $DC down -v --remove-orphans
+  c_green "Old stack removed (containers + volumes)."
 fi
 
 # 4. Bring services up --------------------------------------------------------
 
 step "Starting services"
 if [[ "$NO_FRONTEND" == "true" ]]; then
-  $DC up -d mysql backend
+  $DC up -d --remove-orphans mysql qdrant backend
 else
-  $DC up -d
+  $DC up -d --remove-orphans
 fi
 c_green "Containers started."
 
@@ -143,13 +152,60 @@ else
   c_green "Seed complete."
 fi
 
-# 7. URLs ---------------------------------------------------------------------
+# 7. Index products into Qdrant (semantic search) -----------------------------
+# Needs the embedding services ready (GPU). They download models on first run,
+# so we wait a while; if they never report model_loaded we skip rather than fail.
+
+# Poll an embedding service /health until {"model_loaded": true}. Args: url name.
+wait_embed() {
+  local url="$1" name="$2" tries=180   # 180 * 5s = up to 15 min (first-run model pull)
+  for ((j = 1; j <= tries; j++)); do
+    if curl -fsS "$url/health" 2>/dev/null | tr -d ' ' | grep -q '"model_loaded":true'; then
+      c_green "  $name ready."
+      return 0
+    fi
+    if (( j % 6 == 0 )); then
+      printf '    …waiting for %s to load its model (%ds)\n' "$name" "$((j * 5))"
+    fi
+    sleep 5
+  done
+  return 1
+}
+
+if [[ "$NO_INDEX" == "true" ]]; then
+  c_yellow "\nSkipping Qdrant indexing (--no-index)."
+elif [[ "$NO_FRONTEND" == "true" ]]; then
+  c_yellow "\nSkipping Qdrant indexing (embedding services not started under --no-frontend)."
+  c_yellow "  Run later with: $DC up -d text-embed image-embed && $DC exec backend npm run index:products"
+else
+  step "Indexing products into Qdrant (semantic search)"
+  if wait_embed "http://localhost:8001" "text-embed" && wait_embed "http://localhost:8002" "image-embed"; then
+    if ! $DC exec -T backend npm run index:products; then
+      c_red "Indexing failed. Rerun manually once services are up:"
+      c_red "  $DC exec backend npm run index:products"
+    else
+      c_green "Product index built."
+    fi
+  else
+    c_yellow "Embedding services never reported model_loaded (no GPU? still downloading?)."
+    c_yellow "  Skipping index. Search will fall back to keyword (LIKE) matching."
+    c_yellow "  Build the index later with:"
+    c_yellow "    $DC logs -f text-embed image-embed   # wait until the model loads"
+    c_yellow "    $DC exec backend npm run index:products"
+  fi
+fi
+
+# 8. URLs ---------------------------------------------------------------------
 
 step "Done"
 c_green "Frontend:  http://localhost:5173"
 c_green "Backend:   http://localhost:3000  (health: $HEALTH_URL)"
 c_green "MySQL:     localhost:3306  (db: amazara, user: amazara)"
+c_green "Qdrant:    http://localhost:6333"
+echo
+c_yellow "Chatbot is off until you set GROQ_API_KEY in backend/.env, then: $DC restart backend"
 echo
 echo "Tail logs:    $DC logs -f backend"
 echo "Stop:         $DC down"
-echo "Reset DB:     $DC down -v  (or rerun: ./setup.sh --reset)"
+echo "Fresh start:  $DC down -v --remove-orphans   (or rerun: ./setup.sh --reset)"
+echo "Reindex:      $DC exec backend npm run index:products"
