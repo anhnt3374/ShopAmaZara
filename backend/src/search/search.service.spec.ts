@@ -124,15 +124,32 @@ describe('SearchService.search', () => {
   });
 });
 
+// A fake SearchCacheStore (stands in for the Redis-backed store) so the cache
+// behavior is exercised without a real Redis.
+function fakeCache() {
+  const m = new Map<string, string>();
+  return {
+    get: jest.fn(async (k: string) => {
+      const v = m.get(k);
+      return v ? JSON.parse(v) : null;
+    }),
+    set: jest.fn(async (k: string, hits: unknown) => {
+      m.set(k, JSON.stringify(hits));
+    }),
+  };
+}
+
 describe('SearchService query cache', () => {
   const retrieved = [{ id: 'p1', payload: {}, vectors: { desc: [1, 0] } }];
 
-  it('serves an identical query from cache (no re-embed / re-qdrant)', async () => {
+  it('serves an identical query from the store (no re-embed / re-qdrant)', async () => {
     const { text, image, qdrant } = deps(retrieved);
-    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const cache = fakeCache();
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig(), cache as any);
     const a = await svc.search({ query: 'Red Shoes' });
     const b = await svc.search({ query: '  red shoes ' }); // trim + case-insensitive
     expect(b).toEqual(a);
+    expect(cache.set).toHaveBeenCalledTimes(1);
     expect(text.embed).toHaveBeenCalledTimes(1);
     expect(image.embedText).toHaveBeenCalledTimes(1);
     expect(qdrant.searchVector).toHaveBeenCalledTimes(3); // 3 vectors, first call only
@@ -140,7 +157,8 @@ describe('SearchService query cache', () => {
 
   it('keys by filters — different filters miss the cache', async () => {
     const { text, image, qdrant } = deps(retrieved);
-    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const cache = fakeCache();
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig(), cache as any);
     await svc.search({ query: 'x' });
     await svc.search({ query: 'x', category: ['shoes'] });
     expect(text.embed).toHaveBeenCalledTimes(2);
@@ -148,7 +166,8 @@ describe('SearchService query cache', () => {
 
   it('keys personalized results by userKey, shares anon entries', async () => {
     const { text, image, qdrant } = deps(retrieved);
-    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const cache = fakeCache();
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig(), cache as any);
     await svc.search({ query: 'x', userPreference: { desc: [1, 0] }, userKey: 'u1' });
     await svc.search({ query: 'x', userPreference: { desc: [1, 0] }, userKey: 'u2' });
     expect(text.embed).toHaveBeenCalledTimes(2); // distinct users -> distinct entries
@@ -157,14 +176,24 @@ describe('SearchService query cache', () => {
     expect(text.embed).toHaveBeenCalledTimes(3); // both anon calls share one entry
   });
 
-  it('SEARCH_CACHE_TTL_MS=0 disables the cache', async () => {
+  it('no store injected -> no caching (every call recomputes)', async () => {
     const { text, image, qdrant } = deps(retrieved);
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    await svc.search({ query: 'x' });
+    await svc.search({ query: 'x' });
+    expect(text.embed).toHaveBeenCalledTimes(2);
+  });
+
+  it('SEARCH_CACHE_TTL_MS=0 disables the cache even with a store', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const cache = fakeCache();
     const svc = new SearchService(
       text as any, image as any, qdrant as any,
-      makeConfig({ SEARCH_CACHE_TTL_MS: '0' }),
+      makeConfig({ SEARCH_CACHE_TTL_MS: '0' }), cache as any,
     );
     await svc.search({ query: 'x' });
     await svc.search({ query: 'x' });
+    expect(cache.get).not.toHaveBeenCalled();
     expect(text.embed).toHaveBeenCalledTimes(2);
   });
 });

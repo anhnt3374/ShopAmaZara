@@ -30,6 +30,8 @@ services:
         condition: service_healthy
       qdrant:
         condition: service_started
+      redis:
+        condition: service_started
     environment:
       PORT: 3000
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
@@ -47,6 +49,8 @@ services:
       EMBED_REQUEST_TIMEOUT_MS: ${EMBED_REQUEST_TIMEOUT_MS:-30000}
       QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-products}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      SEARCH_CACHE_TTL_MS: ${SEARCH_CACHE_TTL_MS:-60000}
     ports:
       - "3000:3000"
     volumes:
@@ -124,6 +128,15 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_storage:/qdrant/storage
+
+  redis:
+    image: redis:7-alpine
+    container_name: amazara-redis
+    restart: unless-stopped
+    # Pure cache — persistence off; entries expire via per-key TTL.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
 
 volumes:
   amazara_mysql_data:

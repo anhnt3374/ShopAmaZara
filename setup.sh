@@ -108,7 +108,7 @@ fi
 
 step "Starting services"
 if [[ "$NO_FRONTEND" == "true" ]]; then
-  $DC up -d --remove-orphans mysql qdrant backend
+  $DC up -d --remove-orphans mysql qdrant redis backend
 else
   $DC up -d --remove-orphans
 fi
