@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import Icon from './Icon.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const items = [
   { to: '/store', icon: 'dashboard', label: 'Dashboard', end: true },
@@ -10,6 +11,14 @@ const items = [
 
 export default function StoreSideNav({ onItemClick }) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  function handleLogout() {
+    onItemClick?.();
+    logout();
+    navigate('/');
+  }
+
   return (
     <aside className="bg-surface-container-low border-r border-outline-variant w-64 h-screen sticky top-0 flex flex-col">
       <div className="px-5 py-4 border-b border-outline-variant flex items-center gap-2">
@@ -56,6 +65,14 @@ export default function StoreSideNav({ onItemClick }) {
           >
             <Icon name="storefront" size={20} />
             <span>Buyer view</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-label-md text-error hover:bg-error/10 transition-colors"
+          >
+            <Icon name="logout" size={20} />
+            <span>Sign out</span>
           </button>
         </div>
       </nav>

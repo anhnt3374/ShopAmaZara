@@ -13,6 +13,10 @@ hashed with bcrypt (cost 12). Successful register/login returns a JWT
 `localStorage` and sends on subsequent requests via the `Authorization: Bearer`
 header.
 
+Logout (`useAuth().logout`, clears token + user) is surfaced in the UI as a
+**Sign out** button: on the buyer Profile page header (`ProfilePage`) and in the
+seller sidebar (`StoreSideNav`); both redirect to `/` afterwards.
+
 ## API
 
 Base URL (dev): `http://localhost:3000`. All requests and responses are JSON.
