@@ -10,7 +10,7 @@ export default function TopNavBar() {
   const { pathname } = useLocation();
   const { count } = useCart();
   const { ids: wishlistIds } = useWishlist();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const [query, setQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -36,6 +36,13 @@ export default function TopNavBar() {
     e.preventDefault();
     const trimmed = query.trim();
     navigate(`/search${trimmed ? `?q=${encodeURIComponent(trimmed)}` : ''}`);
+  }
+
+  function handleLogout() {
+    if (!confirm('Sign out of your account?')) return;
+    setMobileMenuOpen(false);
+    logout();
+    navigate('/');
   }
 
   return (
@@ -174,6 +181,16 @@ export default function TopNavBar() {
               />
               <Icon name="search" className="absolute left-3 top-2.5 text-outline" size={20} />
             </form>
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="mt-2 px-3 py-2 flex items-center gap-3 rounded-lg text-label-md text-error hover:bg-error/10 transition-colors text-left"
+              >
+                <Icon name="logout" size={20} />
+                <span>Sign out</span>
+              </button>
+            )}
           </div>
         </div>
       )}
