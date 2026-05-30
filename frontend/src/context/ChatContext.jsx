@@ -38,8 +38,19 @@ export function ChatProvider({ children }) {
   const [messagesByChat, setMessagesByChat] = useState({});
   const [typingByChat, setTypingByChat] = useState({});
   const [connected, setConnected] = useState(false);
+  // Snapshot of each conversation's lastReadAt taken when it was opened, used
+  // to draw the "New messages" divider. Captured before markRead so it survives
+  // the read refresh; overwritten on each fresh open (server lastReadAt advances).
+  const [readBoundaryByChat, setReadBoundaryByChat] = useState({});
 
   const typingTimers = useRef({});
+  // Cached promise for the single system (assistant) conversation; collapses
+  // concurrent/repeat opens (StrictMode double-mount) into one request.
+  const systemChatPromise = useRef(null);
+  // Live mirrors so openConversation stays referentially stable (must not
+  // re-fire effects when messages change, or the divider boundary would reset).
+  const chatsRef = useRef([]);
+  const loadMessagesRef = useRef(null);
 
   const openChat = useCallback((nextView = 'system') => {
     setOpen(true);
@@ -108,10 +119,44 @@ export function ChatProvider({ children }) {
     }
   }, []);
 
+  // Keep refs fresh so openConversation can be a stable callback.
+  useEffect(() => {
+    chatsRef.current = chats;
+  }, [chats]);
+  useEffect(() => {
+    loadMessagesRef.current = loadMessages;
+  }, [loadMessages]);
+
+  // Open a conversation: snapshot the read boundary (for the unread divider)
+  // BEFORE marking it read, then load messages and mark read. Stable identity.
+  const openConversation = useCallback(
+    async (conversationId) => {
+      if (!conversationId) return;
+      const summary = chatsRef.current.find((c) => c.id === conversationId);
+      setReadBoundaryByChat((prev) => ({
+        ...prev,
+        [conversationId]: summary?.lastReadAt ?? null,
+      }));
+      await loadMessagesRef.current?.(conversationId);
+      markRead(conversationId);
+    },
+    [markRead],
+  );
+
   const ensureSystemChat = useCallback(async () => {
-    const res = await apiOpenSystemChat();
-    await refreshChats();
-    return res.conversation.id;
+    if (systemChatPromise.current) return systemChatPromise.current;
+    const p = (async () => {
+      const res = await apiOpenSystemChat();
+      await refreshChats();
+      return res.conversation.id;
+    })();
+    systemChatPromise.current = p;
+    try {
+      return await p;
+    } catch (err) {
+      systemChatPromise.current = null; // allow retry on failure
+      throw err;
+    }
   }, [refreshChats]);
 
   const ensureStoreChat = useCallback(
@@ -168,6 +213,7 @@ export function ChatProvider({ children }) {
     if (!token) {
       disconnect();
       setConnected(false);
+      systemChatPromise.current = null; // a different user must resolve their own
       return;
     }
     const s = connect(token);
@@ -215,7 +261,8 @@ export function ChatProvider({ children }) {
       activeStoreChatId, setActiveStoreChatId,
       chats, refreshChats,
       messagesByChat, loadMessages,
-      sendMessage, markRead,
+      sendMessage, markRead, openConversation,
+      readBoundaryByChat,
       ensureSystemChat, ensureStoreChat,
       unreadTotal, unreadSystem, unreadStores, typingByChat,
       emitTyping,
@@ -226,7 +273,8 @@ export function ChatProvider({ children }) {
       activeStoreChatId,
       chats, refreshChats,
       messagesByChat, loadMessages,
-      sendMessage, markRead,
+      sendMessage, markRead, openConversation,
+      readBoundaryByChat,
       ensureSystemChat, ensureStoreChat,
       unreadTotal, unreadSystem, unreadStores, typingByChat,
       connected,

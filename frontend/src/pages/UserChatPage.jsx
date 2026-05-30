@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import { useChat } from '../context/ChatContext.jsx';
 import { MessageBubble } from '../components/chat/MessageBubble.jsx';
+import UnreadDivider, { firstUnseenIndex } from '../components/chat/UnreadDivider.jsx';
 
 export default function UserChatPage() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
   const {
     chats, refreshChats,
-    messagesByChat, loadMessages, sendMessage, markRead,
+    messagesByChat, sendMessage,
+    openConversation, readBoundaryByChat,
     typingByChat, emitTyping,
   } = useChat();
   const [text, setText] = useState('');
@@ -28,11 +30,11 @@ export default function UserChatPage() {
 
   useEffect(() => {
     if (!conversationId) return;
-    loadMessages(conversationId);
-    markRead(conversationId);
-  }, [conversationId, loadMessages, markRead]);
+    openConversation(conversationId);
+  }, [conversationId, openConversation]);
 
   const messages = conversationId ? messagesByChat[conversationId] ?? [] : [];
+  const dividerIdx = firstUnseenIndex(messages, readBoundaryByChat[conversationId]);
 
   const initialScrollDoneRef = useRef(false);
   useEffect(() => {
@@ -153,12 +155,14 @@ export default function UserChatPage() {
               </header>
 
               <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3 bg-surface-container-low">
-                {messages.map((m) => (
-                  <MessageBubble
-                    key={m.id}
-                    message={m}
-                    conversationId={conversationId}
-                  />
+                {messages.map((m, i) => (
+                  <Fragment key={m.id}>
+                    {i === dividerIdx && <UnreadDivider />}
+                    <MessageBubble
+                      message={m}
+                      conversationId={conversationId}
+                    />
+                  </Fragment>
                 ))}
               </div>
 

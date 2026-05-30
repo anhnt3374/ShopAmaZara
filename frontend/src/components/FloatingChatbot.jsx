@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useChat } from '../context/ChatContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { MessageBubble } from './chat/MessageBubble.jsx';
+import UnreadDivider, { firstUnseenIndex } from './chat/UnreadDivider.jsx';
 
 const FAQ_ITEMS = [
   { id: 1, q: 'How long does shipping take?', a: 'Standard delivery: 5-7 business days. Express: 1-2 business days.' },
@@ -176,10 +177,10 @@ function SignInState() {
 function SystemChat() {
   const {
     ensureSystemChat,
-    loadMessages,
     messagesByChat,
     sendMessage,
-    markRead,
+    openConversation,
+    readBoundaryByChat,
     emitTyping,
     typingByChat,
   } = useChat();
@@ -193,13 +194,13 @@ function SystemChat() {
     (async () => {
       const id = await ensureSystemChat();
       setConversationId(id);
-      await loadMessages(id);
-      markRead(id);
+      openConversation(id);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const messages = conversationId ? messagesByChat[conversationId] ?? [] : [];
+  const dividerIdx = firstUnseenIndex(messages, readBoundaryByChat[conversationId]);
 
   const initialScrollDoneRef = useRef(false);
   useEffect(() => {
@@ -250,13 +251,15 @@ function SystemChat() {
             Say hi to start the conversation 👋
           </div>
         )}
-        {messages.map((m) => (
-          <MessageBubble
-            key={m.id}
-            message={m}
-            conversationId={conversationId}
-            compact
-          />
+        {messages.map((m, i) => (
+          <Fragment key={m.id}>
+            {i === dividerIdx && <UnreadDivider />}
+            <MessageBubble
+              message={m}
+              conversationId={conversationId}
+              compact
+            />
+          </Fragment>
         ))}
         {conversationId && typingByChat[conversationId] && (
           <div className="text-[11px] text-on-surface-variant pl-2">Assistant is typing…</div>
@@ -272,10 +275,10 @@ function StoresTab() {
     chats,
     activeStoreChatId,
     setActiveStoreChatId,
-    loadMessages,
+    openConversation,
+    readBoundaryByChat,
     messagesByChat,
     sendMessage,
-    markRead,
     emitTyping,
     typingByChat,
     ensureStoreChat,
@@ -290,10 +293,7 @@ function StoresTab() {
   const storeChats = useMemo(() => chats.filter((c) => c.kind === 'store'), [chats]);
 
   useEffect(() => {
-    if (activeStoreChatId) {
-      loadMessages(activeStoreChatId);
-      markRead(activeStoreChatId);
-    }
+    if (activeStoreChatId) openConversation(activeStoreChatId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeStoreChatId]);
 
@@ -320,6 +320,7 @@ function StoresTab() {
 
   if (activeStoreChatId) {
     const messages = messagesByChat[activeStoreChatId] ?? [];
+    const dividerIdx = firstUnseenIndex(messages, readBoundaryByChat[activeStoreChatId]);
     const onChange = (e) => {
       setText(e.target.value);
       emitTyping(activeStoreChatId, true);
@@ -348,7 +349,12 @@ function StoresTab() {
           <Icon name="arrow_back" size={16} /> Back to stores
         </button>
         <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-3 space-y-2">
-          {messages.map((m) => <Bubble key={m.id} m={m} ownKind="buyer" />)}
+          {messages.map((m, i) => (
+            <Fragment key={m.id}>
+              {i === dividerIdx && <UnreadDivider />}
+              <Bubble m={m} ownKind="buyer" />
+            </Fragment>
+          ))}
           {typingByChat[activeStoreChatId] && (
             <div className="text-[11px] text-on-surface-variant pl-2">Store is typing…</div>
           )}
