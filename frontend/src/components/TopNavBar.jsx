@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useWishlist } from '../context/WishlistContext.jsx';
@@ -7,11 +7,20 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 export default function TopNavBar() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { count } = useCart();
   const { ids: wishlistIds } = useWishlist();
   const { isAuthenticated, user } = useAuth();
   const [query, setQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // The nav bar persists across routes, so its search box would otherwise keep
+  // a stale term after navigating away. Clear it on every page change. (The
+  // search results page reads the term from the URL and shows it in its
+  // heading, so emptying the box loses nothing.)
+  useEffect(() => {
+    setQuery('');
+  }, [pathname]);
 
   const isSeller = isAuthenticated && user?.role === 'seller';
   const showBuyerTools = !isSeller; // guests + buyers see cart/wishlist/messages
