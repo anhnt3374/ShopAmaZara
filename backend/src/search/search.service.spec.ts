@@ -123,3 +123,48 @@ describe('SearchService.search', () => {
     expect(hits[0].score).toBeCloseTo(0.55, 5);
   });
 });
+
+describe('SearchService query cache', () => {
+  const retrieved = [{ id: 'p1', payload: {}, vectors: { desc: [1, 0] } }];
+
+  it('serves an identical query from cache (no re-embed / re-qdrant)', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    const a = await svc.search({ query: 'Red Shoes' });
+    const b = await svc.search({ query: '  red shoes ' }); // trim + case-insensitive
+    expect(b).toEqual(a);
+    expect(text.embed).toHaveBeenCalledTimes(1);
+    expect(image.embedText).toHaveBeenCalledTimes(1);
+    expect(qdrant.searchVector).toHaveBeenCalledTimes(3); // 3 vectors, first call only
+  });
+
+  it('keys by filters — different filters miss the cache', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    await svc.search({ query: 'x' });
+    await svc.search({ query: 'x', category: ['shoes'] });
+    expect(text.embed).toHaveBeenCalledTimes(2);
+  });
+
+  it('keys personalized results by userKey, shares anon entries', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const svc = new SearchService(text as any, image as any, qdrant as any, makeConfig());
+    await svc.search({ query: 'x', userPreference: { desc: [1, 0] }, userKey: 'u1' });
+    await svc.search({ query: 'x', userPreference: { desc: [1, 0] }, userKey: 'u2' });
+    expect(text.embed).toHaveBeenCalledTimes(2); // distinct users -> distinct entries
+    await svc.search({ query: 'x' });
+    await svc.search({ query: 'x' });
+    expect(text.embed).toHaveBeenCalledTimes(3); // both anon calls share one entry
+  });
+
+  it('SEARCH_CACHE_TTL_MS=0 disables the cache', async () => {
+    const { text, image, qdrant } = deps(retrieved);
+    const svc = new SearchService(
+      text as any, image as any, qdrant as any,
+      makeConfig({ SEARCH_CACHE_TTL_MS: '0' }),
+    );
+    await svc.search({ query: 'x' });
+    await svc.search({ query: 'x' });
+    expect(text.embed).toHaveBeenCalledTimes(2);
+  });
+});

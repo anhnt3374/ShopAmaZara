@@ -93,6 +93,7 @@ export class ProductsService {
           gender: dto.gender,
           ageGroup: dto.ageGroup,
           userPreference,
+          userKey: userId,
         });
         if (hits.length > 0) {
           const page = dto.page ?? 1;

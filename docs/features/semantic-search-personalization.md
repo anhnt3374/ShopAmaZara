@@ -44,6 +44,17 @@ model/device settings are in `backend/.env.example`.
 - `POST /me/events/view { productId }` — record a product view (buyers).
 - `GET /me/profile` — color/size/order-price hints for the current buyer.
 
+## Query cache
+`SearchService` holds an in-memory exact-match cache: ranked hits keyed by the
+normalized query + filters + personalization (anonymous / no-history requests
+share one entry; personalized results are keyed per user). A repeated query is
+served without re-embedding or re-querying Qdrant, and because pagination only
+slices the cached hits in `ProductsService.list`, **paging never re-calls the
+embed/Qdrant pipeline**. Only the hit list (ids + scores) is cached — product
+rows are still fetched fresh from MySQL per page, so prices/stock stay current.
+Entries expire after `SEARCH_CACHE_TTL_MS` (default 60000; `0` disables) with an
+LRU cap of `SEARCH_CACHE_MAX` (default 500); staleness self-heals via the TTL.
+
 ## Notes / future work
 - The boost and preference vectors are catalog- and behavior-driven; there is no standalone
   "recommended for you" feed, and the q-absent default-browse path is not personalized.

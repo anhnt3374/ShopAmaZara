@@ -10,6 +10,9 @@ import { buildFilter, SearchFilters } from './search.filter';
 export interface SearchParams extends SearchFilters {
   query: string;
   userPreference?: ProductVectors;
+  // Personalization discriminator for the query cache (the caller's user id).
+  // Only used to key cache entries when a preference vector is actually applied.
+  userKey?: string;
 }
 export interface RankedHit {
   id: string;
@@ -55,6 +58,12 @@ export class SearchService {
   private readonly candidateK: number;
   private readonly resultCap: number;
   private readonly alpha: number;
+  // Exact-match query cache: maps a normalized (query + filters + personalization)
+  // key to the ranked hit list, so a repeated query — and every page of it, since
+  // pagination just slices these hits — skips the embed + Qdrant + fusion work.
+  private readonly cacheTtlMs: number;
+  private readonly cacheMax: number;
+  private readonly cache = new Map<string, { expires: number; hits: RankedHit[] }>();
 
   constructor(
     private readonly text: TextEmbeddingClient,
@@ -75,9 +84,57 @@ export class SearchService {
     this.candidateK = num('SEARCH_CANDIDATE_K', DEFAULT_CANDIDATE_K);
     this.resultCap = num('SEARCH_RESULT_CAP', DEFAULT_RESULT_CAP);
     this.alpha = num('PERSONALIZATION_ALPHA', 0.25);
+    this.cacheTtlMs = num('SEARCH_CACHE_TTL_MS', 60000); // 0 disables the cache
+    this.cacheMax = num('SEARCH_CACHE_MAX', 500);
+  }
+
+  private cacheKey(params: SearchParams): string {
+    const pref = params.userPreference;
+    const hasPref = !!pref && !!(pref.desc || pref.attr || pref.image);
+    // Non-personalized results (anon, or logged-in with no history) share one
+    // entry; personalized results are keyed per user.
+    const prefKey = hasPref ? params.userKey ?? 'pref' : 'anon';
+    return JSON.stringify([
+      params.query.trim().toLowerCase(),
+      params.category ?? null,
+      params.brand ?? null,
+      params.storeId ?? null,
+      params.minPrice ?? null,
+      params.maxPrice ?? null,
+      params.gender ?? null,
+      params.ageGroup ?? null,
+      prefKey,
+    ]);
+  }
+
+  private cacheGet(key: string): RankedHit[] | null {
+    const hit = this.cache.get(key);
+    if (!hit) return null;
+    if (hit.expires <= Date.now()) {
+      this.cache.delete(key);
+      return null;
+    }
+    // Refresh LRU position.
+    this.cache.delete(key);
+    this.cache.set(key, hit);
+    return hit.hits;
+  }
+
+  private cacheSet(key: string, hits: RankedHit[]): void {
+    if (this.cache.size >= this.cacheMax) {
+      const oldest = this.cache.keys().next().value;
+      if (oldest !== undefined) this.cache.delete(oldest);
+    }
+    this.cache.set(key, { expires: Date.now() + this.cacheTtlMs, hits });
   }
 
   async search(params: SearchParams): Promise<RankedHit[]> {
+    const key = this.cacheTtlMs > 0 ? this.cacheKey(params) : null;
+    if (key) {
+      const cached = this.cacheGet(key);
+      if (cached) return cached;
+    }
+
     const [bgeVecs, clipVecs] = await Promise.all([
       this.text.embed([params.query], { isQuery: true }),
       this.image.embedText([params.query]),
@@ -93,7 +150,10 @@ export class SearchService {
       this.qdrant.searchVector(IMAGE_VECTOR, qClip, filter, this.candidateK),
     ]);
     const ids = [...new Set([...descIds, ...attrIds, ...imageIds])];
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      if (key) this.cacheSet(key, []);
+      return [];
+    }
 
     const points = await this.qdrant.retrieveWithVectors(ids);
     // Only blend when there is an actual preference vector — an empty {} (a
@@ -118,6 +178,7 @@ export class SearchService {
     hits.sort((a, b) => b.score - a.score);
     const capped = hits.slice(0, this.resultCap);
     this.log.debug(`q=${JSON.stringify(params.query)} cands=${ids.length} kept=${capped.length}`);
+    if (key) this.cacheSet(key, capped);
     return capped;
   }
 }
