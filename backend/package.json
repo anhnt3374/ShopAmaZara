@@ -15,7 +15,8 @@
     "seed:products": "ts-node -P scripts/tsconfig.json scripts/seed-products.ts",
     "seed:reviews": "ts-node -P scripts/tsconfig.json scripts/seed-reviews.ts",
     "seed:all": "ts-node -P scripts/tsconfig.json scripts/seed-all.ts",
-    "index:products": "ts-node -P scripts/tsconfig.json scripts/index-products.ts"
+    "index:products": "ts-node -P scripts/tsconfig.json scripts/index-products.ts",
+    "migrate:merge-system-chats": "ts-node -P scripts/tsconfig.json scripts/merge-duplicate-system-chats.ts"
   },
   "dependencies": {
     "@qdrant/js-client-rest": "^1.12.0",

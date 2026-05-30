@@ -24,6 +24,7 @@ export interface ConversationSummary {
   buyerId: string;
   lastMessage: { body: string | null; senderKind: SenderKind; createdAt: Date } | null;
   unread: number;
+  lastReadAt: Date | null;
   updatedAt: Date;
 }
 
@@ -42,18 +43,34 @@ export class ChatsService {
   ) {}
 
   async ensureSystem(buyerId: string): Promise<Conversation> {
-    return this.ds.transaction(async (m) => {
-      const existing = await m.findOne(Conversation, {
+    // Get-or-create must not race: concurrent opens (React StrictMode
+    // double-mount, multiple tabs/devices) would otherwise each read "none
+    // found" and insert, splitting the assistant chat into duplicates. There
+    // is no DB unique constraint that can cover system rows (store_id is NULL
+    // and MySQL treats NULLs as distinct), so we serialize per buyer with a
+    // named advisory lock held on a single dedicated connection.
+    const runner = this.ds.createQueryRunner();
+    await runner.connect();
+    const lockName = `amazara:sys:${buyerId}`;
+    try {
+      await runner.query('SELECT GET_LOCK(?, 10)', [lockName]);
+      // Autocommit reads/writes on this connection so the second caller sees
+      // the first caller's committed row instead of a stale snapshot.
+      const existing = await runner.manager.findOne(Conversation, {
         where: { buyerId, kind: 'system' },
+        order: { id: 'ASC' },
       });
       if (existing) return existing;
-      const entity = m.create(Conversation, {
+      const entity = runner.manager.create(Conversation, {
         kind: 'system',
         buyerId,
         storeId: null,
       });
-      return m.save(entity);
-    });
+      return await runner.manager.save(entity);
+    } finally {
+      await runner.query('SELECT RELEASE_LOCK(?)', [lockName]);
+      await runner.release();
+    }
   }
 
   async ensureStore(buyerId: string, storeId: string): Promise<Conversation> {
@@ -282,6 +299,7 @@ export class ChatsService {
           }
         : null,
       unread: unreadCount,
+      lastReadAt: lastReadAt ?? null,
       updatedAt: c.updatedAt,
     };
   }

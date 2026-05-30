@@ -136,4 +136,50 @@ describe('Chats (e2e)', () => {
     expect(res.status).toBe(200);
     expect(res.body.at).toBeDefined();
   });
+
+  it('keeps a single system conversation under concurrent opens', async () => {
+    const t = await registerBuyer(ctx.app.getHttpServer(), 'race@a.local');
+    // Fire several opens at once, mimicking React StrictMode double-mount /
+    // multi-tab. ensureSystem must converge on exactly one conversation.
+    const opens = await Promise.all(
+      Array.from({ length: 5 }, () =>
+        request(ctx.app.getHttpServer())
+          .post('/me/chats/system')
+          .set('Authorization', `Bearer ${t}`),
+      ),
+    );
+    const ids = new Set(opens.map((r) => r.body.conversation.id));
+    expect(ids.size).toBe(1);
+
+    const list = await request(ctx.app.getHttpServer())
+      .get('/me/chats')
+      .set('Authorization', `Bearer ${t}`);
+    const systemChats = list.body.items.filter((c: any) => c.kind === 'system');
+    expect(systemChats.length).toBe(1);
+  });
+
+  it('exposes lastReadAt on chat summaries (null before read, set after)', async () => {
+    const t = await registerBuyer(ctx.app.getHttpServer(), 'lr@a.local');
+    const open = await request(ctx.app.getHttpServer())
+      .post('/me/chats/system')
+      .set('Authorization', `Bearer ${t}`);
+    const id = open.body.conversation.id;
+
+    const before = await request(ctx.app.getHttpServer())
+      .get('/me/chats')
+      .set('Authorization', `Bearer ${t}`);
+    const sysBefore = before.body.items.find((c: any) => c.id === id);
+    expect(sysBefore).toHaveProperty('lastReadAt', null);
+
+    await request(ctx.app.getHttpServer())
+      .patch(`/me/chats/${id}/read`)
+      .set('Authorization', `Bearer ${t}`)
+      .expect(200);
+
+    const after = await request(ctx.app.getHttpServer())
+      .get('/me/chats')
+      .set('Authorization', `Bearer ${t}`);
+    const sysAfter = after.body.items.find((c: any) => c.id === id);
+    expect(sysAfter.lastReadAt).not.toBeNull();
+  });
 });

@@ -18,8 +18,15 @@ describe('ChatsService', () => {
     query: jest.fn(),
     create: jest.fn((_e: any, d: any) => d),
   };
+  const queryRunner = {
+    connect: jest.fn(),
+    release: jest.fn(),
+    query: jest.fn(),
+    manager,
+  };
   const ds = {
     transaction: jest.fn().mockImplementation(async (cb: any) => cb(manager)),
+    createQueryRunner: jest.fn(() => queryRunner),
   } as unknown as DataSource;
   const convoRepo: any = { find: jest.fn(), findOne: jest.fn(), createQueryBuilder: jest.fn() };
   const messageRepo: any = {
