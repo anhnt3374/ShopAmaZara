@@ -12,12 +12,12 @@ const WATCH_IMG =
   'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80';
 
 const categories = [
-  { icon: 'devices', label: 'Electronics' },
-  { icon: 'checkroom', label: 'Apparel' },
-  { icon: 'chair', label: 'Home & Garden' },
-  { icon: 'sports_basketball', label: 'Sports' },
-  { icon: 'auto_awesome', label: 'Beauty' },
-  { icon: 'toys', label: 'Toys' },
+  { icon: 'checkroom', label: 'Shirts' },
+  { icon: 'watch', label: 'Watches' },
+  { icon: 'headphones', label: 'Headphones' },
+  { icon: 'brush', label: 'Make-up' },
+  { icon: 'chair', label: 'Furniture' },
+  { icon: 'toys', label: 'Toys & Games' },
 ];
 
 export default function HomePage() {
@@ -56,7 +56,7 @@ export default function HomePage() {
 
         <div className="flex flex-col gap-unit">
           <Link
-            to="/search?cat=Audio"
+            to="/search?q=audio"
             className="flex-1 bg-surface-container rounded-xl p-6 relative overflow-hidden group min-h-[200px]"
           >
             <img
@@ -77,7 +77,7 @@ export default function HomePage() {
             </div>
           </Link>
           <Link
-            to="/search?cat=Watches"
+            to="/search?q=watches"
             className="flex-1 bg-tertiary-container rounded-xl p-6 relative overflow-hidden group min-h-[200px]"
           >
             <img
@@ -112,7 +112,7 @@ export default function HomePage() {
           {categories.map((c) => (
             <Link
               key={c.label}
-              to={`/search?cat=${encodeURIComponent(c.label)}`}
+              to={`/search?category=${encodeURIComponent(c.label)}`}
               className="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex flex-col items-center gap-2 hover:border-primary hover:shadow-lifted transition-all"
             >
               <Icon name={c.icon} className="text-primary" size={32} />
