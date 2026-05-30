@@ -153,20 +153,20 @@ else
 fi
 
 # 7. Index products into Qdrant (semantic search) -----------------------------
-# Needs the embedding services ready (GPU). They download models on first run,
-# so we wait a while; if they never report model_loaded we skip rather than fail.
+# Needs the embedding services ready (GPU). The models load lazily on the first
+# request (so /health reports model_loaded:false until then) and download on the
+# first run, so we force + await the load via /info and skip rather than fail.
 
-# Poll an embedding service /health until {"model_loaded": true}. Args: url name.
+# Hit /info, which forces the lazy model load and returns {model,dim,device}.
+# Each call may block while the model loads/downloads. Args: url name.
 wait_embed() {
-  local url="$1" name="$2" tries=180   # 180 * 5s = up to 15 min (first-run model pull)
+  local url="$1" name="$2" tries=30   # ~30 attempts; each /info waits up to 5 min
   for ((j = 1; j <= tries; j++)); do
-    if curl -fsS "$url/health" 2>/dev/null | tr -d ' ' | grep -q '"model_loaded":true'; then
-      c_green "  $name ready."
+    if curl -fsS --max-time 300 "$url/info" 2>/dev/null | grep -q '"dim"'; then
+      c_green "  $name ready (model loaded)."
       return 0
     fi
-    if (( j % 6 == 0 )); then
-      printf '    …waiting for %s to load its model (%ds)\n' "$name" "$((j * 5))"
-    fi
+    printf '    …loading %s model (attempt %d; first run downloads weights)\n' "$name" "$j"
     sleep 5
   done
   return 1
