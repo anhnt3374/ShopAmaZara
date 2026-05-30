@@ -210,7 +210,11 @@ function mapRowToProduct(r: CsvRow):
   };
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Exit explicitly: AppModule opens handles (e.g. the ioredis query-cache client)
+// that aren't all closed by app.close(), which would otherwise hang the process.
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });

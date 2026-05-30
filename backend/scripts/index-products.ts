@@ -9,6 +9,9 @@ const BATCH = 64;
 
 async function main() {
   const start = Date.now();
+  // Background embedding warmup is for the long-running API server, not a
+  // one-shot script; disable it so it doesn't run alongside the indexing pass.
+  process.env.EMBED_WARMUP_ENABLED = 'false';
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error', 'warn'] });
   try {
     const ds = app.get(DataSource);
@@ -51,7 +54,11 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Exit explicitly: AppModule opens handles (e.g. the ioredis query-cache client)
+// that aren't all closed by app.close(), which would otherwise hang the process.
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });

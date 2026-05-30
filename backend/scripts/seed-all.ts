@@ -135,6 +135,11 @@ async function main() {
     throw new Error(`Sample file not found at ${SAMPLE_PATH}`);
   }
 
+  // Background embedding warmup is for the long-running API server, not a
+  // one-shot script; disable it so its in-flight warm call (a cold model load
+  // can take minutes) doesn't keep this process alive after seeding.
+  process.env.EMBED_WARMUP_ENABLED = 'false';
+
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error', 'warn'],
   });
@@ -503,7 +508,11 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Exit explicitly: AppModule opens handles (e.g. the ioredis query-cache client)
+// that aren't all closed by app.close(), which would otherwise hang the process.
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
