@@ -55,4 +55,14 @@ describe('ImageEmbeddingClient', () => {
     const client = new ImageEmbeddingClient(makeConfig());
     await expect(client.embedImages(['u'])).rejects.toThrow(/502/);
   });
+
+  it('healthy() reflects the /health status', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'ok', model_loaded: true }) })
+      .mockRejectedValueOnce(new Error('ECONNREFUSED')) as any;
+    const client = new ImageEmbeddingClient(makeConfig());
+    expect(await client.healthy()).toBe(true);
+    expect(await client.healthy()).toBe(false);
+  });
 });

@@ -55,7 +55,7 @@ Backend (`backend/.env`, see `backend/.env.example`):
 - `JWT_SECRET`, `JWT_EXPIRES_IN`
 - Docker-only: `MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_PORT`
 - Test-only: `TEST_DATABASE_NAME` (defaults to `amazara_test`)
-- Embedding warmup: `EMBED_WARMUP_ENABLED` (default true), `EMBED_WARMUP_DELAY_MS` (default 5000), `EMBED_WARMUP_INTERVAL_MS` (default 300000)
+- Embedding warmup: `EMBED_WARMUP_ENABLED` (default true), `EMBED_WARMUP_DELAY_MS` (default 5000), `EMBED_WARMUP_INTERVAL_MS` (default 300000), `EMBED_WARMUP_TIMEOUT_MS` (default 300000 — long, to ride out the cold model load)
 
 Frontend (`frontend/.env`, see `frontend/.env.example`):
 - `VITE_API_BASE_URL` — defaults to `http://localhost:3000`. Set to empty for relative requests, or to the deployed API origin in prod.

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { postJson } from './embeddings.http';
+import { getJson, postJson } from './embeddings.http';
 
 interface EmbedResponse {
   vectors: number[][];
@@ -26,10 +26,14 @@ export class TextEmbeddingClient {
     return Number.isFinite(n) && n > 0 ? n : 30000;
   }
 
-  async embed(texts: string[], opts: { isQuery?: boolean } = {}): Promise<number[][]> {
+  async embed(
+    texts: string[],
+    opts: { isQuery?: boolean; timeoutMs?: number } = {},
+  ): Promise<number[][]> {
     if (!this.enabled) throw new Error('Embeddings disabled (EMBEDDINGS_ENABLED=false)');
     if (texts.length === 0) return [];
-    const { baseUrl, batchSize, timeoutMs } = this;
+    const { baseUrl, batchSize } = this;
+    const timeoutMs = opts.timeoutMs ?? this.timeoutMs;
     const out: number[][] = [];
     for (let i = 0; i < texts.length; i += batchSize) {
       const batch = texts.slice(i, i + batchSize);
@@ -41,5 +45,16 @@ export class TextEmbeddingClient {
       out.push(...res.vectors);
     }
     return out;
+  }
+
+  // Returns true if the service's HTTP server responds with status "ok"
+  // (regardless of whether the model is loaded yet).
+  async healthy(timeoutMs = 2000): Promise<boolean> {
+    try {
+      const res = await getJson<{ status?: string }>(`${this.baseUrl}/health`, timeoutMs);
+      return res?.status === 'ok';
+    } catch {
+      return false;
+    }
   }
 }

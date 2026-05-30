@@ -1,4 +1,5 @@
 import { TextEmbeddingClient } from './text-embedding.client';
+import * as http from './embeddings.http';
 
 function makeConfig(overrides: Record<string, string> = {}) {
   const values: Record<string, string> = {
@@ -60,5 +61,26 @@ describe('TextEmbeddingClient', () => {
       .mockResolvedValue({ ok: false, status: 500, text: async () => 'boom' }) as any;
     const client = new TextEmbeddingClient(makeConfig());
     await expect(client.embed(['a'])).rejects.toThrow(/500/);
+  });
+
+  it('forwards a per-call timeoutMs override', async () => {
+    const client = new TextEmbeddingClient(makeConfig());
+    const spy = jest.spyOn(http, 'postJson').mockResolvedValue({ vectors: [[1]], dim: 1 });
+    await client.embed(['a'], { timeoutMs: 99000 });
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/embed'), expect.anything(), 99000);
+  });
+
+  it('healthy() returns true when /health reports ok', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ status: 'ok', model_loaded: false }) }) as any;
+    const client = new TextEmbeddingClient(makeConfig());
+    expect(await client.healthy()).toBe(true);
+  });
+
+  it('healthy() returns false when the service is unreachable', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('ECONNREFUSED')) as any;
+    const client = new TextEmbeddingClient(makeConfig());
+    expect(await client.healthy()).toBe(false);
   });
 });
