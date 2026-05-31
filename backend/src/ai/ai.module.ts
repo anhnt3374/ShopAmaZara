@@ -27,6 +27,7 @@ import {
 } from './graph/tools/order-tools';
 import { makeLookupOrderTool } from './graph/tools/lookup-order.tool';
 import { makeSuggestSimilarTool } from './graph/tools/suggest-similar.tool';
+import { makeGetPoliciesTool } from './graph/tools/get-policies.tool';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { makeSuggestSimilarTool } from './graph/tools/suggest-similar.tool';
           makeCancelOrderTool({ orders }),
           makeLookupOrderTool({ orders }),
           makeSuggestSimilarTool({ products }),
+          makeGetPoliciesTool(),
         ];
         const apiKey = config.get<string>('GROQ_API_KEY');
         const model = new ChatGroq({
