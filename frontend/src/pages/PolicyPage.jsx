@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 
+// SOURCE OF TRUTH MIRROR: the chatbot Policy Agent reads the same copy from
+// backend/src/ai/knowledge/policies.ts. Edit both when policies change.
 const sections = [
   {
     id: 'privacy',
