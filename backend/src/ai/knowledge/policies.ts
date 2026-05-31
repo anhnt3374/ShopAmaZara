@@ -82,7 +82,7 @@ export const POLICY_SECTIONS: PolicySection[] = [
     paragraphs: [
       {
         heading: 'Support channels',
-        body: 'You can reach AmaZara via 24/7 live chat, email at support@amazara.com, or by phone at 1900 1234 during business hours.',
+        body: `You can reach AmaZara via 24/7 live chat, email at ${SUPPORT_CONTACT}, or by phone at 1900 1234 during business hours.`,
       },
       {
         heading: 'Response times',
