@@ -26,3 +26,4 @@ under `superpowers/plans/`.
 | 2026-05-29 | Product card color swatches | [features/product-card-color-swatches.md](features/product-card-color-swatches.md) |
 | 2026-05-29 | Category filter live search | [features/category-filter-live-search.md](features/category-filter-live-search.md) |
 | 2026-05-30 | Embedding model warmup (periodic keep-alive) | [features/embedding-warmup.md](features/embedding-warmup.md) |
+| 2026-05-31 | Chatbot — Policy Agent (policy Q&A, no RAG) | [features/chatbot-policy-agent.md](features/chatbot-policy-agent.md) |

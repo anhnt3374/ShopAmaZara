@@ -9,6 +9,7 @@ LangGraph + Groq powered assistant that replaces the `kind='system'` echo conver
 | 3 | "add the first to my cart" / "save this to wishlist" | `add_to_cart` / `toggle_wishlist` → toast block |
 | 4 | "order this now" → click Confirm | `create_preorder` (confirm card) → user confirms → `confirm_order` → order success block |
 | 9 | "I added headphones, anything else?" | `suggest_similar` after `add_to_cart` → upsell block |
+| — | "how long does shipping take?" / "what's the commission?" | `get_policies` → text answer citing /policy/<section> |
 
 ## Architecture (one-liner)
 
@@ -42,7 +43,7 @@ Type union lives in `backend/src/ai/rich-message.ts`. Frontend dispatcher: `fron
 - `orders` — order lookup list with status + total.
 - `toast` — inline success/info/warn notice.
 
-## Tools (10)
+## Tools (11)
 
 `backend/src/ai/graph/tools/*`. Each wraps an existing service; `userId` is injected via `RunnableConfig.configurable`, never from LLM input.
 
@@ -58,6 +59,7 @@ Type union lives in `backend/src/ai/rich-message.ts`. Frontend dispatcher: `fron
 | `cancel_order` | `OrdersService.cancelForBuyer` | toast |
 | `lookup_order` | `OrdersService.listForBuyer` / `findOneForBuyer` | orders |
 | `suggest_similar` | `ProductsService.suggest` | products (upsell) |
+| `get_policies` | static `policies.ts` (no service) | nothing (text answer) |
 
 ## Environment
 
@@ -94,7 +96,6 @@ Expected: bot reply with a vertical list of products and Save/+Add buttons. Try 
 
 ## Out of scope (separate sub-projects)
 
-- Policy/FAQ RAG agent (sub-project B).
 - Notification agent for cart abandonment / price drop / restock (sub-project C, event-driven).
 - Token streaming over WS (delta/done/error stubs are emitted by the gateway but `AiService.respond` is currently single-shot — UX nice-to-have for a follow-up).
 - E2E tests for KB1/2/3/4/9 against a `FakeChatModel` — planned, not yet wired.
